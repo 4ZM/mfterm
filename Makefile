@@ -27,8 +27,10 @@ LDFLAGS	= -g -lreadline
 CC			= gcc
 
 MFTERM_SRCS = \
-	mfterm.c    \
-	term_cmd.c
+	mfterm.c     \
+	term_cmd.c   \
+	util.c
+
 MFTERM_OBJS = $(MFTERM_SRCS:.c=.o)
 
 mfterm: $(MFTERM_OBJS)

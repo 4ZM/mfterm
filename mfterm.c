@@ -25,13 +25,12 @@
 #include <readline/history.h>
 #include "term_cmd.h"
 #include "mfterm.h"
+#include "util.h"
 
 int stop_input_loop_ = 0;
 void stop_input_loop() {
   stop_input_loop_ = 1;
 }
-
-char *trim();
 
 char *completion_cmd_generator();
 char **mft_completion();
@@ -79,27 +78,6 @@ int execute_line (char *line) {
 
   return (*(command->func))(arg);
 }
-
-/* Strip whitespace from the start and end of STRING.  Return a pointer
-   into STRING. */
-char* trim(char* string) {
-
-  char* s = string;
-  while (whitespace(*s))
-    ++s;
-
-  if (*s == 0)
-    return s;
-
-  char* t = s + strlen (s) - 1;
-  while (t > s && whitespace(*t))
-    --t;
-  *++t = '\0';
-
-  return s;
-}
-
-
 
 void initialize_readline()
 {
