@@ -72,10 +72,18 @@ void print_tag() {
 }
 
 void print_tag_range(size_t first, size_t last) {
+  // Print header
+  printf("xS  xB  00                   07 08                   0f\n");
+  printf("-------------------------------------------------------\n");
+
   // Iterate over all blocks
   for (int block = 0; block <= last; ++block) {
 
-    // Start with block number
+    // Sector number
+    printf("%02x  ",
+           block < 0x10*4 ? block / 4 : 0x10 + (block - 0x10*4) / 0x10);
+
+    // Block number
     printf("%02x  ", block);
 
     // then print the block data
