@@ -24,17 +24,31 @@ typedef int (*cmd_func_t)(char*);
 
 int com_help(char* arg);
 int com_quit(char* arg);
-int com_read_file(char* arg);
-int com_write_file(char* arg);
-int com_read_dev(char* arg);
-int com_write_dev(char* arg);
-int com_display_raw(char* arg);
-int com_display_keys(char* arg);
+
+// Load/Save tag file operations
+int com_load_tag(char* arg);
+int com_save_tag(char* arg);
+
+// Read/Write tag NFC operations
+int com_read_tag(char* arg);
+int com_write_tag(char* arg);
+
+int com_print(char* arg);
+int com_print_keys(char* arg);
+
+int com_set(char* arg);
+
+int com_keys_load(char* arg);
+int com_keys_save(char* arg);
+int com_keys_set(char* arg);
+int com_keys_print(char* arg);
 
 typedef struct {
-  char *name;
-  cmd_func_t func;
-  char *doc;
+  char *name;       // The command
+  cmd_func_t func;  // Function to call on command
+  int fn_arg;       // File name completion if > 0
+  int document;     // Show in documentation if > 0
+  char *doc;        // String documenting the command
 } command_t;
 
 extern command_t commands[];

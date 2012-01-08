@@ -32,9 +32,11 @@ void stop_input_loop() {
   stop_input_loop_ = 1;
 }
 
-char *completion_cmd_generator();
-char **mft_completion();
-int execute_line(char *line);
+char* completion_cmd_generator(const char* text, int state);
+char* completion_sub_cmd_generator(const char* text, int state);
+int perform_filename_completion();
+char** mft_completion();
+int execute_line(char* line);
 void initialize_readline();
 
 int main(int argc, char** argv) {
@@ -63,20 +65,19 @@ void input_loop() {
 }
 
 /* Execute a command line. */
-int execute_line (char *line) {
-  char* word = strtok(line, " ");
-  command_t* command;
-  command = find_command(word);
+int execute_line (char* line) {
+  command_t* command = find_command(line);
 
   if (!command) {
-    fprintf (stderr, "%s: No such command.\n", word);
+    fprintf (stderr, "%s: No such command.\n", line);
     return -1;
   }
 
-  char* arg = strtok(NULL, " ");
-  // Pull out more args here...
+  // Skip past command and ws to the arguments
+  line += strlen(command->name);
+  line = trim(line);
 
-  return (*(command->func))(arg);
+  return (*(command->func))(line);
 }
 
 void initialize_readline()
@@ -93,38 +94,60 @@ void initialize_readline()
 char** mft_completion(char* text, int start, int end) {
   char **matches = (char **)NULL;
 
+  // Don't complete on files for most cases
+  rl_attempted_completion_over = 1;
 
-  if (start == 0) {
-    // Commands start at 0
-    matches = rl_completion_matches(text, completion_cmd_generator);
-  }
-  else {
-    // Don't complete on anything else (default is complete on filename)
-    rl_attempted_completion_over = 1;
+  // Commands start at 0
+  if (start == 0)
+    return rl_completion_matches(text, completion_cmd_generator);
+
+  // else: Sub commands and file arguments start at > 0
+
+  // Try to match sub commands
+  matches = rl_completion_matches(text, completion_sub_cmd_generator);
+  if (matches)
+      return matches;
+
+  if (perform_filename_completion()) {
+    // Do complete on filenames
+    rl_attempted_completion_over = 0;
+    return matches;
   }
 
   return matches;
 }
 
 
+int perform_filename_completion() {
+  for (int i = 0; commands[i].name; ++i) {
+    if (commands[i].fn_arg &&
+        strncmp(rl_line_buffer, commands[i].name,
+                strlen(commands[i].name)) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /**
   Called to generate completion suggestions.
   state == 0 on first call.
  */
-char* completion_cmd_generator(char* text, int state) {
-  static int list_index, len;
-  char *name;
+char* completion_cmd_generator(const char* text, int state) {
+  static int cmd_index, len;
 
   // First call?
   if (!state) {
-    list_index = 0;
+    cmd_index = 0;
     len = strlen(text); // Cached for performance
   }
 
   // Return next suggestion
-  while ((name = commands[list_index].name)) {
-    ++list_index;
+  char *name;
+  while ((name = commands[cmd_index].name)) {
+    ++cmd_index;
 
+    // Check if the command is applicable
     if (strncmp(name, text, len) == 0) {
       char* r = malloc(strlen(name) + 1);
       strcpy(r, name);
@@ -136,5 +159,40 @@ char* completion_cmd_generator(char* text, int state) {
   return (char*) NULL;
 }
 
-// Add more completion_xxx_generators here...
+char* completion_sub_cmd_generator(const char* text, int state) {
+  static int cmd_index, len, full_len;
+
+  // First call?
+  if (!state) {
+    cmd_index = 0;
+    len = strlen(text); // Cached for performance
+    full_len = strlen(rl_line_buffer);
+  }
+
+  // Return next suggestion
+  char* name;
+  while ((name = commands[cmd_index].name)) {
+    ++cmd_index;
+
+    // Extract command and sub-command
+    char buff[128];
+    strncpy(buff, name, sizeof(buff));
+    char* cmd = strtok(buff, " ");
+    char* sub = strtok(NULL, " ");
+
+    // Make sure the command *has* a sub command
+    // and that we have the right command.
+    if (cmd && sub && strncmp(rl_line_buffer, name, full_len) == 0) {
+      // Check if the sub command is applicable
+      if (strncmp(sub, text, len) == 0) {
+        char* r = malloc(strlen(sub) + 1);
+        strcpy(r, sub);
+        return r;
+      }
+    }
+  }
+
+  // No (more) matches
+  return (char*) NULL;
+}
 
