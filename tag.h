@@ -1,5 +1,5 @@
-#ifndef TERM_CMD__H
-#define TERM_CMD__H
+#ifndef TAG__H_
+#define TAG__H_
 
 /**
  * Copyright (C) 2011 Anders Sundman <anders@4zm.org>
@@ -10,34 +10,37 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
-
+ *
  * mfterm is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Parts of code used in this file are from the GNU readline library file
+ * fileman.c (GPLv3). Copyright (C) 1987-2009 Free Software Foundation, Inc
  */
 
-typedef int (*cmd_func_t)(char*);
+#include "mifare.h"
 
-int com_help(char* arg);
-int com_quit(char* arg);
-int com_read_file(char* arg);
-int com_write_file(char* arg);
-int com_read_dev(char* arg);
-int com_write_dev(char* arg);
-int com_display_raw(char* arg);
+// Convenience typedefs (shortening)
+typedef mifare_classic_tag mf_tag_t;
+typedef mifare_classic_block mf_block_t;
 
-typedef struct {
-  char *name;
-  cmd_func_t func;
-  char *doc;
-} command_t;
+// The active tag
+extern mf_tag_t mt_current;
 
-extern command_t commands[];
+// The ACL + keys used
+extern mf_tag_t mt_auth;
 
-command_t *find_command();
+// Load tag or keys from file
+int load_tag(char* fn);
+int load_auth(char* fn);
+
+// Output
+void print_tag();
+void print_tag_range(size_t first, size_t last);
 
 #endif

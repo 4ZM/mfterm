@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "mfterm.h"
+#include "tag.h"
 #include "term_cmd.h"
 
 command_t commands[] = {
@@ -30,10 +31,11 @@ command_t commands[] = {
   { "?", com_help, "Synonym for 'help'" },
   { "quit", com_quit, "Quit" },
   { "exit", com_quit, "Synonym for 'quit'" },
-  { "read-file", com_read_file, "Read card data from a file" },
-  { "write-file", com_write_file, "Write card data to a file" },
-  { "read-device", com_read_dev, "Read card data from a device" },
-  { "write-device", com_write_dev, "Write card data to a card" },
+  { "read-file", com_read_file, "Read tag data from a file" },
+  { "write-file", com_write_file, "Write tag data to a file" },
+  { "read-device", com_read_dev, "Read tag data from a device" },
+  { "write-device", com_write_dev, "Write tag data to a tag" },
+  { "display-raw", com_display_raw, "Display the raw tag data" },
   { (char *)NULL, (cmd_func_t)NULL, (char *)NULL }
 };
 
@@ -72,23 +74,29 @@ int com_quit(char *arg) {
   return 0;
 }
 
-int com_read_file() {
-  printf("TBD - read from file\n");
+int com_read_file(char *arg) {
+  int res = load_tag(arg);
+  if (res == 0)
+    printf("Successfully loaded tag from: %s\n", arg);
   return 0;
 }
 
-int com_write_file() {
+int com_write_file(char* arg) {
   printf("TBD - read write to file\n");
   return 0;
 }
 
-int com_read_dev() {
+int com_read_dev(char* arg) {
   printf("TBD - read from device\n");
   return 0;
 }
 
-int com_write_dev() {
+int com_write_dev(char* arg) {
   printf("TBD - write to device\n");
   return 0;
 }
 
+int com_display_raw(char* arg) {
+  print_tag();
+  return 0;
+}

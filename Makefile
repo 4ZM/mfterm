@@ -23,13 +23,15 @@ clean:
 	rm -f mfterm *.o *~ *.bak
 
 CFLAGS	= -g -Wall -std=c99
-LDFLAGS	= -g -lreadline
+LDFLAGS	= -g -lreadline -lnfc
 CC			= gcc
 
 MFTERM_SRCS = \
 	mfterm.c     \
 	term_cmd.c   \
-	util.c
+	util.c       \
+	tag.c        \
+	mifare.c
 
 MFTERM_OBJS = $(MFTERM_SRCS:.c=.o)
 
