@@ -69,7 +69,7 @@ int execute_line (char *line) {
   command = find_command(word);
 
   if (!command) {
-    fprintf (stderr, "%s: No such command for FileMan.\n", word);
+    fprintf (stderr, "%s: No such command.\n", word);
     return -1;
   }
 
