@@ -21,6 +21,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 #include "util.h"
 
 int is_space(char c) {
@@ -44,4 +45,16 @@ char* trim(char* string) {
   *++t = '\0';
 
   return s;
+}
+
+void print_hex_array(unsigned char* data, size_t nbytes) {
+  print_hex_array_sep(data, nbytes, NULL);
+}
+
+void print_hex_array_sep(unsigned char* data, size_t nbytes, char* sep) {
+    for (int i = 0; i < nbytes; ++i) {
+      printf("%02x", data[i]);
+      if (sep)
+        printf("%s", sep);
+    }
 }

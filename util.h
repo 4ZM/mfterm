@@ -27,4 +27,7 @@
    into STRING. */
 char* trim(char* string);
 
+void print_hex_array(unsigned char* data, size_t nbytes);
+void print_hex_array_sep(unsigned char* data, size_t nbytes, char* sep);
+
 #endif
