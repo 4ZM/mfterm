@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "mifare.h"
+#include "util.h"
 #include "tag.h"
 
 mf_tag_t mt_current;
@@ -78,9 +79,8 @@ void print_tag_range(size_t first, size_t last) {
     printf("%02x  ", block);
 
     // then print the block data
-    for (int b = 0; b < sizeof(mf_block_t); ++b) {
-      printf("%02x ", mt_current.amb[block].mbd.abtData[b]);
-    }
+    print_hex_array_sep(mt_current.amb[block].mbd.abtData,
+                    sizeof(mf_block_t), " ");
 
     printf("\n");
 
@@ -89,5 +89,26 @@ void print_tag_range(size_t first, size_t last) {
       printf("\n");
     else if (block < last && block > 16*4 && (block + 1) % 16 == 0)
       printf("\n");
+  }
+}
+
+void print_keys() {
+  printf("xS  xB  KeyA          KeyB\n");
+  for (int block = 3; block < 0x10 * 4; block += 4) {
+    printf("%02x  %02x  ", block / 4, block);
+    print_hex_array(mt_current.amb[block].mbt.abtKeyA, 6);
+    printf("  ");
+    print_hex_array(mt_current.amb[block].mbt.abtKeyB, 6);
+    printf("\n");
+  }
+
+  printf("\n");
+
+  for (int block = 0xf; block < 0x0c * 0x10; block += 0x10) {
+    printf("%02x  %02x  ", 0x10 + block/0x10, 0x10*4 + block);
+    print_hex_array(mt_current.amb[0x10*4 + block].mbt.abtKeyA, 6);
+    printf("  ");
+    print_hex_array(mt_current.amb[0x10*4 + block].mbt.abtKeyB, 6);
+    printf("\n");
   }
 }

@@ -36,6 +36,7 @@ command_t commands[] = {
   { "read-device", com_read_dev, "Read tag data from a device" },
   { "write-device", com_write_dev, "Write tag data to a tag" },
   { "display-raw", com_display_raw, "Display the raw tag data" },
+  { "display-keys", com_display_keys, "Display the MF keys" },
   { (char *)NULL, (cmd_func_t)NULL, (char *)NULL }
 };
 
@@ -98,5 +99,10 @@ int com_write_dev(char* arg) {
 
 int com_display_raw(char* arg) {
   print_tag();
+  return 0;
+}
+
+int com_display_keys(char* arg) {
+  print_keys();
   return 0;
 }

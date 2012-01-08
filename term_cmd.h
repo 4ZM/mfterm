@@ -29,6 +29,7 @@ int com_write_file(char* arg);
 int com_read_dev(char* arg);
 int com_write_dev(char* arg);
 int com_display_raw(char* arg);
+int com_display_keys(char* arg);
 
 typedef struct {
   char *name;

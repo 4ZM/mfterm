@@ -42,5 +42,6 @@ int load_auth(char* fn);
 // Output
 void print_tag();
 void print_tag_range(size_t first, size_t last);
+void print_keys();
 
 #endif
