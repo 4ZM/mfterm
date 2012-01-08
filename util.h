@@ -1,5 +1,5 @@
-#ifndef UTIL__H_
-#define UTIL__H_
+#ifndef UTIL__H
+#define UTIL__H
 
 /**
  * Copyright (C) 2011 Anders Sundman <anders@4zm.org>

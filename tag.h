@@ -1,5 +1,5 @@
-#ifndef TAG__H_
-#define TAG__H_
+#ifndef TAG__H
+#define TAG__H
 
 /**
  * Copyright (C) 2011 Anders Sundman <anders@4zm.org>

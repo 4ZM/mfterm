@@ -1,5 +1,5 @@
-#ifndef MFTERM__H_
-#define MFTERM__H_
+#ifndef MFTERM__H
+#define MFTERM__H
 
 /**
  * Copyright (C) 2011 Anders Sundman <anders@4zm.org>
