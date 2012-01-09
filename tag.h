@@ -25,6 +25,11 @@
 
 #include "mifare.h"
 
+typedef enum {
+  MF_1K = 1024,
+  MF_4K = 4096
+} mf_size;
+
 // Convenience typedefs (shortening)
 typedef mifare_classic_tag mf_tag_t;
 typedef mifare_classic_block mf_block_t;

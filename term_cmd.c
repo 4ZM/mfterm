@@ -142,7 +142,39 @@ int com_write_tag(char* arg) {
 }
 
 int com_print(char* arg) {
-  print_tag();
+  char* args[128];
+  size_t arg_index = 0;
+
+  if (arg) {
+    args[arg_index++] = strtok(arg, " ");
+    while(arg_index < sizeof(args) &&
+          (args[arg_index] = strtok(NULL, " "))) {
+      ++arg_index;
+    }
+    if (arg_index == sizeof(args)) {
+      printf("Too many arguments.\n");
+      return -1;
+    }
+  }
+  else {
+    args[0] = (char*)NULL;
+  }
+
+  if (args[0] == (char*)NULL)
+    print_tag(MF_1K);
+  else if (args[1] != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+  else if (strcmp(args[0], "1k") == 0)
+    print_tag(MF_1K);
+  else if (strcmp(args[0], "4k") == 0)
+    print_tag(MF_4K);
+  else {
+    printf("Unknown argument: %s\n", args[0]);
+    return -1;
+  }
+
   return 0;
 }
 

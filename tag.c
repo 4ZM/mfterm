@@ -66,12 +66,19 @@ int load_auth(char* fn) {
   return 0;
 }
 
-void print_tag() {
-  print_tag_range(0, sizeof(mf_tag_t) / sizeof(mf_block_t) - 1);
+void print_tag(mf_size size) {
+  if (size == MF_1K)
+    print_tag_range(0, MF_1K / sizeof(mf_block_t) - 1);
+  else if (size == MF_4K)
+    print_tag_range(0, MF_4K / sizeof(mf_block_t) - 1);
+  else {
+    printf("Unsupported tag size.\n");
+  }
   return;
 }
 
 void print_tag_range(size_t first, size_t last) {
+
   // Print header
   printf("xS  xB  00                   07 08                   0f\n");
   printf("-------------------------------------------------------\n");
