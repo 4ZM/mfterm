@@ -44,10 +44,11 @@ command_t commands[] = {
 
   { "set", com_set, 0, 1, "#block #offset = xx xx xx : Set tag data" },
 
-  { "keys load", com_keys_load,  1, 1, "Load keys from a file" },
-  { "keys save", com_keys_save,  1, 1, "Save keys to a file" },
-  { "keys set",  com_keys_set,   0, 1, "A|B = key : Set a key value" },
-  { "keys",      com_keys_print, 0, 1, "Print the keys" },
+  { "keys load",   com_keys_load,   1, 1, "Load keys from a file" },
+  { "keys save",   com_keys_save,   1, 1, "Save keys to a file" },
+  { "keys set",    com_keys_set,    0, 1, "A|B = key : Set a key value" },
+  { "keys import", com_keys_import, 0, 1, "Import keys from the current tag" },
+  { "keys",        com_keys_print,  0, 1, "Print the keys" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
@@ -184,12 +185,14 @@ int com_set(char* arg) {
 }
 
 int com_print_keys(char* arg) {
-  print_keys();
+  print_keys(&mt_current, MF_1K);
   return 0;
 }
 
 int com_keys_load(char* arg) {
-  printf("TBD - com_keys_load\n");
+  int res = load_auth(arg);
+  if (res == 0)
+    printf("Successfully loaded keys from: %s\n", arg);
   return 0;
 }
 
@@ -203,7 +206,12 @@ int com_keys_set(char* arg) {
   return 0;
 }
 
+int com_keys_import(char* arg) {
+  import_auth();
+  return 0;
+}
+
 int com_keys_print(char* arg) {
-  printf("TBD - com_keys_print\n");
+  print_keys(&mt_auth, MF_1K);
   return 0;
 }

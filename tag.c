@@ -26,7 +26,9 @@
 mf_tag_t mt_current;
 mf_tag_t mt_auth;
 
-int load_mfd(char* fn, mf_tag_t* tag) {
+void strip_non_auth_data(mf_tag_t* tag);
+
+int load_mfd(const char* fn, mf_tag_t* tag) {
   FILE* mfd_file = fopen(fn, "rb");
 
   if (mfd_file == NULL) {
@@ -44,25 +46,21 @@ int load_mfd(char* fn, mf_tag_t* tag) {
   return 0;
 }
 
-int load_tag(char* fn) {
+int load_tag(const char* fn) {
   return load_mfd(fn, &mt_current);
 }
 
-int load_auth(char* fn) {
-
+int load_auth(const char* fn) {
   if (load_mfd(fn, &mt_auth))
     return 1;
 
-  // Clear 1k sector data 16 á 4 - only keep sector trailer
-  for (int i = 0; i < 0x10; ++i)
-    for (int j = 0; j < 0x03; ++j)
-      memset(&mt_auth + i * sizeof(mf_block_t) + j, 0x00, sizeof(mf_block_t));
+  strip_non_auth_data(&mt_auth);
+  return 0;
+}
 
-  // Clear 2-4k sector data 12 á 16 - only keep sector trailer
-  for (int i = 0; i < 0x0C; ++i)
-    for (int j = 0; j < 0x10; ++j)
-      memset(&mt_auth + i * sizeof(mf_block_t) + j, 0x00, sizeof(mf_block_t));
-
+int import_auth() {
+  memcpy(&mt_auth, &mt_current, sizeof(mf_tag_t));
+  strip_non_auth_data(&mt_auth);
   return 0;
 }
 
@@ -107,23 +105,38 @@ void print_tag_range(size_t first, size_t last) {
   }
 }
 
-void print_keys() {
+void print_keys(const mf_tag_t* tag, mf_size size) {
   printf("xS  xB  KeyA          KeyB\n");
   for (int block = 3; block < 0x10 * 4; block += 4) {
     printf("%02x  %02x  ", block / 4, block);
-    print_hex_array(mt_current.amb[block].mbt.abtKeyA, 6);
+    print_hex_array(tag->amb[block].mbt.abtKeyA, 6);
     printf("  ");
-    print_hex_array(mt_current.amb[block].mbt.abtKeyB, 6);
+    print_hex_array(tag->amb[block].mbt.abtKeyB, 6);
     printf("\n");
   }
+
+  if (size == MF_1K)
+    return;
 
   printf("\n");
 
   for (int block = 0xf; block < 0x0c * 0x10; block += 0x10) {
     printf("%02x  %02x  ", 0x10 + block/0x10, 0x10*4 + block);
-    print_hex_array(mt_current.amb[0x10*4 + block].mbt.abtKeyA, 6);
+    print_hex_array(tag->amb[0x10*4 + block].mbt.abtKeyA, 6);
     printf("  ");
-    print_hex_array(mt_current.amb[0x10*4 + block].mbt.abtKeyB, 6);
+    print_hex_array(tag->amb[0x10*4 + block].mbt.abtKeyB, 6);
     printf("\n");
   }
+}
+
+void strip_non_auth_data(mf_tag_t* tag) {
+  static const size_t bs = sizeof(mf_block_t);
+
+  // Clear 1k sector data 16 á 4 - only keep sector trailer
+  for (int i = 0; i < 0x10; ++i)
+    memset(((void*)tag) + i * 4 * bs, 0x00, 3 * bs);
+
+  // Clear 2-4k sector data 12 á 16 - only keep sector trailer
+  for (int i = 0; i < 0x0c; ++i)
+    memset(((void*)tag) + 0x10 * 4 * bs + i * 0x10 * bs, 0x00, 0x0f * bs);
 }

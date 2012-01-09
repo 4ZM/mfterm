@@ -47,11 +47,11 @@ char* trim(char* string) {
   return s;
 }
 
-void print_hex_array(unsigned char* data, size_t nbytes) {
+void print_hex_array(const unsigned char* data, size_t nbytes) {
   print_hex_array_sep(data, nbytes, NULL);
 }
 
-void print_hex_array_sep(unsigned char* data, size_t nbytes, char* sep) {
+void print_hex_array_sep(const unsigned char* data, size_t nbytes, char* sep) {
     for (int i = 0; i < nbytes; ++i) {
       printf("%02x", data[i]);
       if (sep)

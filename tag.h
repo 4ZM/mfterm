@@ -41,12 +41,14 @@ extern mf_tag_t mt_current;
 extern mf_tag_t mt_auth;
 
 // Load tag or keys from file
-int load_tag(char* fn);
-int load_auth(char* fn);
+int load_tag(const char* fn);
+int load_auth(const char* fn);
+
+int import_auth();
 
 // Output
 void print_tag();
 void print_tag_range(size_t first, size_t last);
-void print_keys();
+void print_keys(const mf_tag_t* tag, mf_size size);
 
 #endif
