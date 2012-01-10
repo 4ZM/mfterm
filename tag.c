@@ -27,6 +27,8 @@ mf_tag_t mt_current;
 mf_tag_t mt_auth;
 
 void strip_non_auth_data(mf_tag_t* tag);
+int load_mfd(const char* fn, mf_tag_t* tag);
+int save_mfd(const char* fn, const mf_tag_t* tag);
 
 int load_mfd(const char* fn, mf_tag_t* tag) {
   FILE* mfd_file = fopen(fn, "rb");
@@ -46,8 +48,30 @@ int load_mfd(const char* fn, mf_tag_t* tag) {
   return 0;
 }
 
+int save_mfd(const char* fn, const mf_tag_t* tag) {
+  FILE* mfd_file = fopen(fn, "w");
+
+  if (mfd_file == NULL) {
+    printf("Could not open file for writing: %s\n", fn);
+    return 1;
+  }
+
+  if (fwrite(tag, 1, sizeof(mf_tag_t), mfd_file) != sizeof(mf_tag_t)) {
+    printf("Could not write file: %s\n", fn);
+    fclose(mfd_file);
+    return 1;
+  }
+
+  fclose(mfd_file);
+  return 0;
+}
+
 int load_tag(const char* fn) {
   return load_mfd(fn, &mt_current);
+}
+
+int save_tag(const char* fn) {
+  return save_mfd(fn, &mt_current);
 }
 
 int load_auth(const char* fn) {
@@ -57,6 +81,11 @@ int load_auth(const char* fn) {
   strip_non_auth_data(&mt_auth);
   return 0;
 }
+
+int save_auth(const char* fn) {
+  return save_mfd(fn, &mt_auth);
+}
+
 
 int import_auth() {
   memcpy(&mt_auth, &mt_current, sizeof(mf_tag_t));

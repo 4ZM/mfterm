@@ -128,7 +128,9 @@ int com_load_tag(char *arg) {
 }
 
 int com_save_tag(char* arg) {
-  printf("TBD - com_save_tag\n");
+  int res = save_tag(arg);
+  if (res == 0)
+    printf("Successfully wrote tag to: %s\n", arg);
   return 0;
 }
 
@@ -198,7 +200,9 @@ int com_keys_load(char* arg) {
 }
 
 int com_keys_save(char* arg) {
-  printf("TBD - com_keys_save\n");
+  int res = save_auth(arg);
+  if (res == 0)
+    printf("Successfully wrote keys to: %s\n", arg);
   return 0;
 }
 

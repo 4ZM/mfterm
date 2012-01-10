@@ -40,9 +40,11 @@ extern mf_tag_t mt_current;
 // The ACL + keys used
 extern mf_tag_t mt_auth;
 
-// Load tag or keys from file
+// Load/Save tag or keys from file
 int load_tag(const char* fn);
 int load_auth(const char* fn);
+int save_tag(const char* fn);
+int save_auth(const char* fn);
 
 int import_auth();
 
