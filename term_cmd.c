@@ -22,6 +22,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
+#include <stdlib.h>
 #include "mfterm.h"
 #include "tag.h"
 #include "term_cmd.h"
@@ -46,7 +48,7 @@ command_t commands[] = {
 
   { "keys load",   com_keys_load,   1, 1, "Load keys from a file" },
   { "keys save",   com_keys_save,   1, 1, "Save keys to a file" },
-  { "keys set",    com_keys_set,    0, 1, "A|B = key : Set a key value" },
+  { "keys set",    com_keys_set,    0, 1, "A|B #S key : Set a key value" },
   { "keys import", com_keys_import, 0, 1, "Import keys from the current tag" },
   { "keys",        com_keys_print,  0, 1, "Print the keys" },
 
@@ -207,7 +209,69 @@ int com_keys_save(char* arg) {
 }
 
 int com_keys_set(char* arg) {
-  printf("TBD - com_keys_set\n");
+  // Arg format: A|B #S key
+
+  char* ab = strtok(arg, " ");
+  char* sector_str = strtok(NULL, " ");
+  char* key_str = strtok(NULL, " ");
+
+  if (strtok(NULL, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+
+  if (!ab || !sector_str || !key_str) {
+    printf("Too few arguments: (A|B) #sector key\n");
+    return -1;
+  }
+
+  // Read sector (hex or dec)
+  int sector = 0;
+  if (strncmp(sector_str, "0x", 2) == 0)
+    sector = strtol(sector_str, NULL, 16);
+  else
+    sector = strtol(sector_str, NULL, 10);
+
+  // Sanity check sector range
+  if (sector < 0 && sector > 0x1b) {
+    printf("Invalid sector [0,1b]: %d\n", sector);
+    return -1;
+  }
+
+  // Sanity check key length
+  if (strncmp(key_str, "0x", 2) == 0)
+    key_str += 2;
+  if (strlen(key_str) != 12) {
+    printf("Invalid key (6 byte hex): %s\n", key_str);
+    return -1;
+  }
+
+  // Compute the block that houses the key for the desired sector
+  size_t block;
+  if (sector < 0x10)
+    block = sector * 4 + 3;
+  else
+    block = 0x10 * 4 + (sector - 0x10) * 0x10 + 0xf;
+
+  // Parse key selection and point to appropriate key
+  byte_t* key;
+  if (strcasecmp(ab, "a") == 0)
+    key = mt_auth.amb[block].mbt.abtKeyA;
+  else if (strcasecmp(ab, "b") == 0)
+    key = mt_auth.amb[block].mbt.abtKeyB;
+  else {
+    printf("Invalid argument (A|B): %s\n", ab);
+    return -1;
+  }
+
+  // Write the key data
+  char byte_tok[] = {0, 0, 0};
+  for (int i = 0; i < 6; ++i) {
+    byte_tok[0] = key_str[i*2];
+    byte_tok[1] = key_str[i*2+1];
+    key[i] = strtol(byte_tok, NULL, 16);
+  }
+
   return 0;
 }
 
