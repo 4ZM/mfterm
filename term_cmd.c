@@ -143,36 +143,21 @@ int com_write_tag(char* arg) {
 }
 
 int com_print(char* arg) {
-  char* args[128];
-  size_t arg_index = 0;
 
-  if (arg) {
-    args[arg_index++] = strtok(arg, " ");
-    while(arg_index < sizeof(args) &&
-          (args[arg_index] = strtok(NULL, " "))) {
-      ++arg_index;
-    }
-    if (arg_index == sizeof(args)) {
-      printf("Too many arguments.\n");
-      return -1;
-    }
-  }
-  else {
-    args[0] = (char*)NULL;
-  }
+  char* a = strtok(arg, " ");
 
-  if (args[0] == (char*)NULL)
+  if (a == (char*)NULL)
     print_tag(MF_1K);
-  else if (args[1] != (char*)NULL) {
+  else if (strtok(NULL, " ") != (char*)NULL) {
     printf("Too many arguments\n");
     return -1;
   }
-  else if (strcmp(args[0], "1k") == 0)
+  else if (strcmp(a, "1k") == 0)
     print_tag(MF_1K);
-  else if (strcmp(args[0], "4k") == 0)
+  else if (strcmp(a, "4k") == 0)
     print_tag(MF_4K);
   else {
-    printf("Unknown argument: %s\n", args[0]);
+    printf("Unknown argument: %s\n", a);
     return -1;
   }
 
@@ -185,7 +170,23 @@ int com_set(char* arg) {
 }
 
 int com_print_keys(char* arg) {
-  print_keys(&mt_current, MF_1K);
+  char* a = strtok(arg, " ");
+
+  if (a == (char*)NULL)
+    print_keys(&mt_current, MF_1K);
+  else if (strtok(NULL, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+  else if (strcmp(a, "1k") == 0)
+    print_keys(&mt_current, MF_1K);
+  else if (strcmp(a, "4k") == 0)
+    print_keys(&mt_current, MF_4K);
+  else {
+    printf("Unknown argument: %s\n", a);
+    return -1;
+  }
+
   return 0;
 }
 
@@ -212,6 +213,22 @@ int com_keys_import(char* arg) {
 }
 
 int com_keys_print(char* arg) {
-  print_keys(&mt_auth, MF_1K);
+  char* a = strtok(arg, " ");
+
+  if (a == (char*)NULL)
+    print_keys(&mt_auth, MF_1K);
+  else if (strtok(NULL, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+  else if (strcmp(a, "1k") == 0)
+    print_keys(&mt_auth, MF_1K);
+  else if (strcmp(a, "4k") == 0)
+    print_keys(&mt_auth, MF_4K);
+  else {
+    printf("Unknown argument: %s\n", a);
+    return -1;
+  }
+
   return 0;
 }
