@@ -178,21 +178,33 @@ int com_set(char* arg) {
     return -1;
   }
 
-  int block = strtol(block_str, NULL, 16);
+  int block = strtol(block_str, &block_str, 16);
+  if (*block_str != '\0') {
+    printf("Invalid block character (non hex): %s\n", block_str);
+    return -1;
+  }
   if (block < 0 || block > 0xff) {
     printf("Invalid block [0,ff]: %x\n", block);
     return -1;
   }
 
-  int offset = strtol(offset_str, NULL, 16);
+  int offset = strtol(offset_str, &offset_str, 16);
+  if (*offset_str != '\0') {
+    printf("Invalid offset character (non hex): %s\n", offset_str);
+    return -1;
+  }
   if (offset < 0 || offset > 0x0f) {
     printf("Invalid offset [0,f]: %x\n", offset);
     return -1;
   }
 
+  // Consume the byte tokens
   do {
-    int byte = strtol(byte_str, NULL, 16);
-
+    int byte = strtol(byte_str, &byte_str, 16);
+    if (*byte_str != '\0') {
+      printf("Invalid byte character (non hex)q: %s\n", byte_str);
+      return -1;
+    }
     if (byte < 0 || byte > 0xff) {
       printf("Invalid byte value [0,ff]: %x\n", byte);
       return -1;
@@ -264,9 +276,13 @@ int com_keys_set(char* arg) {
   }
 
   // Read sector
-  int sector = strtol(sector_str, NULL, 16);
+  int sector = strtol(sector_str, &sector_str, 16);
 
   // Sanity check sector range
+  if (*sector_str != '\0') {
+    printf("Invalid sector character (non hex): %s\n", sector_str);
+    return -1;
+  }
   if (sector < 0 || sector > 0x1b) {
     printf("Invalid sector [0,1b]: %x\n", sector);
     return -1;
@@ -300,10 +316,15 @@ int com_keys_set(char* arg) {
 
   // Write the key data
   char byte_tok[] = {0, 0, 0};
+  char* byte_tok_end;
   for (int i = 0; i < 6; ++i) {
     byte_tok[0] = key_str[i*2];
     byte_tok[1] = key_str[i*2+1];
-    key[i] = strtol(byte_tok, NULL, 16);
+    key[i] = strtol(byte_tok, &byte_tok_end, 16);
+    if (*byte_tok_end != '\0') {
+      printf("Invalid key character (non hex): %s\n", byte_tok_end);
+      return -1;
+    }
   }
 
   return 0;
