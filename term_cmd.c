@@ -263,12 +263,8 @@ int com_keys_set(char* arg) {
     return -1;
   }
 
-  // Read sector (hex or dec)
-  int sector = 0;
-  if (strncmp(sector_str, "0x", 2) == 0)
-    sector = strtol(sector_str, NULL, 16);
-  else
-    sector = strtol(sector_str, NULL, 10);
+  // Read sector
+  int sector = strtol(sector_str, NULL, 16);
 
   // Sanity check sector range
   if (sector < 0 && sector > 0x1b) {
