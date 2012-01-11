@@ -169,7 +169,45 @@ int com_print(char* arg) {
 }
 
 int com_set(char* arg) {
-  printf("TBD - com_set\n");
+  char* block_str = strtok(arg, " ");
+  char* offset_str = strtok(NULL, " ");
+  char* byte_str = strtok(NULL, " ");
+
+  if (!block_str || !offset_str || !byte_str) {
+    printf("Too few arguments: #block #offset xx xx xx .. xx\n");
+    return -1;
+  }
+
+  int block = strtol(block_str, NULL, 16);
+  if (block < 0 || block > 0xff) {
+    printf("Invalid block [0,ff]: %d\n", block);
+    return -1;
+  }
+
+  int offset = strtol(offset_str, NULL, 16);
+  if (offset < 0 || offset > 0x0f) {
+    printf("Invalid offset [0,f]: %d\n", offset);
+    return -1;
+  }
+
+  do {
+    int byte = strtol(byte_str, NULL, 16);
+
+    if (byte < 0 || byte > 0xff) {
+      printf("Invalid byte value [0,ff]: %d\n", byte);
+      return -1;
+    }
+
+    if (offset > 0x0f) {
+      printf("Too many bytes specified.\n");
+      return -1;
+    }
+
+    // Write the data
+    mt_current.amb[block].mbd.abtData[offset++] = byte;
+
+  } while((byte_str = strtok(NULL, " ")) != (char*)NULL);
+
   return 0;
 }
 
