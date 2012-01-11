@@ -180,13 +180,13 @@ int com_set(char* arg) {
 
   int block = strtol(block_str, NULL, 16);
   if (block < 0 || block > 0xff) {
-    printf("Invalid block [0,ff]: %d\n", block);
+    printf("Invalid block [0,ff]: %x\n", block);
     return -1;
   }
 
   int offset = strtol(offset_str, NULL, 16);
   if (offset < 0 || offset > 0x0f) {
-    printf("Invalid offset [0,f]: %d\n", offset);
+    printf("Invalid offset [0,f]: %x\n", offset);
     return -1;
   }
 
@@ -194,7 +194,7 @@ int com_set(char* arg) {
     int byte = strtol(byte_str, NULL, 16);
 
     if (byte < 0 || byte > 0xff) {
-      printf("Invalid byte value [0,ff]: %d\n", byte);
+      printf("Invalid byte value [0,ff]: %x\n", byte);
       return -1;
     }
 
@@ -267,8 +267,8 @@ int com_keys_set(char* arg) {
   int sector = strtol(sector_str, NULL, 16);
 
   // Sanity check sector range
-  if (sector < 0 && sector > 0x1b) {
-    printf("Invalid sector [0,1b]: %d\n", sector);
+  if (sector < 0 || sector > 0x1b) {
+    printf("Invalid sector [0,1b]: %x\n", sector);
     return -1;
   }
 
