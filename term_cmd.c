@@ -39,8 +39,8 @@ command_t commands[] = {
   { "load",  com_load_tag, 1, 1, "Load tag data from a file" },
   { "save",  com_save_tag, 1, 1, "Save tag data to a file" },
 
-  { "read",  com_read_tag,  0, 1, "Read tag data from a physical tag" },
-  { "write", com_write_tag, 0, 1, "Write tag data to a physical tag" },
+  { "read",  com_read_tag,  0, 1, "A|B : Read tag data from a physical tag" },
+  { "write", com_write_tag, 0, 1, "A|B : Write tag data to a physical tag" },
 
   { "print",      com_print,      0, 1, "1k|4k : Print tag data" },
   { "print keys", com_print_keys, 0, 1, "Print tag's keys" },
@@ -138,12 +138,62 @@ int com_save_tag(char* arg) {
 }
 
 int com_read_tag(char* arg) {
-  mf_read_tag(&mt_current, MF_KEY_A);
+  // Add option to choose key
+  char* ab = strtok(arg, " ");
+
+  if (strtok(NULL, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+
+  if (!ab) {
+    printf("Too few arguments: (A|B)\n");
+    return -1;
+  }
+
+  // Parse key selection
+  mf_key_type key_type;
+  if (strcasecmp(ab, "a") == 0)
+    key_type = MF_KEY_A;
+  else if (strcasecmp(ab, "b") == 0)
+    key_type = MF_KEY_B;
+  else {
+    printf("Invalid argument (A|B): %s\n", ab);
+    return -1;
+  }
+
+  // Issue the read request
+  mf_read_tag(&mt_current, key_type);
   return 0;
 }
 
 int com_write_tag(char* arg) {
-  mf_write_tag(&mt_current, MF_KEY_A);
+  // Add option to choose key
+  char* ab = strtok(arg, " ");
+
+  if (strtok(NULL, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+
+  if (!ab) {
+    printf("Too few arguments: (A|B)\n");
+    return -1;
+  }
+
+  // Parse key selection
+  mf_key_type key_type;
+  if (strcasecmp(ab, "a") == 0)
+    key_type = MF_KEY_A;
+  else if (strcasecmp(ab, "b") == 0)
+    key_type = MF_KEY_B;
+  else {
+    printf("Invalid argument (A|B): %s\n", ab);
+    return -1;
+  }
+
+  // Issue the read request
+  mf_write_tag(&mt_current, key_type);
   return 0;
 }
 
