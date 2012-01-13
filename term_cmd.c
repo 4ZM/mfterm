@@ -27,6 +27,7 @@
 #include "mfterm.h"
 #include "tag.h"
 #include "term_cmd.h"
+#include "mifare_ctrl.h"
 
 command_t commands[] = {
   { "help",  com_help, 0, 0, "Display this text" },
@@ -137,12 +138,12 @@ int com_save_tag(char* arg) {
 }
 
 int com_read_tag(char* arg) {
-  printf("TBD - com_read_tag\n");
+  mf_read_tag(&mt_current, MF_KEY_A);
   return 0;
 }
 
 int com_write_tag(char* arg) {
-  printf("TBD - com_write_tag\n");
+  mf_write_tag(&mt_current, MF_KEY_A);
   return 0;
 }
 

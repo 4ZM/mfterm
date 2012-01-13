@@ -24,14 +24,15 @@ clean:
 
 CFLAGS	= -g -Wall -std=c99
 LDFLAGS	= -g -lreadline -lnfc
-CC			= gcc
+CC      = gcc
 
-MFTERM_SRCS = \
-	mfterm.c     \
-	term_cmd.c   \
-	util.c       \
-	tag.c        \
-	mifare.c
+MFTERM_SRCS =   \
+	mfterm.c      \
+	term_cmd.c    \
+	util.c        \
+	tag.c         \
+	mifare.c      \
+	mifare_ctrl.c
 
 MFTERM_OBJS = $(MFTERM_SRCS:.c=.o)
 
