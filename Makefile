@@ -20,11 +20,18 @@
 all: mfterm
 
 clean:
-	rm -f mfterm *.o *~ *.bak
+	rm -f mfterm *.o *~ *.bak dictionary.c
 
-CFLAGS	= -g -Wall -std=c99
-LDFLAGS	= -g -lreadline -lnfc
-CC      = gcc
+CC       = gcc
+CFLAGS	 = -g -Wall -std=c99
+LDFLAGS  = -g -lreadline -lnfc
+
+LEX        = flex
+LEXCFLAGS	 = \
+  -g -std=c99 -Wall \
+  -Wno-unused-function \
+  -Wno-implicit-function-declaration
+LEXFLAGS   =
 
 MFTERM_SRCS =   \
 	mfterm.c      \
@@ -32,16 +39,26 @@ MFTERM_SRCS =   \
 	util.c        \
 	tag.c         \
 	mifare.c      \
-	mifare_ctrl.c
+	mifare_ctrl.c \
 
-MFTERM_OBJS = $(MFTERM_SRCS:.c=.o)
+MFTERM_LEX =    \
+	dictionary.l
+
+MFTERM_OBJS = $(MFTERM_SRCS:.c=.o) $(MFTERM_LEX:.l=.o)
 
 mfterm: $(MFTERM_OBJS)
 	${CC} ${LDFLAGS} -o $@ $^ 
 
+# Flex generated source is not Wall clean, skip that flag
+dictionary.o : dictionary.c Makefile
+	${CC} ${LEXCFLAGS} -c $<
+
 # Generic compilation rule - make file plumbing
 %.o : %.c Makefile
 	${CC} ${CFLAGS} -c $<
+
+%.c : %.l Makefile
+	${LEX} ${LEXFLAGS} -o $@ $<
 
 # makedepend section - set up include dependencies
 DEPFILE		= .depends

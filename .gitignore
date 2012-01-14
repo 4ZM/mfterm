@@ -1,5 +1,6 @@
-rkfterm
+mfterm
 .depends
 *.o
 *~
 *.bak
+dictionary.c

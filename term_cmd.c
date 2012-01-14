@@ -28,6 +28,7 @@
 #include "tag.h"
 #include "term_cmd.h"
 #include "mifare_ctrl.h"
+#include "dictionary.h"
 
 command_t commands[] = {
   { "help",  com_help, 0, 0, "Display this text" },
@@ -52,6 +53,10 @@ command_t commands[] = {
   { "keys set",    com_keys_set,    0, 1, "A|B #S key : Set a key value" },
   { "keys import", com_keys_import, 0, 1, "Import keys from the current tag" },
   { "keys",        com_keys_print,  0, 1, "Print the keys" },
+
+  { "dict import", com_dict_import, 1, 1, "Import a dictionary key file" },
+  { "dict clear",  com_dict_clear,  0, 1, "Clear the key dictionary" },
+  { "dict",        com_dict_print,  0, 1, "Print the key dictionary" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
@@ -403,6 +408,46 @@ int com_keys_print(char* arg) {
     printf("Unknown argument: %s\n", a);
     return -1;
   }
+
+  return 0;
+}
+
+int com_dict_import(char* arg) {
+  FILE* dict_file = fopen(arg, "r");
+
+  if (dict_file == NULL) {
+    printf("Could not open file: %s\n", arg);
+    return 1;
+  }
+
+  dictionary_import(dict_file);
+
+  fclose(dict_file);
+  return 0;
+}
+
+int com_dict_clear(char* arg) {
+  dictionary_clear();
+  return 0;
+}
+
+int com_dict_print(char* arg) {
+  key_list_t* kl = dictionary_get();
+
+  int count = 0;
+  while(kl) {
+      printf("%02x %02x %02x %02x %02x %02x\n",
+             (unsigned int)(kl->key[0]),
+             (unsigned int)(kl->key[1]),
+             (unsigned int)(kl->key[2]),
+             (unsigned int)(kl->key[3]),
+             (unsigned int)(kl->key[4]),
+             (unsigned int)(kl->key[5]));
+      kl = kl->next;
+      ++count;
+  }
+
+  printf("Dictionary contains: %d keys\n", count);
 
   return 0;
 }
