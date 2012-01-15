@@ -1,1 +1,56 @@
 A terminal interface for working with MC 1/4k tags.
+
+Working with the mfterm program there are a few state variables that
+are used.
+
+Current Tag
+-----------
+The "current tag" is populated with the 'load' or 'read' commands. The
+'read' command will read data from a physical tag and requires the
+"current keys" to be set to the keys of the tag.
+
+Display the "current tag" by using the 'print' command. The keys of
+the "current tag" are displayed with the 'print keys' command. Note:
+the tag keys could be different from the "current keys" displayed by
+the 'keys print' command.
+
+The data of the "current tag" can be manipulated with the 'set' command.
+
+The "current tag" can be persisted by writing it to a file with the
+'save' command. It can also be written to a physical tag with the
+'write' command. For the 'write' command to succeed, the "current
+keys" have to be set to appropriate values.
+
+If you are reading or loading a 1k tag, the mfterm program will still
+use a full 4k tag to represent it. The last 3k will be all
+zeroes. This is in analogy with the other libnfc tools.
+
+Current Keys
+------------
+The "current keys" are used to authenticate when performing operations
+on a physical tag. They can be displayed using the 'keys' command.
+
+The keys are stored just like a tag in a file using the 'keys save',
+but with all the data fields except the sector trailers cleared. The
+keys can be loaded from a file, either a real tag dump or a key tag
+dump, with the 'keys load' command.
+
+The "current keys" can be set to match the "current tag" by using the
+'keys import' command. It is also possible to manually set a key using
+the 'keys set' command.
+
+Dictionary
+----------
+
+A key dictionary can be imported from a file using the 'dict load'
+command. This dictionary can then be used to perform a dictionary
+attack on the sectors of a tag by using the 'dict attack' command.
+
+The format of the dictionary file is simple. One key (6 bytes, 12 hex
+characters) per line and # is a comment. 
+
+Performing 'dict load' on several files will produce a dictionary that
+is the union of those files. Duplicates will be removed.
+
+To list all the keys in the dictionary, use the command 'dict'. To
+clear the dictionary use 'dict clear'.
