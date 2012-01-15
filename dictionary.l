@@ -49,13 +49,7 @@ comment        #[^\n]*
 %%
 
 {key}          {
-                 sscanf(yytext, "%02x%02x%02x%02x%02x%02x",
-                        (unsigned int*)(key_token + 0),
-                        (unsigned int*)(key_token + 1),
-                        (unsigned int*)(key_token + 2),
-                        (unsigned int*)(key_token + 3),
-                        (unsigned int*)(key_token + 4),
-                        (unsigned int*)(key_token + 5));
+                 read_key(key_token, yytext);
                  return DT_KEY;
                }
 {comment}      {} // eat comments

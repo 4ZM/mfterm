@@ -18,6 +18,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "mifare.h"
 #include "util.h"
@@ -158,6 +159,45 @@ void print_keys(const mf_tag_t* tag, mf_size size) {
   }
 }
 
+const char* sprint_key(const byte_t* key) {
+  static char str_buff[13];
+
+  if (!key)
+    return NULL;
+
+  sprintf(str_buff, "%02x%02x%02x%02x%02x%02x",
+          (unsigned int)(key[0]),
+          (unsigned int)(key[1]),
+          (unsigned int)(key[2]),
+          (unsigned int)(key[3]),
+          (unsigned int)(key[4]),
+          (unsigned int)(key[5]));
+
+  return str_buff;
+}
+
+byte_t* read_key(byte_t* key, const char* str) {
+  if (!key || !str)
+    return NULL;
+
+  static char byte_tok[] = {0, 0, 0};
+  char* byte_tok_end;
+  for (int i = 0; i < 6; ++i) {
+    byte_tok[0] = str[i*2];
+    byte_tok[1] = str[i*2+1];
+    key[i] = strtol(byte_tok, &byte_tok_end, 16);
+    if (*byte_tok_end != '\0') {
+      return NULL;
+    }
+  }
+
+  return key;
+}
+
+void clear_tag(mf_tag_t* tag) {
+  memset((void*)tag, 0x00, MF_4K);
+}
+
 void strip_non_auth_data(mf_tag_t* tag) {
   static const size_t bs = sizeof(mf_block_t);
 
@@ -168,4 +208,57 @@ void strip_non_auth_data(mf_tag_t* tag) {
   // Clear 2-4k sector data 12 á 16 - only keep sector trailer
   for (int i = 0; i < 0x0c; ++i)
     memset(((void*)tag) + 0x10 * 4 * bs + i * 0x10 * bs, 0x00, 0x0f * bs);
+}
+
+
+size_t block_count(mf_size size) {
+  return size / 0x10;
+}
+
+size_t sector_count(mf_size size) {
+  return size == MF_1K ? 0x10 : 0x1c;
+}
+
+int is_trailer_block(size_t block) {
+  return (block + 1) % (block < 0x40 ? 4 : 0x10) == 0;
+}
+
+size_t block_to_sector(size_t block) {
+  if (block < 0x10*4)
+    return block / 4;
+
+  return 0x10 + (block - 0x10*4) / 0x10;
+}
+
+// Return the trailer block for the specified block
+size_t block_to_trailer(size_t block)
+{
+  if (block < 0x10*4)
+    return block + (3 - (block % 4));
+
+  return block + (0xf - (block % 0x10));
+}
+
+/**
+ * Return block index of the first block in every sector in turn on
+ * repeated calls. Initialize the iterator by calling with state
+ * 0. Subsequent calls should use the tag size as state. The iterator
+ * returns -1 as an end marker.
+ */
+int sector_iterator(int state) {
+  static int block;
+
+  if (state == 0)
+    return block = 0;
+
+  if (block + 4 < 0x10*4)
+    return block += 4;
+
+  if (state == MF_1K) // End marker for 1k state
+    return -1;
+
+  if (block + 0x10 < 0x100)
+    return block += 0x10;
+
+  return -1; // End marker for 4k state
 }

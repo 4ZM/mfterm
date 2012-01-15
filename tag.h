@@ -58,4 +58,33 @@ void print_tag();
 void print_tag_range(size_t first, size_t last);
 void print_keys(const mf_tag_t* tag, mf_size size);
 
+const char* sprint_key(const byte_t* key);
+byte_t* read_key(byte_t* key, const char* str);
+
+void clear_tag(mf_tag_t* tag);
+
+// Return number of blocks for size
+size_t block_count(mf_size size);
+
+// Return number of sectors for size
+size_t sector_count(mf_size size);
+
+// Return > 0 if the block is a trailer, 0 otherwise.
+int is_trailer_block(size_t block);
+
+// Return the sector index of the block
+size_t block_to_sector(size_t block);
+
+// Return the trailer block for the specified block
+size_t block_to_trailer(size_t block);
+
+/**
+ * Return block index of the first block in every sector in turn on
+ * repeated calls. Initialize the iterator by calling with state
+ * 0. Subsequent calls should use the tag size as state. The iterator
+ * returns -1 as an end marker.
+ */
+int sector_iterator(int state);
+
+
 #endif

@@ -371,17 +371,10 @@ int com_keys_set(char* arg) {
     return -1;
   }
 
-  // Write the key data
-  char byte_tok[] = {0, 0, 0};
-  char* byte_tok_end;
-  for (int i = 0; i < 6; ++i) {
-    byte_tok[0] = key_str[i*2];
-    byte_tok[1] = key_str[i*2+1];
-    key[i] = strtol(byte_tok, &byte_tok_end, 16);
-    if (*byte_tok_end != '\0') {
-      printf("Invalid key character (non hex): %s\n", byte_tok_end);
-      return -1;
-    }
+  // Parse the key
+  if (read_key(key, key_str) == NULL) {
+    printf("Invalid key character (non hex)\n");
+    return -1;
   }
 
   return 0;
@@ -449,15 +442,9 @@ int com_dict_print(char* arg) {
 
   int count = 0;
   while(kl) {
-      printf("%02x %02x %02x %02x %02x %02x\n",
-             (unsigned int)(kl->key[0]),
-             (unsigned int)(kl->key[1]),
-             (unsigned int)(kl->key[2]),
-             (unsigned int)(kl->key[3]),
-             (unsigned int)(kl->key[4]),
-             (unsigned int)(kl->key[5]));
-      kl = kl->next;
-      ++count;
+    printf("%s\n", sprint_key(kl->key));
+    kl = kl->next;
+    ++count;
   }
 
   printf("Dictionary contains: %d keys\n", count);

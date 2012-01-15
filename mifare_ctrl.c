@@ -49,6 +49,7 @@
 #include <string.h>
 #include <nfc/nfc.h>
 #include "mifare.h"
+#include "tag.h"
 #include "mifare_ctrl.h"
 
 
@@ -78,8 +79,6 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
 
 bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
                               mf_size size);
-
-int sector_start_iterator(int state);
 
 int mf_setup(nfc_device_t** device /* out */,
              nfc_target_t* target /* out */,
@@ -230,24 +229,21 @@ bool mf_select_target(nfc_device_t* device, nfc_target_t* target) {
   return true;
 }
 
-
 bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
                       nfc_device_t* device, nfc_target_t* target,
                       const mf_tag_t* keys, mf_key_type key_type) {
   mifare_param mp;
 
   static mf_tag_t buffer_tag;
-
-  // Clear the buffer
-  memset((void*)&buffer_tag, 0x00, 0x100*0x10 /* 4096 */);
+  clear_tag(&buffer_tag);
 
   printf("Reading tag ["); fflush(stdout);
 
   // Read the card from end to begin
-  for (int block = size / 0x10 - 1; block >= 0; --block) {
+  for (int block = block_count(size) - 1; block >= 0; --block) {
 
     // Authenticate everytime we reach a trailer block
-    if ((block + 1) % (block < 0x40 ? 4 : 0x10) == 0) {
+    if (is_trailer_block(block)) {
 
       // Try to authenticate for the current sector
       if (!mf_authenticate_tag(device, target, block, keys, key_type)) {
@@ -283,25 +279,18 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
 
   // Success! Copy the data
   // todo: Or return static ptr?
-  memcpy(tag, &buffer_tag, 0x100*0x10 /* 4096 */);
+  memcpy(tag, &buffer_tag, MF_4K);
 
   return true;
 }
 
-size_t block_to_sector(size_t block) {
-
-  if (block < 0x10*4)
-    return block / 4;
-
-  return 0x10 + (block - 0x10*4) / 0x10;
-}
 
 bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
                                mf_size size) {
 
   // Iterate over the start blocks in all sectors
-  for (int block = sector_start_iterator(0);
-       block >= 0; block = sector_start_iterator(size)) {
+  for (int block = sector_iterator(0);
+       block >= 0; block = sector_iterator(size)) {
 
     printf("Working on sector: %02x [", block_to_sector(block));
 
@@ -333,13 +322,7 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
 
     printf("  A Key: ");
     if (key_a) {
-      printf("%02x%02x%02x%02x%02x%02x\n",
-             (unsigned int)(key_a[0]),
-             (unsigned int)(key_a[1]),
-             (unsigned int)(key_a[2]),
-             (unsigned int)(key_a[3]),
-             (unsigned int)(key_a[4]),
-             (unsigned int)(key_a[5]));
+      printf("%s\n", sprint_key(key_a));
 
       // Optimize dictionary by moving key to the front
       dictionary_add(key_a);
@@ -350,13 +333,7 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
 
     printf("  B Key: ");
     if (key_b) {
-      printf("%02x%02x%02x%02x%02x%02x\n",
-             (unsigned int)(key_b[0]),
-             (unsigned int)(key_b[1]),
-             (unsigned int)(key_b[2]),
-             (unsigned int)(key_b[3]),
-             (unsigned int)(key_b[4]),
-             (unsigned int)(key_b[5]));
+      printf("%s\n", sprint_key(key_b));
 
       // Optimize dictionary by moving key to the front
       dictionary_add(key_b);
@@ -398,24 +375,6 @@ bool mf_authenticate(nfc_device_t* device, nfc_target_t* target,
   return false;
 }
 
-// 0 : first, MF_1K|MF_4K : next -> block | -1 (end)
-int sector_start_iterator(int state) {
-  static int block;
-
-  if (state == 0)
-    return block = 0;
-
-  if (block + 4 < 0x10*4)
-    return block += 4;
-
-  if (state == MF_1K) // End marker for 1k state
-    return -1;
-
-  if (block + 0x10 < 0x100)
-    return block += 0x10;
-
-  return -1; // End marker for 4k state
-}
 
 bool mf_authenticate_tag(nfc_device_t* device, nfc_target_t* target,
                          byte_t block,
