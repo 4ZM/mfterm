@@ -32,11 +32,11 @@ typedef enum {
 
 key_list_t* key_list = NULL;
 
-key_list_t* kl_add(key_list_t** list, unsigned char* key);
+key_list_t* kl_add(key_list_t** list, const uint8_t* key);
 void kl_clear(key_list_t** list);
 
-key_list_t* kl_make_node(unsigned char* key);
-int key_cmp(unsigned char* k1, unsigned char* k2);
+key_list_t* kl_make_node(const uint8_t* key);
+int key_cmp(const uint8_t* k1, const uint8_t* k2);
 
 %}
 
@@ -103,7 +103,7 @@ void dictionary_clear() {
   kl_clear(&key_list);
 }
 
-int dictionary_add(uint8_t* key) {
+int dictionary_add(const uint8_t* key) {
   return kl_add(&key_list, key) != NULL;
 }
 
@@ -112,7 +112,7 @@ key_list_t* dictionary_get() {
 }
 
 // Append a node to the list. Don't append duplicates, O(n) operation.
-key_list_t* kl_add(key_list_t** list, unsigned char* key) {
+key_list_t* kl_add(key_list_t** list, const uint8_t* key) {
   if (list == NULL)
     return NULL;
 
@@ -148,7 +148,7 @@ void kl_clear(key_list_t** list) {
   *list = 0;
 }
 
-key_list_t* kl_make_node(unsigned char* key) {
+key_list_t* kl_make_node(const uint8_t* key) {
   // Create the list node
   key_list_t* new_node = (key_list_t*) malloc(sizeof(key_list_t));
   memcpy((void*)new_node, key, 6);
@@ -156,7 +156,7 @@ key_list_t* kl_make_node(unsigned char* key) {
   return new_node;
 }
 
-int key_cmp(unsigned char* k1, unsigned char* k2) {
+int key_cmp(const uint8_t* k1, const uint8_t* k2) {
   for (int i = 0; i < 6; ++i) {
     if (k1[i] != k2[i])
       return -1;

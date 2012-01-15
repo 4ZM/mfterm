@@ -30,7 +30,7 @@ typedef struct key_list_t_ {
 
 int dictionary_import(FILE* input);
 void dictionary_clear();
-int dictionary_add(uint8_t* key);
+int dictionary_add(const uint8_t* key);
 key_list_t* dictionary_get();
 
 #endif
