@@ -78,7 +78,7 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
                       const mf_tag_t* keys, mf_key_type key_type);
 
 bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
-                              mf_size size);
+                               mf_size size, mf_tag_t* tag);
 
 int mf_setup(nfc_device_t** device /* out */,
              nfc_target_t* target /* out */,
@@ -156,7 +156,7 @@ int mf_write_tag(const mf_tag_t* tag, mf_key_type key_type) {
   return 0;
 }
 
-int mf_dictionary_attack() {
+int mf_dictionary_attack(mf_tag_t* tag) {
   int res = -1;
 
   nfc_device_t* device;
@@ -167,7 +167,7 @@ int mf_dictionary_attack() {
     return -1; // No need to disconnect here
   }
 
-  if (!mf_dictionary_attack_impl(device, &target, size)) {
+  if (!mf_dictionary_attack_impl(device, &target, size, tag)) {
     printf("Dictionary attack failed!\n");
     goto ret; // Disconnect and return
   }
@@ -286,7 +286,12 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
 
 
 bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
-                               mf_size size) {
+                               mf_size size, mf_tag_t* tag) {
+
+  // Tag buffer to swap in if we find all keys
+  int all_keys_found = 1;
+  static mf_tag_t buffer_tag;
+  clear_tag(&buffer_tag);
 
   // Iterate over the start blocks in all sectors
   for (int block = sector_iterator(0);
@@ -326,8 +331,12 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
 
       // Optimize dictionary by moving key to the front
       dictionary_add(key_a);
+
+      // Save key in the buffer
+      memcpy(buffer_tag.amb[block_to_trailer(block)].mbt.abtKeyA, key_a, 6);
     }
     else {
+      all_keys_found = 0;
       printf("Not found\n");
     }
 
@@ -337,12 +346,20 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
 
       // Optimize dictionary by moving key to the front
       dictionary_add(key_b);
+
+      // Save key in the buffer
+      memcpy(buffer_tag.amb[block_to_trailer(block)].mbt.abtKeyB, key_b, 6);
     }
     else {
+      all_keys_found = 0;
       printf("Not found\n");
     }
 
   }
+
+  // All keys found, use them as current keys
+  if (all_keys_found)
+    memcpy(tag, &buffer_tag, MF_4K);
 
   return true;
 }

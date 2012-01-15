@@ -433,7 +433,7 @@ int com_dict_attack(char* arg) {
     return -1;
   }
 
-  mf_dictionary_attack();
+  mf_dictionary_attack(&mt_auth);
   return 0;
 }
 
