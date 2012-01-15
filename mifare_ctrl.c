@@ -111,10 +111,13 @@ int mf_setup(nfc_device_t** device /* out */,
   }
 
   // Guessing tag size
-  if ((target->nti.nai.abtAtqa[1] & 0x02)) // 4K
+  if ((target->nti.nai.abtAtqa[1] & 0x02)) { // 4K
     *size = MF_4K;
-  if ((target->nti.nai.abtAtqa[1] & 0x04)) // 1K
+  }
+  else
+  if ((target->nti.nai.abtAtqa[1] & 0x04)) { // 1K
     *size = MF_1K;
+  }
   else {
     printf("Unsupported tag size [1|4]K.\n");
     goto err; // Disconnect and return
