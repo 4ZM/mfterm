@@ -122,10 +122,19 @@ key_list_t* kl_add(key_list_t** list, const uint8_t* key) {
 
   // Append (but no duplicates)
   key_list_t* it = *list;
-  key_list_t* last;
+  key_list_t* last = NULL;
   while(it) {
-    if (key_cmp(it->key, key) == 0)
+
+    // Don't add duplicates, but move the key first in the list
+    if (key_cmp(it->key, key) == 0) {
+      if (last) {
+        last->next = it->next; // disconnect it
+        it->next = *list;      // move it fisrt
+        *list = it;            // re-point the head
+      }
+
       return NULL; // Return null on duplicates
+    }
     last = it;
     it = it->next;
   }

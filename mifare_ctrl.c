@@ -77,7 +77,7 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
                       const mf_tag_t* keys, mf_key_type key_type);
 
 bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
-                              mf_size size, const key_list_t* dictionary);
+                              mf_size size);
 
 int sector_start_iterator(int state);
 
@@ -157,7 +157,7 @@ int mf_write_tag(const mf_tag_t* tag, mf_key_type key_type) {
   return 0;
 }
 
-int mf_dictionary_attack(const key_list_t* dictionary) {
+int mf_dictionary_attack() {
   int res = -1;
 
   nfc_device_t* device;
@@ -168,7 +168,7 @@ int mf_dictionary_attack(const key_list_t* dictionary) {
     return -1; // No need to disconnect here
   }
 
-  if (!mf_dictionary_attack_impl(device, &target, size, dictionary)) {
+  if (!mf_dictionary_attack_impl(device, &target, size)) {
     printf("Dictionary attack failed!\n");
     goto ret; // Disconnect and return
   }
@@ -297,7 +297,7 @@ size_t block_to_sector(size_t block) {
 }
 
 bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
-                               mf_size size, const key_list_t* dictionary) {
+                               mf_size size) {
 
   // Iterate over the start blocks in all sectors
   for (int block = sector_start_iterator(0);
@@ -309,7 +309,7 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
     const byte_t* key_b = NULL;
 
     // Iterate we run out of dictionary keys or the sector is cracked
-    const key_list_t* key_it = dictionary;
+    const key_list_t* key_it = dictionary_get();
     while(key_it && (key_a == NULL || key_b == NULL)) {
 
       // Try to authenticate for the current sector
@@ -340,6 +340,9 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
              (unsigned int)(key_a[3]),
              (unsigned int)(key_a[4]),
              (unsigned int)(key_a[5]));
+
+      // Optimize dictionary by moving key to the front
+      dictionary_add(key_a);
     }
     else {
       printf("Not found\n");
@@ -354,6 +357,9 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
              (unsigned int)(key_b[3]),
              (unsigned int)(key_b[4]),
              (unsigned int)(key_b[5]));
+
+      // Optimize dictionary by moving key to the front
+      dictionary_add(key_b);
     }
     else {
       printf("Not found\n");

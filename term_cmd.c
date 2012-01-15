@@ -433,15 +433,14 @@ int com_dict_clear(char* arg) {
 }
 
 int com_dict_attack(char* arg) {
-  key_list_t* dictionary = dictionary_get();
 
   // Not much point if we don't have any keys
-  if (!dictionary) {
+  if (!dictionary_get()) {
     printf("Dictionary is empty!");
     return -1;
   }
 
-  mf_dictionary_attack(dictionary);
+  mf_dictionary_attack();
   return 0;
 }
 
