@@ -44,8 +44,9 @@ int com_keys_set(char* arg);
 int com_keys_import(char* arg);
 int com_keys_print(char* arg);
 
-int com_dict_import(char* arg);
+int com_dict_load(char* arg);
 int com_dict_clear(char* arg);
+int com_dict_attack(char* arg);
 int com_dict_print(char* arg);
 
 typedef struct {

@@ -24,8 +24,10 @@
  */
 
 #include "tag.h"
+#include "dictionary.h"
 
 int mf_read_tag(mf_tag_t* tag, mf_key_type key_type);
 int mf_write_tag(const mf_tag_t* tag, mf_key_type key_type);
+int mf_dictionary_attack(const key_list_t* dictionary);
 
 #endif

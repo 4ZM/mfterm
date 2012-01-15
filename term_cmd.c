@@ -54,8 +54,9 @@ command_t commands[] = {
   { "keys import", com_keys_import, 0, 1, "Import keys from the current tag" },
   { "keys",        com_keys_print,  0, 1, "Print the keys" },
 
-  { "dict import", com_dict_import, 1, 1, "Import a dictionary key file" },
+  { "dict load",   com_dict_load,   1, 1, "Load a dictionary key file" },
   { "dict clear",  com_dict_clear,  0, 1, "Clear the key dictionary" },
+  { "dict attack", com_dict_attack, 0, 1, "Find keys of a physical tag"},
   { "dict",        com_dict_print,  0, 1, "Print the key dictionary" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
@@ -412,7 +413,7 @@ int com_keys_print(char* arg) {
   return 0;
 }
 
-int com_dict_import(char* arg) {
+int com_dict_load(char* arg) {
   FILE* dict_file = fopen(arg, "r");
 
   if (dict_file == NULL) {
@@ -428,6 +429,19 @@ int com_dict_import(char* arg) {
 
 int com_dict_clear(char* arg) {
   dictionary_clear();
+  return 0;
+}
+
+int com_dict_attack(char* arg) {
+  key_list_t* dictionary = dictionary_get();
+
+  // Not much point if we don't have any keys
+  if (!dictionary) {
+    printf("Dictionary is empty!");
+    return -1;
+  }
+
+  mf_dictionary_attack(dictionary);
   return 0;
 }
 
