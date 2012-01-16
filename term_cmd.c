@@ -152,20 +152,21 @@ int com_read_tag(char* arg) {
     return -1;
   }
 
-  if (!ab) {
-    printf("Too few arguments: (A|B)\n");
-    return -1;
-  }
-
   // Parse key selection
   mf_key_type key_type;
-  if (strcasecmp(ab, "a") == 0)
+  if (!ab) {
+    printf("No key argument (A|B) given. Defaulting to A\n");
     key_type = MF_KEY_A;
-  else if (strcasecmp(ab, "b") == 0)
-    key_type = MF_KEY_B;
+  }
   else {
-    printf("Invalid argument (A|B): %s\n", ab);
-    return -1;
+    if (strcasecmp(ab, "a") == 0)
+      key_type = MF_KEY_A;
+    else if (strcasecmp(ab, "b") == 0)
+      key_type = MF_KEY_B;
+    else {
+      printf("Invalid argument (A|B): %s\n", ab);
+      return -1;
+    }
   }
 
   // Issue the read request
