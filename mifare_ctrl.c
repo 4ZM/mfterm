@@ -69,10 +69,6 @@ bool mf_authenticate(nfc_device_t* device, nfc_target_t* target,
                      byte_t block, const byte_t* key, mf_key_type key_type,
                      int re_select_on_fail);
 
-bool mf_authenticate_tag(nfc_device_t* device, nfc_target_t* target,
-                         byte_t block,
-                         const mf_tag_t* keys, mf_key_type key_type);
-
 bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
                       nfc_device_t* device, nfc_target_t* target,
                       const mf_tag_t* keys, mf_key_type key_type);
@@ -248,7 +244,8 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
     if (is_trailer_block(block)) {
 
       // Try to authenticate for the current sector
-      if (!mf_authenticate_tag(device, target, block, keys, key_type)) {
+      byte_t* key = key_from_tag(keys, key_type, block);
+      if (!mf_authenticate(device, target, block, key, key_type, 0)) {
         printf ("\nAuthentication failed for block: 0x%02x.\n", block);
         return false;
       }
@@ -393,24 +390,3 @@ bool mf_authenticate(nfc_device_t* device, nfc_target_t* target,
 
   return false;
 }
-
-
-bool mf_authenticate_tag(nfc_device_t* device, nfc_target_t* target,
-                         byte_t block,
-                         const mf_tag_t* keys, mf_key_type key_type) {
-
-  // Find block that corresponds to sector trailer for requested sector
-  byte_t trailer_block = block +
-    ((block < 0x10*4) ? (3 - (block % 4)) : (0xf - (block % 0x10)));
-
-  // Extract the right key
-  static byte_t key_buff[6];
-  if (key_type == MF_KEY_A)
-    memcpy(key_buff, keys->amb[trailer_block].mbt.abtKeyA, 6);
-  else
-    memcpy(key_buff, keys->amb[trailer_block].mbt.abtKeyB, 6);
-
-  // Try to authenticate for the current sector
-  return mf_authenticate(device, target, block, key_buff, key_type, 0);
-}
-

@@ -78,6 +78,9 @@ size_t block_to_sector(size_t block);
 // Return the trailer block for the specified block
 size_t block_to_trailer(size_t block);
 
+// Extract a key from a tag and return it
+byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block);
+
 /**
  * Return block index of the first block in every sector in turn on
  * repeated calls. Initialize the iterator by calling with state
