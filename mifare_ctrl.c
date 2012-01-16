@@ -235,6 +235,8 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
   static mf_tag_t buffer_tag;
   clear_tag(&buffer_tag);
 
+  int error = 0;
+
   printf("Reading tag ["); fflush(stdout);
 
   // Read the card from end to begin
@@ -245,23 +247,28 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
 
       // Try to authenticate for the current sector
       byte_t* key = key_from_tag(keys, key_type, block);
-      if (!mf_authenticate(device, target, block, key, key_type, 0)) {
-        printf ("\nAuthentication failed for block: 0x%02x.\n", block);
-        return false;
-      }
+      if (!mf_authenticate(device, target, block, key, key_type, 1)) {
+        // Progress indication and error report
+        printf("0x%02x", block_to_sector(block));
+        if (block != 3) printf(".");
+        fflush(stdout);
 
-      // Try to read out the trailer (only to get access bits)
-      if (nfc_initiator_mifare_cmd(device, MC_READ, block, &mp)) {
-        // Copy the keys over from our key dump and store the retrieved access bits
-        memcpy(buffer_tag.amb[block].mbt.abtKeyA, keys->amb[block].mbt.abtKeyA, 6);
-        memcpy(buffer_tag.amb[block].mbt.abtAccessBits, mp.mpd.abtData + 6, 4);
-        memcpy(buffer_tag.amb[block].mbt.abtKeyB, keys->amb[block].mbt.abtKeyB, 6);
-      } else {
-        printf ("\nUnable to read trailer block: 0x%02x.\n", block);
-        return false;
+        block -= sector_size(block) - 1; // Skip the rest of the sector blocks
+        error = 1;
       }
-
-      printf("."); fflush(stdout); // Progress indicator
+      else {
+        // Try to read out the trailer (only to get access bits)
+        if (nfc_initiator_mifare_cmd(device, MC_READ, block, &mp)) {
+          // Copy the keys over from our key dump and store the retrieved access bits
+          memcpy(buffer_tag.amb[block].mbt.abtKeyA, keys->amb[block].mbt.abtKeyA, 6);
+          memcpy(buffer_tag.amb[block].mbt.abtAccessBits, mp.mpd.abtData + 6, 4);
+          memcpy(buffer_tag.amb[block].mbt.abtKeyB, keys->amb[block].mbt.abtKeyB, 6);
+        } else {
+          printf ("\nUnable to read trailer block: 0x%02x.\n", block);
+          return false;
+        }
+        printf("."); fflush(stdout); // Progress indicator
+      }
     }
 
     else { // I.e. not a sector trailer
@@ -274,7 +281,11 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
     }
   }
 
-  printf("] Success!\n"); // Terminate progress indicator
+  // Terminate progress indicator
+  if (error)
+    printf("] Auth errors in indicated sectors.\n");
+  else
+    printf("] Success!\n");
 
   // Success! Copy the data
   // todo: Or return static ptr?
