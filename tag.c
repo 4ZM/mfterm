@@ -239,6 +239,11 @@ size_t block_to_trailer(size_t block)
   return block + (0xf - (block % 0x10));
 }
 
+// Return the sector size (in blocks) that contains the block
+size_t sector_size(size_t block) {
+  return block < 0x10*4 ? 4 : 16;
+}
+
 // Extract a key from a tag and return it
 byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block) {
   static byte_t key[6];
