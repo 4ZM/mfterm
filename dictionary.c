@@ -17,81 +17,18 @@
  * along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-%{
-
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "dictionary.h"
 
-uint8_t key_token[6];
-
-typedef enum {
-  DT_KEY = 1,
-  DT_ERR = 2
-} dict_token_t;
-
-key_list_t* key_list = NULL;
+static key_list_t* key_list = NULL;
 
 key_list_t* kl_add(key_list_t** list, const uint8_t* key);
 void kl_clear(key_list_t** list);
 
 key_list_t* kl_make_node(const uint8_t* key);
 int key_cmp(const uint8_t* k1, const uint8_t* k2);
-
-%}
-
-%option yylineno
-
-hex_digit      [0-9a-fA-F]
-key            {hex_digit}{12}
-comment        #[^\n]*
-
-%%
-
-{key}          {
-                 read_key(key_token, yytext);
-                 return DT_KEY;
-               }
-{comment}      {} // eat comments
-[ \t\r\n]+     {} // eat white space
-.              {
-                 printf("Line: %d - Unrecognized input: %s\n", yylineno, yytext);
-                 return DT_ERR;
-               }
-
-%%
-
-int yywrap() { yylineno = 1; return 1; }
-
-
-int dictionary_import(FILE* input) {
-  dict_token_t token;
-  int res = 0;
-  int keys_count = 0;
-  int imported_count = 0;
-  yyin = input;
-
-  while((token = yylex())) {
-    switch(token) {
-    case DT_KEY:
-      ++keys_count;
-      if (dictionary_add(key_token))
-        ++imported_count;
-      break;
-
-    case DT_ERR:
-      res = -1;
-      break;
-    }
-  }
-
-  if (res)
-    printf("There were errors.\n");
-
-  printf("%d keys (of %d) imported.\n", imported_count, keys_count);
-
-  return res;
-}
 
 void dictionary_clear() {
   kl_clear(&key_list);

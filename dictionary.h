@@ -28,9 +28,31 @@ typedef struct key_list_t_ {
   struct key_list_t_* next;
 } key_list_t;
 
+/**
+ * Parse the input file and import all keys found in the dictionary.
+ */
 int dictionary_import(FILE* input);
+
+/**
+ * Clear the dictionary and free all allocated memory.
+ */
 void dictionary_clear();
+
+/**
+ * Add a new key to the dictionary. If the dictionary does not exist
+ * (is empty), it will be created and the key inserted. If the key
+ * already exists in the list, it will be moved to the head of the
+ * list and 0 will be returned; else != 0 is returned.
+ * Note: this operation is O(n)
+ */
 int dictionary_add(const uint8_t* key);
+
+/**
+ * Return a head pointer to the current dictionary (or NULL if it is
+ * empty). Don't hang on to this pointer after an add operation, since
+ * the list head migt change; rather, use this function again
+ * everywhere a ref. to the list is required.
+ */
 key_list_t* dictionary_get();
 
 #endif

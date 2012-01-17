@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
 
-.PHONY: clean all
-
-all: mfterm
-
-clean:
-	rm -f mfterm *.o *~ *.bak dictionary.c
-
 CC       = gcc
 CFLAGS	 = -g -Wall -std=c99
 LDFLAGS  = -g -lreadline -lnfc
@@ -40,17 +33,25 @@ MFTERM_SRCS =   \
 	tag.c         \
 	mifare.c      \
 	mifare_ctrl.c \
+	dictionary.c
 
-MFTERM_LEX =    \
-	dictionary.l
+MFTERM_LEX =          \
+	dictionary_parser.l
 
 MFTERM_OBJS = $(MFTERM_SRCS:.c=.o) $(MFTERM_LEX:.l=.o)
+
+.PHONY: clean all
+
+all: mfterm
+
+clean:
+	rm -f mfterm *.o *~ *.bak  $(MFTERM_LEX:.l=.c)
 
 mfterm: $(MFTERM_OBJS)
 	${CC} ${LDFLAGS} -o $@ $^ 
 
 # Flex generated source is not Wall clean, skip that flag
-dictionary.o : dictionary.c Makefile
+dictionary_parser.o : dictionary_parser.c Makefile
 	${CC} ${LEXCFLAGS} -c $<
 
 # Generic compilation rule - make file plumbing

@@ -3,4 +3,4 @@ mfterm
 *.o
 *~
 *.bak
-dictionary.c
+dictionary_parser.c
