@@ -52,66 +52,62 @@
 #include "tag.h"
 #include "mifare_ctrl.h"
 
+// State of the device/tag - should be NULL between high level calls.
+static nfc_device_t* device = NULL;
+static nfc_target_t target;
+static mf_size size;
 
 static const nfc_modulation_t mf_nfc_modulation = {
   .nmt = NMT_ISO14443A,
   .nbr = NBR_106,
 };
 
-int mf_setup(nfc_device_t** device /* out */,
-             nfc_target_t* target /* out */,
-             mf_size* size /* out */);
+int mf_setup();
 
-bool mf_configure_device(nfc_device_t* device);
-bool mf_select_target(nfc_device_t* device, nfc_target_t* target);
+bool mf_configure_device();
+bool mf_select_target();
 
-bool mf_authenticate(nfc_device_t* device, nfc_target_t* target,
-                     byte_t block, const byte_t* key, mf_key_type key_type,
+bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type,
                      int re_select_on_fail);
 
-bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
-                      nfc_device_t* device, nfc_target_t* target,
-                      const mf_tag_t* keys, mf_key_type key_type);
+bool mf_read_tag_impl(mf_tag_t* tag, const mf_tag_t* keys, mf_key_type key_type);
 
-bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
-                               mf_size size, mf_tag_t* tag);
+bool mf_dictionary_attack_impl(mf_tag_t* tag);
 
-int mf_setup(nfc_device_t** device /* out */,
-             nfc_target_t* target /* out */,
-             mf_size* size /* out */) {
+int mf_setup() {
 
   // Connect to (any) NFC reader
-  *device = nfc_connect(NULL);
-  if (*device == NULL) {
+  device = nfc_connect(NULL);
+  if (device == NULL) {
     printf ("Could not connect to any NFC device\n");
     return -1; // Don't jump here, since we don't need to disconnect
   }
 
   // Initialize the device as a reader
-  if (!mf_configure_device(*device)) {
+  if (!mf_configure_device()) {
     printf("Error initializing NFC device\n");
     goto err; // Disconnect and return
   }
 
   // Try to find a tag
-  if (!mf_select_target(*device, target)) {
+  if (!mf_select_target()) {
     printf("Connected to device, but no tag found.\n");
     goto err; // Disconnect and return
   }
 
   // Test if we are dealing with a Mifare compatible tag
-  if ((target->nti.nai.btSak & 0x08) == 0) {
+  if ((target.nti.nai.btSak & 0x08) == 0) {
     printf("Incompatible tag type: 0x%02x (i.e. not Mifare).\n",
-           target->nti.nai.btSak);
+           target.nti.nai.btSak);
     goto err;
   }
 
   // Guessing tag size
-  if ((target->nti.nai.abtAtqa[1] & 0x02)) { // 4K
-    *size = MF_4K;
+  if ((target.nti.nai.abtAtqa[1] & 0x02)) { // 4K
+    size = MF_4K;
   }
-  else if ((target->nti.nai.abtAtqa[1] & 0x04)) { // 1K
-    *size = MF_1K;
+  else if ((target.nti.nai.abtAtqa[1] & 0x04)) { // 1K
+    size = MF_1K;
   }
   else {
     printf("Unsupported tag size [1|4]K.\n");
@@ -122,7 +118,8 @@ int mf_setup(nfc_device_t** device /* out */,
 
   // Disconnect on error
  err:
-  nfc_disconnect(*device);
+  nfc_disconnect(device);
+  device = NULL;
   return -1;
 }
 
@@ -130,14 +127,10 @@ int mf_setup(nfc_device_t** device /* out */,
 int mf_read_tag(mf_tag_t* tag, mf_key_type key_type) {
   int res = -1;
 
-  nfc_device_t* device;
-  static nfc_target_t target;
-  mf_size size;
-
-  if (mf_setup(&device, &target, &size))
+  if (mf_setup())
     return -1; // No need to disconnect here
 
-  if (!mf_read_tag_impl(tag, size, device, &target, &mt_auth, key_type)) {
+  if (!mf_read_tag_impl(tag, &mt_auth, key_type)) {
     printf("Read failed!\n");
     goto ret; // Disconnect and return
   }
@@ -145,6 +138,7 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type key_type) {
   res = 0; // Indicate success
  ret:
   nfc_disconnect(device);
+  device = NULL;
   return res;
 }
 
@@ -157,15 +151,11 @@ int mf_write_tag(const mf_tag_t* tag, mf_key_type key_type) {
 int mf_dictionary_attack(mf_tag_t* tag) {
   int res = -1;
 
-  nfc_device_t* device;
-  static nfc_target_t target;
-  mf_size size;
-
-  if (mf_setup(&device, &target, &size)) {
+  if (mf_setup()) {
     return -1; // No need to disconnect here
   }
 
-  if (!mf_dictionary_attack_impl(device, &target, size, tag)) {
+  if (!mf_dictionary_attack_impl(tag)) {
     printf("Dictionary attack failed!\n");
     goto ret; // Disconnect and return
   }
@@ -173,23 +163,24 @@ int mf_dictionary_attack(mf_tag_t* tag) {
   res = 0; // Indicate success
  ret:
   nfc_disconnect(device);
+  device = NULL;
   return res;
 }
 
-bool mf_configure_device(nfc_device_t* device) {
+bool mf_configure_device() {
 
   // Disallow invalid frame
-  if (!nfc_configure (device, NDO_ACCEPT_INVALID_FRAMES, false))
+  if (!nfc_configure(device, NDO_ACCEPT_INVALID_FRAMES, false))
     return false;
 
   // Disallow multiple frames
-  if (!nfc_configure (device, NDO_ACCEPT_MULTIPLE_FRAMES, false))
+  if (!nfc_configure(device, NDO_ACCEPT_MULTIPLE_FRAMES, false))
     return false;
 
   // Make sure we reset the CRC and parity to chip handling.
-  if (!nfc_configure (device, NDO_HANDLE_CRC, true))
+  if (!nfc_configure(device, NDO_HANDLE_CRC, true))
     return false;
-  if (!nfc_configure (device, NDO_HANDLE_PARITY, true))
+  if (!nfc_configure(device, NDO_HANDLE_PARITY, true))
     return false;
 
   // Disable ISO14443-4 switching in order to read devices that emulate
@@ -198,15 +189,15 @@ bool mf_configure_device(nfc_device_t* device) {
     return false;
 
   // Activate "easy framing" feature by default
-  if (!nfc_configure (device, NDO_EASY_FRAMING, true))
+  if (!nfc_configure(device, NDO_EASY_FRAMING, true))
     return false;
 
   // Deactivate the CRYPTO1 cipher, it may could cause problems when still active
-  if (!nfc_configure (device, NDO_ACTIVATE_CRYPTO1, false))
+  if (!nfc_configure(device, NDO_ACTIVATE_CRYPTO1, false))
     return false;
 
   // Drop explicitely the field
-  if (!nfc_configure (device, NDO_ACTIVATE_FIELD, false))
+  if (!nfc_configure(device, NDO_ACTIVATE_FIELD, false))
     return false;
 
   // Override default initialization option, only try to select a tag once.
@@ -216,19 +207,18 @@ bool mf_configure_device(nfc_device_t* device) {
   return true;
 }
 
-bool mf_select_target(nfc_device_t* device, nfc_target_t* target) {
+bool mf_select_target() {
   if (!nfc_initiator_select_passive_target(device,
                                            mf_nfc_modulation,
                                            NULL,   // init data
                                            0,      // init data len
-                                           target)) {
+                                           &target)) {
     return false;
   }
   return true;
 }
 
-bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
-                      nfc_device_t* device, nfc_target_t* target,
+bool mf_read_tag_impl(mf_tag_t* tag,
                       const mf_tag_t* keys, mf_key_type key_type) {
   mifare_param mp;
 
@@ -247,7 +237,7 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
 
       // Try to authenticate for the current sector
       byte_t* key = key_from_tag(keys, key_type, block);
-      if (!mf_authenticate(device, target, block, key, key_type, 1)) {
+      if (!mf_authenticate(block, key, key_type, 1)) {
         // Progress indication and error report
         printf("0x%02x", block_to_sector(block));
         if (block != 3) printf(".");
@@ -295,8 +285,7 @@ bool mf_read_tag_impl(mf_tag_t* tag, mf_size size,
 }
 
 
-bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
-                               mf_size size, mf_tag_t* tag) {
+bool mf_dictionary_attack_impl(mf_tag_t* tag) {
 
   // Tag buffer to swap in if we find all keys
   int all_keys_found = 1;
@@ -317,14 +306,14 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
     while(key_it && (key_a == NULL || key_b == NULL)) {
 
       // Try to authenticate for the current sector
-      if (key_a == NULL && mf_authenticate(device, target, block,
-                                        key_it->key, MF_KEY_A, 1)) {
+      if (key_a == NULL &&
+          mf_authenticate(block, key_it->key, MF_KEY_A, 1)) {
         key_a = key_it->key;
       }
 
       // Try to authenticate for the current sector
-      if (key_b == NULL && mf_authenticate(device, target, block,
-                                        key_it->key, MF_KEY_B, 1)) {
+      if (key_b == NULL &&
+          mf_authenticate(block, key_it->key, MF_KEY_B, 1)) {
         key_b = key_it->key;
       }
 
@@ -375,14 +364,13 @@ bool mf_dictionary_attack_impl(nfc_device_t* device, nfc_target_t* target,
 }
 
 
-bool mf_authenticate(nfc_device_t* device, nfc_target_t* target,
-                     byte_t block, const byte_t* key, mf_key_type key_type,
+bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type,
                      int re_select_on_fail) {
 
   mifare_param mp;
 
   // Set the authentication information (uid)
-  memcpy(mp.mpa.abtUid, target->nti.nai.abtUid + target->nti.nai.szUidLen - 4, 4);
+  memcpy(mp.mpa.abtUid, target.nti.nai.abtUid + target.nti.nai.szUidLen - 4, 4);
 
   // Select key for authentication
   mifare_cmd mc = (key_type == MF_KEY_A) ? MC_AUTH_A : MC_AUTH_B;
@@ -396,7 +384,7 @@ bool mf_authenticate(nfc_device_t* device, nfc_target_t* target,
 
   if (re_select_on_fail) {
     nfc_initiator_select_passive_target(device, mf_nfc_modulation,
-                                        NULL, 0, target);
+                                        NULL, 0, &target);
   }
 
   return false;
