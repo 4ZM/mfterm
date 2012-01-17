@@ -39,6 +39,7 @@ command_t commands[] = {
 
   { "load",  com_load_tag, 1, 1, "Load tag data from a file" },
   { "save",  com_save_tag, 1, 1, "Save tag data to a file" },
+  { "clear", com_clear_tag, 0, 1, "Clear the current tag data" },
 
   { "read",  com_read_tag,  0, 1, "A|B : Read tag data from a physical tag" },
   { "write", com_write_tag, 0, 1, "A|B : Write tag data to a physical tag" },
@@ -140,6 +141,11 @@ int com_save_tag(char* arg) {
   int res = save_tag(arg);
   if (res == 0)
     printf("Successfully wrote tag to: %s\n", arg);
+  return 0;
+}
+
+int com_clear_tag(char* arg) {
+  clear_tag(&mt_current);
   return 0;
 }
 

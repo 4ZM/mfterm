@@ -28,6 +28,7 @@ int com_quit(char* arg);
 // Load/Save tag file operations
 int com_load_tag(char* arg);
 int com_save_tag(char* arg);
+int com_clear_tag(char* arg);
 
 // Read/Write tag NFC operations
 int com_read_tag(char* arg);
