@@ -41,6 +41,7 @@ int com_set(char* arg);
 
 int com_keys_load(char* arg);
 int com_keys_save(char* arg);
+int com_keys_clear(char* arg);
 int com_keys_set(char* arg);
 int com_keys_import(char* arg);
 int com_keys_print(char* arg);

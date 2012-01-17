@@ -51,6 +51,7 @@ command_t commands[] = {
 
   { "keys load",   com_keys_load,   1, 1, "Load keys from a file" },
   { "keys save",   com_keys_save,   1, 1, "Save keys to a file" },
+  { "keys clear",  com_keys_clear,  0, 1, "Clear the keys" },
   { "keys set",    com_keys_set,    0, 1, "A|B #S key : Set a key value" },
   { "keys import", com_keys_import, 0, 1, "Import keys from the current tag" },
   { "keys",        com_keys_print,  0, 1, "Print the keys" },
@@ -319,6 +320,11 @@ int com_keys_save(char* arg) {
   int res = save_auth(arg);
   if (res == 0)
     printf("Successfully wrote keys to: %s\n", arg);
+  return 0;
+}
+
+int com_keys_clear(char* arg) {
+  clear_tag(&mt_auth);
   return 0;
 }
 
