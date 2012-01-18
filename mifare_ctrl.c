@@ -62,7 +62,8 @@ static const nfc_modulation_t mf_nfc_modulation = {
   .nbr = NBR_106,
 };
 
-int mf_setup();
+int mf_connect();
+int mf_disconnect(int ret_state);
 
 bool mf_configure_device();
 bool mf_select_target();
@@ -72,7 +73,13 @@ bool mf_read_tag_impl(mf_tag_t* tag, const mf_tag_t* keys, mf_key_type key_type)
 
 bool mf_dictionary_attack_impl(mf_tag_t* tag);
 
-int mf_setup() {
+int mf_disconnect(int ret_state) {
+  nfc_disconnect(device);
+  device = NULL;
+  return ret_state;
+}
+
+int mf_connect() {
 
   // Connect to (any) NFC reader
   device = nfc_connect(NULL);
@@ -84,20 +91,20 @@ int mf_setup() {
   // Initialize the device as a reader
   if (!mf_configure_device()) {
     printf("Error initializing NFC device\n");
-    goto err; // Disconnect and return
+    return mf_disconnect(-1);
   }
 
   // Try to find a tag
   if (!mf_select_target()) {
     printf("Connected to device, but no tag found.\n");
-    goto err; // Disconnect and return
+    return mf_disconnect(-1);
   }
 
   // Test if we are dealing with a Mifare compatible tag
   if ((target.nti.nai.btSak & 0x08) == 0) {
     printf("Incompatible tag type: 0x%02x (i.e. not Mifare).\n",
            target.nti.nai.btSak);
-    goto err;
+    return mf_disconnect(-1);
   }
 
   // Guessing tag size
@@ -109,35 +116,24 @@ int mf_setup() {
   }
   else {
     printf("Unsupported tag size [1|4]K.\n");
-    goto err; // Disconnect and return
+    return mf_disconnect(-1);
   }
 
-  return 0; // Indicate success
-
-  // Disconnect on error
- err:
-  nfc_disconnect(device);
-  device = NULL;
-  return -1;
+  return 0; // Indicate success - we are now connected
 }
 
 
 int mf_read_tag(mf_tag_t* tag, mf_key_type key_type) {
-  int res = -1;
 
-  if (mf_setup())
+  if (mf_connect())
     return -1; // No need to disconnect here
 
   if (!mf_read_tag_impl(tag, &mt_auth, key_type)) {
     printf("Read failed!\n");
-    goto ret; // Disconnect and return
+    return mf_disconnect(-1);
   }
 
-  res = 0; // Indicate success
- ret:
-  nfc_disconnect(device);
-  device = NULL;
-  return res;
+  return mf_disconnect(0);
 }
 
 
@@ -147,22 +143,17 @@ int mf_write_tag(const mf_tag_t* tag, mf_key_type key_type) {
 }
 
 int mf_dictionary_attack(mf_tag_t* tag) {
-  int res = -1;
 
-  if (mf_setup()) {
+  if (mf_connect()) {
     return -1; // No need to disconnect here
   }
 
   if (!mf_dictionary_attack_impl(tag)) {
     printf("Dictionary attack failed!\n");
-    goto ret; // Disconnect and return
+    return mf_disconnect(-1);
   }
 
-  res = 0; // Indicate success
- ret:
-  nfc_disconnect(device);
-  device = NULL;
-  return res;
+  return mf_disconnect(0);
 }
 
 bool mf_configure_device() {
