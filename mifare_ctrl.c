@@ -67,9 +67,7 @@ int mf_setup();
 bool mf_configure_device();
 bool mf_select_target();
 
-bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type,
-                     int re_select_on_fail);
-
+bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type);
 bool mf_read_tag_impl(mf_tag_t* tag, const mf_tag_t* keys, mf_key_type key_type);
 
 bool mf_dictionary_attack_impl(mf_tag_t* tag);
@@ -237,7 +235,7 @@ bool mf_read_tag_impl(mf_tag_t* tag,
 
       // Try to authenticate for the current sector
       byte_t* key = key_from_tag(keys, key_type, block);
-      if (!mf_authenticate(block, key, key_type, 1)) {
+      if (!mf_authenticate(block, key, key_type)) {
         // Progress indication and error report
         printf("0x%02x", block_to_sector(block));
         if (block != 3) printf(".");
@@ -307,13 +305,13 @@ bool mf_dictionary_attack_impl(mf_tag_t* tag) {
 
       // Try to authenticate for the current sector
       if (key_a == NULL &&
-          mf_authenticate(block, key_it->key, MF_KEY_A, 1)) {
+          mf_authenticate(block, key_it->key, MF_KEY_A)) {
         key_a = key_it->key;
       }
 
       // Try to authenticate for the current sector
       if (key_b == NULL &&
-          mf_authenticate(block, key_it->key, MF_KEY_B, 1)) {
+          mf_authenticate(block, key_it->key, MF_KEY_B)) {
         key_b = key_it->key;
       }
 
@@ -364,8 +362,7 @@ bool mf_dictionary_attack_impl(mf_tag_t* tag) {
 }
 
 
-bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type,
-                     int re_select_on_fail) {
+bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type) {
 
   mifare_param mp;
 
@@ -382,10 +379,9 @@ bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type,
   if (nfc_initiator_mifare_cmd(device, mc, block, &mp))
     return true;
 
-  if (re_select_on_fail) {
-    nfc_initiator_select_passive_target(device, mf_nfc_modulation,
-                                        NULL, 0, &target);
-  }
+  // Do the hand shaking again if auth failed
+  nfc_initiator_select_passive_target(device, mf_nfc_modulation,
+                                      NULL, 0, &target);
 
   return false;
 }
