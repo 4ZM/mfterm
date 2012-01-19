@@ -137,6 +137,7 @@ void print_tag_range(size_t first, size_t last) {
 
 void print_keys(const mf_tag_t* tag, mf_size_t size) {
   printf("xS  xB  KeyA          KeyB\n");
+  printf("----------------------------------\n");
   for (int block = 3; block < 0x10 * 4; block += 4) {
     printf("%02x  %02x  ", block / 4, block);
     print_hex_array(tag->amb[block].mbt.abtKeyA, 6);
