@@ -242,12 +242,15 @@ bool mf_read_tag_internal(mf_tag_t* tag,
         error = 1;
       }
       else {
-        // Try to read out the trailer (only to get access bits)
+        // Try to read the trailer (only to *read* the access bits)
         if (nfc_initiator_mifare_cmd(device, MC_READ, block, &mp)) {
-          // Copy the keys over from our key dump and store the retrieved access bits
-          memcpy(buffer_tag.amb[block].mbt.abtKeyA, keys->amb[block].mbt.abtKeyA, 6);
-          memcpy(buffer_tag.amb[block].mbt.abtAccessBits, mp.mpd.abtData + 6, 4);
-          memcpy(buffer_tag.amb[block].mbt.abtKeyB, keys->amb[block].mbt.abtKeyB, 6);
+          // Copy the keys over to our tag buffer
+          key_to_tag(&buffer_tag, keys->amb[block].mbt.abtKeyA, MF_KEY_A, block);
+          key_to_tag(&buffer_tag, keys->amb[block].mbt.abtKeyB, MF_KEY_B, block);
+
+          // Store the retrieved access bits in the tag buffer
+          memcpy(buffer_tag.amb[block].mbt.abtAccessBits,
+                 mp.mpd.abtData + 6, 4);
         } else {
           printf ("\nUnable to read trailer block: 0x%02x.\n", block);
           return false;
@@ -327,7 +330,7 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
       dictionary_add(key_a);
 
       // Save key in the buffer
-      memcpy(buffer_tag.amb[block_to_trailer(block)].mbt.abtKeyA, key_a, 6);
+      key_to_tag(&buffer_tag, key_a, MF_KEY_A, block);
     }
     else {
       all_keys_found = 0;
@@ -342,7 +345,7 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
       dictionary_add(key_b);
 
       // Save key in the buffer
-      memcpy(buffer_tag.amb[block_to_trailer(block)].mbt.abtKeyB, key_b, 6);
+      key_to_tag(&buffer_tag, key_b, MF_KEY_B, block);
     }
     else {
       all_keys_found = 0;
