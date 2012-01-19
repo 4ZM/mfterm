@@ -68,10 +68,15 @@ int mf_disconnect(int ret_state);
 bool mf_configure_device();
 bool mf_select_target();
 
-bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type);
-bool mf_read_tag_impl(mf_tag_t* tag, const mf_tag_t* keys, mf_key_type key_type);
+bool mf_authenticate(byte_t block,
+                     const byte_t* key,
+                     mf_key_type key_type);
 
-bool mf_dictionary_attack_impl(mf_tag_t* tag);
+bool mf_read_tag_internal(mf_tag_t* tag,
+                          const mf_tag_t* keys,
+                          mf_key_type key_type);
+
+bool mf_dictionary_attack_internal(mf_tag_t* tag);
 
 int mf_disconnect(int ret_state) {
   nfc_disconnect(device);
@@ -128,7 +133,7 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type key_type) {
   if (mf_connect())
     return -1; // No need to disconnect here
 
-  if (!mf_read_tag_impl(tag, &mt_auth, key_type)) {
+  if (!mf_read_tag_internal(tag, &mt_auth, key_type)) {
     printf("Read failed!\n");
     return mf_disconnect(-1);
   }
@@ -148,7 +153,7 @@ int mf_dictionary_attack(mf_tag_t* tag) {
     return -1; // No need to disconnect here
   }
 
-  if (!mf_dictionary_attack_impl(tag)) {
+  if (!mf_dictionary_attack_internal(tag)) {
     printf("Dictionary attack failed!\n");
     return mf_disconnect(-1);
   }
@@ -181,7 +186,8 @@ bool mf_configure_device() {
   if (!nfc_configure(device, NDO_EASY_FRAMING, true))
     return false;
 
-  // Deactivate the CRYPTO1 cipher, it may could cause problems when still active
+  // Deactivate the CRYPTO1 cipher, it may could cause problems when
+  // still active
   if (!nfc_configure(device, NDO_ACTIVATE_CRYPTO1, false))
     return false;
 
@@ -207,7 +213,7 @@ bool mf_select_target() {
   return true;
 }
 
-bool mf_read_tag_impl(mf_tag_t* tag,
+bool mf_read_tag_internal(mf_tag_t* tag,
                       const mf_tag_t* keys, mf_key_type key_type) {
   mifare_param mp;
 
@@ -274,7 +280,7 @@ bool mf_read_tag_impl(mf_tag_t* tag,
 }
 
 
-bool mf_dictionary_attack_impl(mf_tag_t* tag) {
+bool mf_dictionary_attack_internal(mf_tag_t* tag) {
 
   // Tag buffer to swap in if we find all keys
   int all_keys_found = 1;
