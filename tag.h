@@ -78,6 +78,9 @@ size_t block_to_sector(size_t block);
 // Return the trailer block for the specified block
 size_t block_to_trailer(size_t block);
 
+// Return the trailer block for the specified sector
+size_t sector_to_trailer(size_t sector);
+
 // Return the sector size (in blocks) that contains the block
 size_t sector_size(size_t block);
 

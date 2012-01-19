@@ -239,6 +239,14 @@ size_t block_to_trailer(size_t block)
   return block + (0xf - (block % 0x10));
 }
 
+// Return the trailer block for the specified sector
+size_t sector_to_trailer(size_t sector) {
+  if (sector < 0x10)
+    return sector * 4 + 3;
+  else
+    return 0x10 * 4 + (sector - 0x10) * 0x10 + 0xf;
+}
+
 // Return the sector size (in blocks) that contains the block
 size_t sector_size(size_t block) {
   return block < 0x10*4 ? 4 : 16;

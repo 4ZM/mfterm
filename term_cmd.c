@@ -367,11 +367,7 @@ int com_keys_set(char* arg) {
   }
 
   // Compute the block that houses the key for the desired sector
-  size_t block;
-  if (sector < 0x10)
-    block = sector * 4 + 3;
-  else
-    block = 0x10 * 4 + (sector - 0x10) * 0x10 + 0xf;
+  size_t block = sector_to_trailer(sector);
 
   // Parse key selection and point to appropriate key
   byte_t* key;
