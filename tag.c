@@ -94,7 +94,7 @@ int import_auth() {
   return 0;
 }
 
-void print_tag(mf_size size) {
+void print_tag(mf_size_t size) {
   if (size == MF_1K)
     print_tag_range(0, MF_1K / sizeof(mf_block_t) - 1);
   else if (size == MF_4K)
@@ -135,7 +135,7 @@ void print_tag_range(size_t first, size_t last) {
   }
 }
 
-void print_keys(const mf_tag_t* tag, mf_size size) {
+void print_keys(const mf_tag_t* tag, mf_size_t size) {
   printf("xS  xB  KeyA          KeyB\n");
   for (int block = 3; block < 0x10 * 4; block += 4) {
     printf("%02x  %02x  ", block / 4, block);
@@ -211,11 +211,11 @@ void strip_non_auth_data(mf_tag_t* tag) {
 }
 
 
-size_t block_count(mf_size size) {
+size_t block_count(mf_size_t size) {
   return size / 0x10;
 }
 
-size_t sector_count(mf_size size) {
+size_t sector_count(mf_size_t size) {
   return size == MF_1K ? 0x10 : 0x1c;
 }
 
@@ -253,7 +253,10 @@ size_t sector_size(size_t block) {
 }
 
 // Extract the key for the block parameters sector of the tag and return it
-byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block) {
+byte_t* key_from_tag(const mf_tag_t* tag,
+                     mf_key_type_t key_type,
+                     size_t block) {
+
   static byte_t key[6];
 
   size_t trailer_block = block_to_trailer(block);
@@ -269,7 +272,7 @@ byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block) {
 // Write key to the sector of a tag, where the sector is specified by
 // the block.
 void key_to_tag(mf_tag_t* tag, const byte_t* key,
-                mf_key_type key_type, size_t block) {
+                mf_key_type_t key_type, size_t block) {
 
   size_t trailer_block = block_to_trailer(block);
 

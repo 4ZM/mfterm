@@ -160,7 +160,7 @@ int com_read_tag(char* arg) {
   }
 
   // Parse key selection
-  mf_key_type key_type;
+  mf_key_type_t key_type;
   if (!ab) {
     printf("No key argument (A|B) given. Defaulting to A\n");
     key_type = MF_KEY_A;
@@ -196,7 +196,7 @@ int com_write_tag(char* arg) {
   }
 
   // Parse key selection
-  mf_key_type key_type;
+  mf_key_type_t key_type;
   if (strcasecmp(ab, "a") == 0)
     key_type = MF_KEY_A;
   else if (strcasecmp(ab, "b") == 0)

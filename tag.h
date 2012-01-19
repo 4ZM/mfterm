@@ -28,12 +28,12 @@
 typedef enum {
   MF_1K = 1024,
   MF_4K = 4096
-} mf_size;
+} mf_size_t;
 
 typedef enum {
   MF_KEY_A = 'a',
   MF_KEY_B = 'b'
-} mf_key_type;
+} mf_key_type_t;
 
 // Convenience typedefs (shortening)
 typedef mifare_classic_tag mf_tag_t;
@@ -56,7 +56,7 @@ int import_auth();
 // Output
 void print_tag();
 void print_tag_range(size_t first, size_t last);
-void print_keys(const mf_tag_t* tag, mf_size size);
+void print_keys(const mf_tag_t* tag, mf_size_t size);
 
 const char* sprint_key(const byte_t* key);
 byte_t* read_key(byte_t* key, const char* str);
@@ -64,10 +64,10 @@ byte_t* read_key(byte_t* key, const char* str);
 void clear_tag(mf_tag_t* tag);
 
 // Return number of blocks for size
-size_t block_count(mf_size size);
+size_t block_count(mf_size_t size);
 
 // Return number of sectors for size
-size_t sector_count(mf_size size);
+size_t sector_count(mf_size_t size);
 
 // Return > 0 if the block is a trailer, 0 otherwise.
 int is_trailer_block(size_t block);
@@ -85,12 +85,14 @@ size_t sector_to_trailer(size_t sector);
 size_t sector_size(size_t block);
 
 // Extract the key for the block parameters sector of the tag and return it
-byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block);
+byte_t* key_from_tag(const mf_tag_t* tag,
+                     mf_key_type_t key_type,
+                     size_t block);
 
 // Write key to the sector of a tag, where the sector is specified by
 // the block.
 void key_to_tag(mf_tag_t* tag, const byte_t* key,
-                mf_key_type key_type, size_t block);
+                mf_key_type_t key_type, size_t block);
 
 /**
  * Return block index of the first block in every sector in turn on

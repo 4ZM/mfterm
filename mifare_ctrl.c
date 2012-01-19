@@ -55,7 +55,7 @@
 // State of the device/tag - should be NULL between high level calls.
 static nfc_device_t* device = NULL;
 static nfc_target_t target;
-static mf_size size;
+static mf_size_t size;
 
 static const nfc_modulation_t mf_nfc_modulation = {
   .nmt = NMT_ISO14443A,
@@ -70,11 +70,11 @@ bool mf_select_target();
 
 bool mf_authenticate(byte_t block,
                      const byte_t* key,
-                     mf_key_type key_type);
+                     mf_key_type_t key_type);
 
 bool mf_read_tag_internal(mf_tag_t* tag,
                           const mf_tag_t* keys,
-                          mf_key_type key_type);
+                          mf_key_type_t key_type);
 
 bool mf_dictionary_attack_internal(mf_tag_t* tag);
 
@@ -128,7 +128,7 @@ int mf_connect() {
 }
 
 
-int mf_read_tag(mf_tag_t* tag, mf_key_type key_type) {
+int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type) {
 
   if (mf_connect())
     return -1; // No need to disconnect here
@@ -142,7 +142,7 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type key_type) {
 }
 
 
-int mf_write_tag(const mf_tag_t* tag, mf_key_type key_type) {
+int mf_write_tag(const mf_tag_t* tag, mf_key_type_t key_type) {
   printf("TBD - com_write_tag\n");
   return 0;
 }
@@ -214,7 +214,7 @@ bool mf_select_target() {
 }
 
 bool mf_read_tag_internal(mf_tag_t* tag,
-                      const mf_tag_t* keys, mf_key_type key_type) {
+                      const mf_tag_t* keys, mf_key_type_t key_type) {
   mifare_param mp;
 
   static mf_tag_t buffer_tag;
@@ -362,7 +362,7 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
 }
 
 
-bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type key_type) {
+bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type_t key_type) {
 
   mifare_param mp;
 
