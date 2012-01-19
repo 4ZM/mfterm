@@ -252,7 +252,7 @@ size_t sector_size(size_t block) {
   return block < 0x10*4 ? 4 : 16;
 }
 
-// Extract a key from a tag and return it
+// Extract the key for the block parameters sector of the tag and return it
 byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block) {
   static byte_t key[6];
 
@@ -264,6 +264,19 @@ byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block) {
     memcpy(key, tag->amb[trailer_block].mbt.abtKeyB, 6);
 
   return key;
+}
+
+// Write key to the sector of a tag, where the sector is specified by
+// the block.
+void key_to_tag(mf_tag_t* tag, const byte_t* key,
+                mf_key_type key_type, size_t block) {
+
+  size_t trailer_block = block_to_trailer(block);
+
+  if (key_type == MF_KEY_A)
+    memcpy(tag->amb[trailer_block].mbt.abtKeyA, key, 6);
+  else
+    memcpy(tag->amb[trailer_block].mbt.abtKeyB, key, 6);
 }
 
 /**

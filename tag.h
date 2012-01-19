@@ -84,8 +84,13 @@ size_t sector_to_trailer(size_t sector);
 // Return the sector size (in blocks) that contains the block
 size_t sector_size(size_t block);
 
-// Extract a key from a tag and return it
+// Extract the key for the block parameters sector of the tag and return it
 byte_t* key_from_tag(const mf_tag_t* tag, mf_key_type key_type, size_t block);
+
+// Write key to the sector of a tag, where the sector is specified by
+// the block.
+void key_to_tag(mf_tag_t* tag, const byte_t* key,
+                mf_key_type key_type, size_t block);
 
 /**
  * Return block index of the first block in every sector in turn on
