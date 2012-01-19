@@ -146,7 +146,7 @@ int com_save_tag(char* arg) {
 }
 
 int com_clear_tag(char* arg) {
-  clear_tag(&mt_current);
+  clear_tag(&current_tag);
   return 0;
 }
 
@@ -177,7 +177,7 @@ int com_read_tag(char* arg) {
   }
 
   // Issue the read request
-  mf_read_tag(&mt_current, key_type);
+  mf_read_tag(&current_tag, key_type);
   return 0;
 }
 
@@ -207,7 +207,7 @@ int com_write_tag(char* arg) {
   }
 
   // Issue the read request
-  mf_write_tag(&mt_current, key_type);
+  mf_write_tag(&current_tag, key_type);
   return 0;
 }
 
@@ -281,7 +281,7 @@ int com_set(char* arg) {
     }
 
     // Write the data
-    mt_current.amb[block].mbd.abtData[offset++] = byte;
+    current_tag.amb[block].mbd.abtData[offset++] = byte;
 
   } while((byte_str = strtok(NULL, " ")) != (char*)NULL);
 
@@ -292,15 +292,15 @@ int com_print_keys(char* arg) {
   char* a = strtok(arg, " ");
 
   if (a == (char*)NULL)
-    print_keys(&mt_current, MF_1K);
+    print_keys(&current_tag, MF_1K);
   else if (strtok(NULL, " ") != (char*)NULL) {
     printf("Too many arguments\n");
     return -1;
   }
   else if (strcmp(a, "1k") == 0)
-    print_keys(&mt_current, MF_1K);
+    print_keys(&current_tag, MF_1K);
   else if (strcmp(a, "4k") == 0)
-    print_keys(&mt_current, MF_4K);
+    print_keys(&current_tag, MF_4K);
   else {
     printf("Unknown argument: %s\n", a);
     return -1;
@@ -324,7 +324,7 @@ int com_keys_save(char* arg) {
 }
 
 int com_keys_clear(char* arg) {
-  clear_tag(&mt_auth);
+  clear_tag(&current_auth);
   return 0;
 }
 
@@ -372,9 +372,9 @@ int com_keys_set(char* arg) {
   // Parse key selection and point to appropriate key
   byte_t* key;
   if (strcasecmp(ab, "a") == 0)
-    key = mt_auth.amb[block].mbt.abtKeyA;
+    key = current_auth.amb[block].mbt.abtKeyA;
   else if (strcasecmp(ab, "b") == 0)
-    key = mt_auth.amb[block].mbt.abtKeyB;
+    key = current_auth.amb[block].mbt.abtKeyB;
   else {
     printf("Invalid argument (A|B): %s\n", ab);
     return -1;
@@ -398,15 +398,15 @@ int com_keys_print(char* arg) {
   char* a = strtok(arg, " ");
 
   if (a == (char*)NULL)
-    print_keys(&mt_auth, MF_1K);
+    print_keys(&current_auth, MF_1K);
   else if (strtok(NULL, " ") != (char*)NULL) {
     printf("Too many arguments\n");
     return -1;
   }
   else if (strcmp(a, "1k") == 0)
-    print_keys(&mt_auth, MF_1K);
+    print_keys(&current_auth, MF_1K);
   else if (strcmp(a, "4k") == 0)
-    print_keys(&mt_auth, MF_4K);
+    print_keys(&current_auth, MF_4K);
   else {
     printf("Unknown argument: %s\n", a);
     return -1;
@@ -442,7 +442,7 @@ int com_dict_attack(char* arg) {
     return -1;
   }
 
-  mf_dictionary_attack(&mt_auth);
+  mf_dictionary_attack(&current_auth);
   return 0;
 }
 

@@ -24,8 +24,8 @@
 #include "util.h"
 #include "tag.h"
 
-mf_tag_t mt_current;
-mf_tag_t mt_auth;
+mf_tag_t current_tag;
+mf_tag_t current_auth;
 
 void strip_non_auth_data(mf_tag_t* tag);
 int load_mfd(const char* fn, mf_tag_t* tag);
@@ -68,29 +68,29 @@ int save_mfd(const char* fn, const mf_tag_t* tag) {
 }
 
 int load_tag(const char* fn) {
-  return load_mfd(fn, &mt_current);
+  return load_mfd(fn, &current_tag);
 }
 
 int save_tag(const char* fn) {
-  return save_mfd(fn, &mt_current);
+  return save_mfd(fn, &current_tag);
 }
 
 int load_auth(const char* fn) {
-  if (load_mfd(fn, &mt_auth))
+  if (load_mfd(fn, &current_auth))
     return 1;
 
-  strip_non_auth_data(&mt_auth);
+  strip_non_auth_data(&current_auth);
   return 0;
 }
 
 int save_auth(const char* fn) {
-  return save_mfd(fn, &mt_auth);
+  return save_mfd(fn, &current_auth);
 }
 
 
 int import_auth() {
-  memcpy(&mt_auth, &mt_current, sizeof(mf_tag_t));
-  strip_non_auth_data(&mt_auth);
+  memcpy(&current_auth, &current_tag, sizeof(mf_tag_t));
+  strip_non_auth_data(&current_auth);
   return 0;
 }
 
@@ -122,7 +122,7 @@ void print_tag_range(size_t first, size_t last) {
     printf("%02x  ", block);
 
     // then print the block data
-    print_hex_array_sep(mt_current.amb[block].mbd.abtData,
+    print_hex_array_sep(current_tag.amb[block].mbd.abtData,
                     sizeof(mf_block_t), " ");
 
     printf("\n");

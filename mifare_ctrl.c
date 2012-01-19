@@ -133,7 +133,7 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type key_type) {
   if (mf_connect())
     return -1; // No need to disconnect here
 
-  if (!mf_read_tag_internal(tag, &mt_auth, key_type)) {
+  if (!mf_read_tag_internal(tag, &current_auth, key_type)) {
     printf("Read failed!\n");
     return mf_disconnect(-1);
   }

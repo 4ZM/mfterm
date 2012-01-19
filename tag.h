@@ -40,10 +40,10 @@ typedef mifare_classic_tag mf_tag_t;
 typedef mifare_classic_block mf_block_t;
 
 // The active tag
-extern mf_tag_t mt_current;
+extern mf_tag_t current_tag;
 
 // The ACL + keys used
-extern mf_tag_t mt_auth;
+extern mf_tag_t current_auth;
 
 // Load/Save tag or keys from file
 int load_tag(const char* fn);
