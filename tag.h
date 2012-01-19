@@ -26,6 +26,7 @@
 #include "mifare.h"
 
 typedef enum {
+  MF_INVALID_SIZE = 0,
   MF_1K = 1024,
   MF_4K = 4096
 } mf_size_t;

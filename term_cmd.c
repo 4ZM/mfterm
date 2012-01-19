@@ -45,7 +45,7 @@ command_t commands[] = {
   { "write", com_write_tag, 0, 1, "A|B : Write tag data to a physical tag" },
 
   { "print",      com_print,      0, 1, "1k|4k : Print tag data" },
-  { "print keys", com_print_keys, 0, 1, "Print tag's keys" },
+  { "print keys", com_print_keys, 0, 1, "1k|4k : Print tag's keys" },
 
   { "set", com_set, 0, 1, "#block #offset = xx xx xx : Set tag data" },
 
@@ -54,7 +54,7 @@ command_t commands[] = {
   { "keys clear",  com_keys_clear,  0, 1, "Clear the keys" },
   { "keys set",    com_keys_set,    0, 1, "A|B #S key : Set a key value" },
   { "keys import", com_keys_import, 0, 1, "Import keys from the current tag" },
-  { "keys",        com_keys_print,  0, 1, "Print the keys" },
+  { "keys",        com_keys_print,  0, 1, "1k|4k : Print the keys" },
 
   { "dict load",   com_dict_load,   1, 1, "Load a dictionary key file" },
   { "dict clear",  com_dict_clear,  0, 1, "Clear the key dictionary" },
@@ -64,6 +64,9 @@ command_t commands[] = {
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
 
+
+mf_size_t parse_size(const char* str);
+mf_size_t parse_size_default(const char* str, mf_size_t default_size);
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -215,20 +218,19 @@ int com_print(char* arg) {
 
   char* a = strtok(arg, " ");
 
-  if (a == (char*)NULL)
-    print_tag(MF_1K);
-  else if (strtok(NULL, " ") != (char*)NULL) {
+  if (a && strtok(NULL, " ") != (char*)NULL) {
     printf("Too many arguments\n");
     return -1;
   }
-  else if (strcmp(a, "1k") == 0)
-    print_tag(MF_1K);
-  else if (strcmp(a, "4k") == 0)
-    print_tag(MF_4K);
-  else {
+
+  mf_size_t size = parse_size_default(a, MF_1K);
+
+  if (size == MF_INVALID_SIZE) {
     printf("Unknown argument: %s\n", a);
     return -1;
   }
+
+  print_tag(size);
 
   return 0;
 }
@@ -291,20 +293,19 @@ int com_set(char* arg) {
 int com_print_keys(char* arg) {
   char* a = strtok(arg, " ");
 
-  if (a == (char*)NULL)
-    print_keys(&current_tag, MF_1K);
-  else if (strtok(NULL, " ") != (char*)NULL) {
+  if (a && strtok(NULL, " ") != (char*)NULL) {
     printf("Too many arguments\n");
     return -1;
   }
-  else if (strcmp(a, "1k") == 0)
-    print_keys(&current_tag, MF_1K);
-  else if (strcmp(a, "4k") == 0)
-    print_keys(&current_tag, MF_4K);
-  else {
+
+  mf_size_t size = parse_size_default(a, MF_1K);
+
+  if (size == MF_INVALID_SIZE) {
     printf("Unknown argument: %s\n", a);
     return -1;
   }
+
+  print_keys(&current_tag, size);
 
   return 0;
 }
@@ -397,20 +398,19 @@ int com_keys_import(char* arg) {
 int com_keys_print(char* arg) {
   char* a = strtok(arg, " ");
 
-  if (a == (char*)NULL)
-    print_keys(&current_auth, MF_1K);
-  else if (strtok(NULL, " ") != (char*)NULL) {
+  if (a && strtok(NULL, " ") != (char*)NULL) {
     printf("Too many arguments\n");
     return -1;
   }
-  else if (strcmp(a, "1k") == 0)
-    print_keys(&current_auth, MF_1K);
-  else if (strcmp(a, "4k") == 0)
-    print_keys(&current_auth, MF_4K);
-  else {
+
+  mf_size_t size = parse_size_default(a, MF_1K);
+
+  if (size == MF_INVALID_SIZE) {
     printf("Unknown argument: %s\n", a);
     return -1;
   }
+
+  print_keys(&current_auth, size);
 
   return 0;
 }
@@ -459,4 +459,24 @@ int com_dict_print(char* arg) {
   printf("Dictionary contains: %d keys\n", count);
 
   return 0;
+}
+
+mf_size_t parse_size(const char* str) {
+
+  if (str == NULL)
+    return MF_INVALID_SIZE;
+
+  if (strcasecmp(str, "1k") == 0)
+    return MF_1K;
+
+  if (strcasecmp(str, "4k") == 0)
+    return MF_4K;
+
+  return MF_INVALID_SIZE;
+}
+
+mf_size_t parse_size_default(const char* str, mf_size_t default_size) {
+  if (str == NULL)
+    return default_size;
+  return parse_size(str);
 }
