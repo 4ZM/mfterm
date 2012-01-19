@@ -45,6 +45,7 @@ int com_keys_clear(char* arg);
 int com_keys_set(char* arg);
 int com_keys_import(char* arg);
 int com_keys_print(char* arg);
+int com_keys_test(char* arg);
 
 int com_dict_load(char* arg);
 int com_dict_clear(char* arg);

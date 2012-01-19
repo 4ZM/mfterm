@@ -78,6 +78,11 @@ bool mf_read_tag_internal(mf_tag_t* tag,
 
 bool mf_dictionary_attack_internal(mf_tag_t* tag);
 
+bool mf_test_auth_internal(const mf_tag_t* keys,
+                           mf_size_t size,
+                           mf_key_type_t key_type);
+
+
 int mf_disconnect(int ret_state) {
   nfc_disconnect(device);
   device = NULL;
@@ -160,6 +165,24 @@ int mf_dictionary_attack(mf_tag_t* tag) {
 
   return mf_disconnect(0);
 }
+
+
+int mf_test_auth(const mf_tag_t* keys,
+                 mf_size_t size,
+                 mf_key_type_t key_type) {
+
+  if (mf_connect()) {
+    return -1; // No need to disconnect here
+  }
+
+  if (!mf_test_auth_internal(keys, size, key_type)) {
+    printf("Test authentication failed!\n");
+    return mf_disconnect(-1);
+  }
+
+  return mf_disconnect(0);
+}
+
 
 bool mf_configure_device() {
 
@@ -357,6 +380,38 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
   // All keys found, use them as current keys
   if (all_keys_found)
     memcpy(tag, &buffer_tag, MF_4K);
+
+  return true;
+}
+
+
+bool mf_test_auth_internal(const mf_tag_t* keys,
+                          mf_size_t size,
+                          mf_key_type_t key_type) {
+
+  printf("xS  T  Key           Status\n");
+  printf("----------------------------\n");
+
+  for (int block = sector_iterator(0);
+       block != -1;
+       block = sector_iterator(size)) {
+
+    byte_t* key = key_from_tag(keys, key_type, block);
+    printf("%02x  %c  %s  ",
+           block_to_sector(block),
+           key_type,
+           sprint_key(key));
+
+
+    if (!mf_authenticate(block, key, key_type)) {
+      printf("Failure");
+    }
+    else {
+      printf("Success");
+    }
+
+    printf("\n");
+  }
 
   return true;
 }

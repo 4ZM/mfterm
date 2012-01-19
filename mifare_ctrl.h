@@ -29,5 +29,8 @@
 int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type);
 int mf_write_tag(const mf_tag_t* tag, mf_key_type_t key_type);
 int mf_dictionary_attack(mf_tag_t* tag);
+int mf_test_auth(const mf_tag_t* keys,
+                 mf_size_t size,
+                 mf_key_type_t key_type);
 
 #endif

@@ -54,6 +54,7 @@ command_t commands[] = {
   { "keys clear",  com_keys_clear,  0, 1, "Clear the keys" },
   { "keys set",    com_keys_set,    0, 1, "A|B #S key : Set a key value" },
   { "keys import", com_keys_import, 0, 1, "Import keys from the current tag" },
+  { "keys test",   com_keys_test,   0, 1, "Try to authenticate with the keys" },
   { "keys",        com_keys_print,  0, 1, "1k|4k : Print the keys" },
 
   { "dict load",   com_dict_load,   1, 1, "Load a dictionary key file" },
@@ -386,6 +387,40 @@ int com_keys_set(char* arg) {
 
 int com_keys_import(char* arg) {
   import_auth();
+  return 0;
+}
+
+int com_keys_test(char* arg) {
+  // Arg format: 1k|4k A|B
+
+  char* s = strtok(arg, " ");
+  char* ab = strtok(NULL, " ");
+
+  if (s && ab && strtok(NULL, " ") != NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+
+  if (!s || !ab) {
+    printf("Too few arguments: (1k|4k) (A|B)\n");
+    return -1;
+  }
+
+  // Parse arguments
+  mf_size_t size = parse_size(s);
+  if (size == MF_INVALID_SIZE) {
+    printf("Unknown size argument (1k|4k): %s\n", s);
+    return -1;
+  }
+
+  mf_key_type_t key_type = parse_key_type(ab);
+  if (key_type == MF_INVALID_KEY_TYPE) {
+    printf("Unknown key type argument (A|B): %s\n", ab);
+    return -1;
+  }
+
+  // Run the auth test
+  mf_test_auth(&current_auth, size, key_type);
   return 0;
 }
 
