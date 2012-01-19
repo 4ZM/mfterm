@@ -32,6 +32,7 @@ typedef enum {
 } mf_size_t;
 
 typedef enum {
+  MF_INVALID_KEY_TYPE = 0,
   MF_KEY_A = 'a',
   MF_KEY_B = 'b'
 } mf_key_type_t;

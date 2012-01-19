@@ -68,6 +68,11 @@ command_t commands[] = {
 mf_size_t parse_size(const char* str);
 mf_size_t parse_size_default(const char* str, mf_size_t default_size);
 
+mf_key_type_t parse_key_type(const char* str);
+mf_key_type_t parse_key_type_default(const char* str,
+                                     mf_key_type_t default_type);
+
+
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
 command_t * find_command(char *name) {
@@ -157,26 +162,18 @@ int com_read_tag(char* arg) {
   // Add option to choose key
   char* ab = strtok(arg, " ");
 
-  if (strtok(NULL, " ") != (char*)NULL) {
+  if (ab && strtok(NULL, " ") != (char*)NULL) {
     printf("Too many arguments\n");
     return -1;
   }
+  if (!ab)
+    printf("No key argument (A|B) given. Defaulting to A\n");
 
   // Parse key selection
-  mf_key_type_t key_type;
-  if (!ab) {
-    printf("No key argument (A|B) given. Defaulting to A\n");
-    key_type = MF_KEY_A;
-  }
-  else {
-    if (strcasecmp(ab, "a") == 0)
-      key_type = MF_KEY_A;
-    else if (strcasecmp(ab, "b") == 0)
-      key_type = MF_KEY_B;
-    else {
-      printf("Invalid argument (A|B): %s\n", ab);
-      return -1;
-    }
+  mf_key_type_t key_type = parse_key_type_default(ab, MF_KEY_A);
+  if (key_type == MF_INVALID_KEY_TYPE) {
+    printf("Invalid argument (A|B): %s\n", ab);
+    return -1;
   }
 
   // Issue the read request
@@ -188,23 +185,19 @@ int com_write_tag(char* arg) {
   // Add option to choose key
   char* ab = strtok(arg, " ");
 
-  if (strtok(NULL, " ") != (char*)NULL) {
-    printf("Too many arguments\n");
-    return -1;
-  }
-
   if (!ab) {
     printf("Too few arguments: (A|B)\n");
     return -1;
   }
 
+  if (strtok(NULL, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+
   // Parse key selection
-  mf_key_type_t key_type;
-  if (strcasecmp(ab, "a") == 0)
-    key_type = MF_KEY_A;
-  else if (strcasecmp(ab, "b") == 0)
-    key_type = MF_KEY_B;
-  else {
+  mf_key_type_t key_type = parse_key_type(ab);
+  if (key_type == MF_INVALID_KEY_TYPE) {
     printf("Invalid argument (A|B): %s\n", ab);
     return -1;
   }
@@ -372,9 +365,10 @@ int com_keys_set(char* arg) {
 
   // Parse key selection and point to appropriate key
   byte_t* key;
-  if (strcasecmp(ab, "a") == 0)
+  mf_key_type_t key_type = parse_key_type(ab);
+  if (key_type == MF_KEY_A)
     key = current_auth.amb[block].mbt.abtKeyA;
-  else if (strcasecmp(ab, "b") == 0)
+  else if (key_type == MF_KEY_B)
     key = current_auth.amb[block].mbt.abtKeyB;
   else {
     printf("Invalid argument (A|B): %s\n", ab);
@@ -479,4 +473,25 @@ mf_size_t parse_size_default(const char* str, mf_size_t default_size) {
   if (str == NULL)
     return default_size;
   return parse_size(str);
+}
+
+mf_key_type_t parse_key_type(const char* str) {
+
+  if (str == NULL)
+    return MF_INVALID_KEY_TYPE;
+
+  if (strcasecmp(str, "a") == 0)
+    return MF_KEY_A;
+
+  if (strcasecmp(str, "b") == 0)
+    return MF_KEY_B;
+
+  return MF_INVALID_KEY_TYPE;
+}
+
+mf_key_type_t parse_key_type_default(const char* str,
+                                     mf_key_type_t default_type) {
+  if (str == NULL)
+    return default_type;
+  return parse_key_type(str);
 }
