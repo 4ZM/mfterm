@@ -76,6 +76,10 @@ bool mf_read_tag_internal(mf_tag_t* tag,
                           const mf_tag_t* keys,
                           mf_key_type_t key_type);
 
+bool mf_write_tag_internal(const mf_tag_t* tag,
+                           const mf_tag_t* keys,
+                           mf_key_type_t key_type);
+
 bool mf_dictionary_attack_internal(mf_tag_t* tag);
 
 bool mf_test_auth_internal(const mf_tag_t* keys,
@@ -148,8 +152,15 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type) {
 
 
 int mf_write_tag(const mf_tag_t* tag, mf_key_type_t key_type) {
-  printf("TBD - com_write_tag\n");
-  return 0;
+  if (mf_connect())
+    return -1; // No need to disconnect here
+
+  if (!mf_write_tag_internal(tag, &current_auth, key_type)) {
+    printf("Write failed!\n");
+    return mf_disconnect(-1);
+  }
+
+  return mf_disconnect(0);
 }
 
 int mf_dictionary_attack(mf_tag_t* tag) {
@@ -301,6 +312,84 @@ bool mf_read_tag_internal(mf_tag_t* tag,
   // Success! Copy the data
   // todo: Or return static ptr?
   memcpy(tag, &buffer_tag, MF_4K);
+
+  return true;
+}
+
+
+bool mf_write_tag_internal(const mf_tag_t* tag,
+                           const mf_tag_t* keys,
+                           mf_key_type_t key_type) {
+
+  mifare_param mp;
+  int error = 0;
+
+  printf("Writing tag ["); fflush(stdout);
+
+  // Process each sector in turn
+  for (int header_block = sector_header_iterator(0);
+       header_block != -1;
+       header_block = sector_header_iterator(size)) {
+
+    // Authenticate
+    byte_t* key = key_from_tag(keys, key_type, header_block);
+    if (!mf_authenticate(header_block, key, key_type)) {
+      // Progress indication and error report
+      if (header_block != 0) printf(".");
+      printf("0x%02x", block_to_sector(header_block));
+      fflush(stdout);
+
+      error = 1;
+      continue; // Skip the rest of the sector blocks
+    }
+
+    // Write the sectors blocks
+    for (int block = header_block, trailer = block_to_trailer(header_block);
+         block < trailer; ++block) {
+
+      // First block on tag is read only - skip it
+      if (block == 0)
+        continue;
+
+      // Try to write the data block
+      memcpy (mp.mpd.abtData, tag->amb[block].mbd.abtData, 0x10);
+
+      // do not write a block 0 with incorrect BCC - card will be made invalid!
+      if (block == 0) {
+        if((mp.mpd.abtData[0] ^ mp.mpd.abtData[1] ^ mp.mpd.abtData[2] ^
+            mp.mpd.abtData[3] ^ mp.mpd.abtData[4]) != 0x00) {
+          printf ("\nError: incorrect BCC in MFD file!\n"); // ADD DATA
+          return false;
+        }
+      }
+
+      // Write the data block
+      if (!nfc_initiator_mifare_cmd(device, MC_WRITE, block, &mp)) {
+        printf("\nUnable to write block: 0x%02x.\n", block);
+        return false;
+      }
+    }
+
+    // Auth ok and sector read ok, finish up by reading trailer
+    int trailer_block = block_to_trailer(header_block);
+    memcpy (mp.mpd.abtData, tag->amb[trailer_block].mbt.abtKeyA, 6);
+    memcpy (mp.mpd.abtData + 6, tag->amb[trailer_block].mbt.abtAccessBits, 4);
+    memcpy (mp.mpd.abtData + 10, tag->amb[trailer_block].mbt.abtKeyB, 6);
+
+    // Try to write the trailer
+    if (!nfc_initiator_mifare_cmd(device, MC_WRITE, trailer_block, &mp)) {
+      printf("\nUnable to write block: 0x%02x.\n", trailer_block);
+      return false;
+    }
+
+    printf("."); fflush(stdout); // Progress indicator
+  }
+
+  // Terminate progress indicator
+  if (error)
+    printf("] Auth errors in indicated sectors.\n");
+  else
+    printf("] Success!\n");
 
   return true;
 }
