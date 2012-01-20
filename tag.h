@@ -53,19 +53,24 @@ int load_auth(const char* fn);
 int save_tag(const char* fn);
 int save_auth(const char* fn);
 
+// Copy key data from the 'current_tag' to the 'current_auth'
 int import_auth();
 
-// Output
+// Output tag data
 void print_tag();
 void print_tag_range(size_t first, size_t last);
 void print_keys(const mf_tag_t* tag, mf_size_t size);
 
+// Return a hex string representation of the key
 const char* sprint_key(const byte_t* key);
+
+// Parse the string and set the key. Return the key, or NULL on error.
 byte_t* read_key(byte_t* key, const char* str);
 
 // Return a string describing the tag type 1k|4k
 const char* sprint_size(mf_size_t size);
 
+// Set the contents of a tag to zeroes
 void clear_tag(mf_tag_t* tag);
 
 // Return number of blocks for size
@@ -98,7 +103,7 @@ byte_t* key_from_tag(const mf_tag_t* tag,
                      size_t block);
 
 // Write key to the sector of a tag, where the sector is specified by
-// the block.
+// the block (anywhere in the sector).
 void key_to_tag(mf_tag_t* tag, const byte_t* key,
                 mf_key_type_t key_type, size_t block);
 

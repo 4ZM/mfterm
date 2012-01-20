@@ -1,4 +1,8 @@
-A terminal interface for working with MC 1/4k tags.
+mfterm is a terminal interface for working with Mifare Classic tags.
+
+Tab completion on commands is available. Also, commands that have file
+name arguments provide tab completion on files. There is also a
+command history, like in most normal shells.
 
 Working with the mfterm program there are a few state variables that
 are used.
@@ -7,14 +11,16 @@ Current Tag
 -----------
 The "current tag" is populated with the 'load' or 'read' commands. The
 'read' command will read data from a physical tag and requires the
-"current keys" to be set to the keys of the tag.
+"current keys" to be set to the keys of the tag. Clear the "current
+tag" by using the 'clear' command.
 
 Display the "current tag" by using the 'print' command. The keys of
 the "current tag" are displayed with the 'print keys' command. Note:
 the tag keys could be different from the "current keys" displayed by
 the 'keys print' command.
 
-The data of the "current tag" can be manipulated with the 'set' command.
+The data of the "current tag" can be manipulated with the 'set'
+command.
 
 The "current tag" can be persisted by writing it to a file with the
 'save' command. It can also be written to a physical tag with the
@@ -28,7 +34,8 @@ zeroes. This is in analogy with the other libnfc tools.
 Current Keys
 ------------
 The "current keys" are used to authenticate when performing operations
-on a physical tag. They can be displayed using the 'keys' command.
+on a physical tag. They can be displayed using the 'keys'
+command. Clear the "current keys" by using the 'keys clear' command.
 
 The keys are stored just like a tag in a file using the 'keys save',
 but with all the data fields except the sector trailers cleared. The
@@ -39,9 +46,11 @@ The "current keys" can be set to match the "current tag" by using the
 'keys import' command. It is also possible to manually set a key using
 the 'keys set' command.
 
+Use the 'keys test' command to test if the "current keys" can be used
+to authenticate with a physical tag.
+
 Dictionary
 ----------
-
 A key dictionary can be imported from a file using the 'dict load'
 command. This dictionary can then be used to perform a dictionary
 attack on the sectors of a tag by using the 'dict attack' command.
@@ -54,3 +63,10 @@ is the union of those files. Duplicates will be removed.
 
 To list all the keys in the dictionary, use the command 'dict'. To
 clear the dictionary use 'dict clear'.
+
+Other commands
+--------------
+
+Quit the mfterm program by issuing the 'quit' command.
+
+Help is available by writing 'help'

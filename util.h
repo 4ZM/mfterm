@@ -27,7 +27,10 @@
    into STRING. */
 char* trim(char* string);
 
+// Print a byte array in hex without byte separation
 void print_hex_array(const unsigned char* data, size_t nbytes);
+
+// Print a byte array in hex with the specified byte separation.
 void print_hex_array_sep(const unsigned char* data, size_t nbytes, char* sep);
 
 #endif

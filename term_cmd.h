@@ -22,23 +22,31 @@
 
 typedef int (*cmd_func_t)(char*);
 
+// Print help command
 int com_help(char* arg);
+
+// Exit mfterm command
 int com_quit(char* arg);
 
 // Load/Save tag file operations
 int com_load_tag(char* arg);
 int com_save_tag(char* arg);
+
+// Clear (zero) tag command
 int com_clear_tag(char* arg);
 
 // Read/Write tag NFC operations
 int com_read_tag(char* arg);
 int com_write_tag(char* arg);
 
+// Tag print commands
 int com_print(char* arg);
 int com_print_keys(char* arg);
 
+// Tag set (value) command
 int com_set(char* arg);
 
+// Key operations
 int com_keys_load(char* arg);
 int com_keys_save(char* arg);
 int com_keys_clear(char* arg);
@@ -47,6 +55,7 @@ int com_keys_import(char* arg);
 int com_keys_print(char* arg);
 int com_keys_test(char* arg);
 
+// Dictionary operations
 int com_dict_load(char* arg);
 int com_dict_clear(char* arg);
 int com_dict_attack(char* arg);
@@ -62,6 +71,8 @@ typedef struct {
 
 extern command_t commands[];
 
-command_t *find_command();
+// Lookup a command by name. Return a ptr to the command function, or
+// NULL if the command isn't found.
+command_t* find_command(const char *name);
 
 #endif

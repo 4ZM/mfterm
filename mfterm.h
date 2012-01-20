@@ -20,7 +20,10 @@
  * along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// The main loop of mfterm
 void input_loop();
+
+// Called to exit the mfterm program
 void stop_input_loop();
 
 #endif

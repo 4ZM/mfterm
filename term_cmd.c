@@ -65,18 +65,25 @@ command_t commands[] = {
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
 
-
+// Parse a Mifare size type argument (1k|4k)
 mf_size_t parse_size(const char* str);
+
+// Parse a Mifare size type argument (1k|4k). Return the default
+// argument value if the string is NULL.
 mf_size_t parse_size_default(const char* str, mf_size_t default_size);
 
+// Parse a Mifare key type argument (A|B)
 mf_key_type_t parse_key_type(const char* str);
+
+// Parse a Mifare key type argument (A|B). Return the default
+// argument value if the string is NULL.
 mf_key_type_t parse_key_type_default(const char* str,
                                      mf_key_type_t default_type);
 
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
-command_t * find_command(char *name) {
+command_t* find_command(const char *name) {
   command_t* cmd = NULL;
   size_t cmd_len = 0;
 

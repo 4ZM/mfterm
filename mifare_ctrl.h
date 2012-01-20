@@ -26,9 +26,40 @@
 #include "tag.h"
 #include "dictionary.h"
 
+/**
+ * Connect to an nfc device. Then read the tag data, authenticating with the
+ * 'current_auth' keys of specified type, and store it in the
+ * 'current_tag' state variable. Finally, disconnect from the device.
+ * If there are authentication errors, those sectors will be set to
+ * all zeroes.
+ * Return 0 on success != 0 on failure.
+ */
 int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type);
+
+/**
+ * Connect to an nfc device. The write the tag data, authenticating with
+ * the 'current_auth' keys of specified type. Finally, disconnect from
+ * the device.  If there are authentication errors, those sectors will
+ * not be written.
+ * Return 0 on success != 0 on failure.
+ */
 int mf_write_tag(const mf_tag_t* tag, mf_key_type_t key_type);
+
+/**
+ * Connect to an nfc device.  Then, for each sector in turn, try keys in the
+ * dictionary for authentication. Report success or failure. If a key
+ * is found, set it in the state variable 'current_auth'. Finally,
+ * disconnect from the device.
+ * Return 0 on success != 0 on failure.
+ */
 int mf_dictionary_attack(mf_tag_t* tag);
+
+/**
+ * Connect to an nfc device. Then test the keys in the 'current_auth'
+ * by trying to authenticate to the sectors of the tag. Report success
+ * or failure for each sector. Finally, disconnect from the device.
+ * Return 0 on success != 0 on failure.
+ */
 int mf_test_auth(const mf_tag_t* keys,
                  mf_size_t size,
                  mf_key_type_t key_type);

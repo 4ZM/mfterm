@@ -52,8 +52,10 @@ comment        #[^\n]*
 
 %%
 
+// Reset the line numbering at the end of a file
 int yywrap() { yylineno = 1; return 1; }
 
+// Parser loop. Import keys to the dictionary as they are found.
 int dictionary_import(FILE* input) {
   dict_token_t token;
   int res = 0;
