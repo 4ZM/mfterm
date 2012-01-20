@@ -77,6 +77,9 @@ int is_trailer_block(size_t block);
 // Return the sector index of the block
 size_t block_to_sector(size_t block);
 
+// Return the head block for the specified block
+size_t block_to_header(size_t block);
+
 // Return the trailer block for the specified block
 size_t block_to_trailer(size_t block);
 
@@ -102,7 +105,7 @@ void key_to_tag(mf_tag_t* tag, const byte_t* key,
  * 0. Subsequent calls should use the tag size as state. The iterator
  * returns -1 as an end marker.
  */
-int sector_iterator(int state);
+int sector_header_iterator(int state);
 
 
 #endif

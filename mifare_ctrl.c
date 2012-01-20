@@ -314,8 +314,8 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
   clear_tag(&buffer_tag);
 
   // Iterate over the start blocks in all sectors
-  for (int block = sector_iterator(0);
-       block >= 0; block = sector_iterator(size)) {
+  for (int block = sector_header_iterator(0);
+       block >= 0; block = sector_header_iterator(size)) {
 
     printf("Working on sector: %02x [", block_to_sector(block));
 
@@ -392,9 +392,9 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
   printf("xS  T  Key           Status\n");
   printf("----------------------------\n");
 
-  for (int block = sector_iterator(0);
+  for (int block = sector_header_iterator(0);
        block != -1;
-       block = sector_iterator(size)) {
+       block = sector_header_iterator(size)) {
 
     byte_t* key = key_from_tag(keys, key_type, block);
     printf("%02x  %c  %s  ",
