@@ -63,6 +63,9 @@ void print_keys(const mf_tag_t* tag, mf_size_t size);
 const char* sprint_key(const byte_t* key);
 byte_t* read_key(byte_t* key, const char* str);
 
+// Return a string describing the tag type 1k|4k
+const char* sprint_size(mf_size_t size);
+
 void clear_tag(mf_tag_t* tag);
 
 // Return number of blocks for size

@@ -177,6 +177,21 @@ const char* sprint_key(const byte_t* key) {
   return str_buff;
 }
 
+// Return a string describing the tag type 1k|4k
+const char* sprint_size(mf_size_t size) {
+  static const char* str_1k = "1k";
+  static const char* str_4k = "4k";
+
+  if (size == MF_1K)
+    return str_1k;
+
+  if (size == MF_4K)
+    return str_4k;
+
+  return NULL;
+}
+
+
 byte_t* read_key(byte_t* key, const char* str) {
   if (!key || !str)
     return NULL;

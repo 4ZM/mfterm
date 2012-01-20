@@ -256,7 +256,7 @@ bool mf_read_tag_internal(mf_tag_t* tag,
 
   int error = 0;
 
-  printf("Reading tag ["); fflush(stdout);
+  printf("Reading %s tag [", sprint_size(size)); fflush(stdout);
 
   // Read the card from end to begin
   for (int block = block_count(size) - 1; block >= 0; --block) {
@@ -324,7 +324,7 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
   mifare_param mp;
   int error = 0;
 
-  printf("Writing tag ["); fflush(stdout);
+  printf("Writing %s tag [", sprint_size(size)); fflush(stdout);
 
   // Process each sector in turn
   for (int header_block = sector_header_iterator(0);
