@@ -1,0 +1,55 @@
+# This sample dictionary for mfterm contains publicly available
+# Mifare keys from different souces.
+
+# Default key
+ffffffffffff
+
+# Blank key
+000000000000
+
+# Keys from mfoc
+a0a1a2a3a4a5 # NFCForum MAD key
+d3f7d3f7d3f7 # NFCForum content key
+b0b1b2b3b4b5
+4d3a99c351dd
+1a982c7e459a
+aabbccddeeff
+714c5c886e97
+587ee5f9350f
+a0478cc39091
+533cb6c723f6
+8fd0a4f256e9
+
+# Key from ladyada.net
+abcdef123456
+
+# Keys from mifare-key-cracker
+bd493a3962b6
+010203040506
+111111111111
+222222222222
+333333333333
+444444444444
+555555555555
+666666666666
+777777777777
+888888888888
+999999999999
+aaaaaaaaaaaa
+bbbbbbbbbbbb
+cccccccccccc
+dddddddddddd
+eeeeeeeeeeee
+0123456789ab
+123456789abc
+
+# Misc other keys
+000000000001
+000000000002
+00000000000a
+00000000000b
+100000000000
+200000000000
+a00000000000
+b00000000000
+
