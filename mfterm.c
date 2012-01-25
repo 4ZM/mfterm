@@ -37,9 +37,11 @@ void stop_input_loop() {
 char* completion_cmd_generator(const char* text, int state);
 char* completion_sub_cmd_generator(const char* text, int state);
 int perform_filename_completion();
-char** mft_completion();
+char** mft_completion(char* text, int start, int end);
 int execute_line(char* line);
 void initialize_readline();
+
+typedef char** rl_completion_func_t(const char*, int, int);
 
 int main(int argc, char** argv) {
   initialize_readline();
@@ -197,4 +199,3 @@ char* completion_sub_cmd_generator(const char* text, int state) {
   // No (more) matches
   return (char*) NULL;
 }
-
