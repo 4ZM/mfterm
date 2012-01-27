@@ -27,6 +27,9 @@
    into STRING. */
 char* trim(char* string);
 
+// Allocate a new string and duplicate the argument string.
+char* strdup(const char* string);
+
 // Print a byte array in hex without byte separation
 void print_hex_array(const unsigned char* data, size_t nbytes);
 

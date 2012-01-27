@@ -20,9 +20,23 @@
  * fileman.c (GPLv3). Copyright (C) 1987-2009 Free Software Foundation, Inc
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "util.h"
+
+char* strdup(const char* string) {
+  if (string == NULL)
+    return NULL;
+
+  // Allocate memory for the string + '\0'
+  char* new_string  = malloc(strlen(string) + 1);
+
+  if(new_string)
+    strcpy(new_string, string);
+
+  return new_string;
+}
 
 int is_space(char c) {
   return c == ' ' || c == '\t';
