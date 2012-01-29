@@ -101,6 +101,9 @@ void free_field(field_t* field);
 // the field_list.
 field_t* append_field(field_t* field_list, field_t* field);
 
+// Search the field list for a field with the given name
+field_t* get_field(field_t* field_list, const char* name);
+
 
 /**
  * A 'table' of all the types in the language. This is part of the

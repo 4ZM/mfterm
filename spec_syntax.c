@@ -100,6 +100,22 @@ field_t* append_field(field_t* field_list, field_t* field) {
   return field_list;
 }
 
+// Search the field list for a field with the given name
+field_t* get_field(field_t* field_list, const char* name) {
+  if (name == NULL || field_list == NULL)
+    return NULL;
+
+  field_t* it = field_list;
+  while(it) {
+    if (it->name && strcmp(it->name, name) == 0)
+      return it;
+    it = it->next_;
+  }
+
+  // Not found
+  return NULL;
+}
+
 
 // The global instance of the type table. If there isn't any, the
 // variable will be NULL. All the type table operations (tt_) operate
@@ -152,8 +168,9 @@ type_t* tt_get_type(const char* type_name) {
 
   type_table_t* it = type_table;
   while(it) {
-    // Anonymous type (name == NULL) will never match
-    if (strcmp(type_name, it->type->composite_extras->name) == 0)
+    // Anonymous types (name == NULL) will never match
+    if (it->type->composite_extras->name &&
+        strcmp(type_name, it->type->composite_extras->name) == 0)
       return it->type; // Type was found!
     it = it->next_;
   }

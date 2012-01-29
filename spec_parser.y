@@ -21,10 +21,16 @@
 %{
   #include <stdio.h>
   #include <string.h>
+  #include <stdarg.h>
   #include "spec_syntax.h"
 
+  #define YYERROR_VERBOSE 1
+
+  struct YYLTYPE;
+
   int sp_lex(void);
-  void sp_error(char const *);
+  void sp_error(const char* s, ...);
+  void sp_lerror(struct YYLTYPE loc, const char* s, ...);
 %}
 
 %union {
@@ -34,9 +40,12 @@
   int integer;
 }
 
-%token BYTE BIT
-%token <string> IDENTIFIER
-%token <string> DEC_NUM HEX_NUM
+%token BYTE "Byte"
+%token BIT "Bit"
+%token <string> IDENTIFIER "name"
+%token <string> DEC_NUM "dec-number"
+%token <string> HEX_NUM "hex-number"
+%token end_of_file 0 "end-of-file"
 
 %type <type_t_ptr> data_type
 %type <type_t_ptr> primitive_data_type
@@ -57,11 +66,15 @@ named_composite_type_decl
 : IDENTIFIER composite_type_decl {
 
     type_t* t = tt_get_type($1);
-    if (t) {
-      // We know of this type name
-      // If it is allready complete, there is an error .. todo add error handling
+    if (t && t->composite_extras->decl_status == COMPLETE_DECL) {
+      // Error - the type has been defined once before
+      sp_lerror(@1, "Re-definition of type '%s'", $1);
+      $$ = NULL;
+      YYERROR; // abort and initiate error recovery
     }
-    else {
+
+    // If it's the first time we see the type, create it
+    if(t == NULL) {
       t = make_composite_type($1);
       tt_add_type(t);
     }
@@ -83,10 +96,27 @@ field_decl_list
     $$ = NULL;
   }
 | field_decl_list field_decl {
-    if ($1 == NULL)
+    if ($1 == NULL) {
       $$ = $2;
-    else
-      $$ = append_field($1, $2);
+    }
+    else {
+      if ($2 == NULL) {
+        $$ = NULL;
+      }
+      else if ($2->name == NULL || get_field($1, $2->name) == NULL) {
+        // If it doesn't exist, then all is well. Add it.
+        $$ = append_field($1, $2);
+      }
+      else {
+        // If it allready exists, we have a semantic error.
+        sp_lerror(@2, "A field with the name '%s' is allready defined.", $2->name);
+        $$ = $1;
+        YYERROR; // abort and initiate error recovery
+      }
+    }
+  }
+| field_decl_list error {
+    $$ = $1;
   }
 ;
 
@@ -102,6 +132,10 @@ field_decl
   }
 | data_type '[' number ']' '-' {
     $$ = make_field(NULL, $1, $3);
+  }
+| data_type '[' error ']'{
+    $$ = NULL;
+    yyerrok;
   }
 ;
 
@@ -142,7 +176,22 @@ number
 
 %%
 
-void sp_error(const char *str)
-{
-  printf("error: %s\n",str);
+void sp_error(const char* s, ...) {
+  va_list ap;
+  va_start(ap, s);
+  sp_lerror(sp_lloc, s, ap);
+}
+
+void sp_lerror(struct YYLTYPE t, const char* s, ...) {
+  va_list ap;
+  va_start(ap, s);
+
+  if(t.first_line) {
+    if (t.last_line == t.first_line)
+      fprintf(stderr, "Error:%d:%d: ", t.first_line, t.first_column);
+    else
+      fprintf(stderr, "Error:%d-%d: ", t.first_line, t.last_line);
+  }
+  vfprintf(stderr, s, ap);
+  fprintf(stderr, "\n");
 }

@@ -22,13 +22,27 @@
 #include <stdio.h>
 #include "util.h"
 #include "spec_syntax.h"
+
 #include "spec_parser.tab.h"
+
+int colnum = 0;
+
+#define YY_USER_ACTION {           \
+  sp_lloc.first_line = sp_lineno;  \
+  sp_lloc.first_column = colnum;   \
+  colnum = colnum + sp_leng;       \
+  sp_lloc.last_column=colnum;      \
+  sp_lloc.last_line = sp_lineno;   \
+}
+
+
 
 %}
 
-%option yylineno bison-bridge
+%option yylineno bison-bridge bison-locations
 
-ws             [ \t\r\n]
+ws             [ \t]
+nl             [\r\n]
 comment        #[^\n]*
 
 hex_digit      [0-9a-fA-F]
@@ -41,6 +55,7 @@ bit            Bit(\[|{ws})
 br             [\[\]\{\}]
 
 %%
+
 
 {identifier}   {
                  sp_lval.string = strdup(sp_text);
@@ -61,6 +76,7 @@ br             [\[\]\{\}]
 
 {comment}      {} // eat comments
 {ws}+          {} // eat white space
+{nl}+          { colnum = 0; } // eat new lines and reset column
 
 .              {
                  printf("Line: %d - Unrecognized input: %s\n", sp_lineno, sp_text);
