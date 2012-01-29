@@ -1,0 +1,92 @@
+# Copyright (c) 2011 Anders Sundman <anders@4zm.org>
+#
+# This file is part of rkfterm.
+#
+# rkfterm is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# rkfterm is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with rkfterm.  If not, see <http://www.gnu.org/licenses/>.
+
+# Types Byte Bit Addr
+# Bit fields must be byte alligned
+# nested named types are not allowed
+
+TAG {
+  Sector0      sectors_0
+  Sector1k[15] sectors_1k
+  Sector4k[12] sectors_4k
+}
+
+Sector0 {
+
+  {
+    Byte[4] uid                # serial
+    Byte    cd                 # serial bytes xor:ed with check byte (cb) should be 0
+    Bit[4]  -                  # Not used
+    Bit[4]  sak                # HOW TO HANDLE ALIGNMENT?
+    Byte[2] atqa
+    Byte[8] manufacturer_data
+  }             block0
+  Block[2]      blocks
+  SectorTrailer trailer
+}
+
+Sector1k {
+  Block[3]      blocks
+  SectorTrailer trailer
+}
+
+Sector4k {
+  Block[15]     blocks
+  SectorTrailer trailer
+}
+
+Block {
+  Byte[16] data
+}
+
+SectorTrailer {
+  Byte[6] key_a
+  ACL     acl
+	Byte[1] -       # Undefined
+  Byte[6] key_b
+}
+
+# See p.12 of Mifare MF1 IC S50 Functional Specification, rev. 4.0
+# _b suffixed bits are inverted versions of non suffixed counterparts
+ACL {
+  Bit c2x3_b # bit 7
+  Bit c2x2_b
+  Bit c2x1_b
+  Bit c2x0_b # bit 4
+  Bit c1x3_b # bit 3
+  Bit c1x2_b
+  Bit c1x1_b
+  Bit c1x0_b # bit 0
+
+  Bit c1x3   # bit 7
+  Bit c1x2
+  Bit c1x1
+  Bit c1x0   # bit 4
+  Bit c3x3_b # bit 3
+  Bit c3x2_b
+  Bit c3x1_b
+  Bit c3x0_b # bit 0
+
+  Bit c3x3   # bit 7
+  Bit c3x2
+  Bit c3x1
+  Bit c3x0   # bit 4
+  Bit c2x3   # bit 3
+  Bit c2x2
+  Bit c2x1
+  Bit c2x0   # bit 0
+}
