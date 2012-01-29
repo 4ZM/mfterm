@@ -55,6 +55,13 @@
 %type <field_t_ptr> field_decl_list
 %type <integer> number
 
+%destructor { free($$); } IDENTIFIER DEC_NUM HEX_NUM <string>
+%destructor { free_field($$);
+            } composite_type_decl field_decl field_decl_list <field_t_ptr>
+%destructor { if ($$ && $$->composite_extras)
+                free_composite_type($$);
+            } named_composite_type_decl data_type <type_t_ptr>
+
 %% /* Grammar rules and actions follow.  */
 
 input
@@ -171,8 +178,8 @@ primitive_data_type
 ;
 
 number
-: DEC_NUM { $$ = strtol($1, NULL, 10); }
-| HEX_NUM { $$ = strtol($1, NULL, 16); }
+: DEC_NUM { $$ = strtol($1, NULL, 10); free($1); }
+| HEX_NUM { $$ = strtol($1, NULL, 16); free($1); }
 ;
 
 %%

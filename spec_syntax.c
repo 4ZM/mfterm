@@ -34,15 +34,16 @@ type_t bit_type = {
   .composite_extras = NULL,
 };
 
-// Allocate and return a composite type instance
-type_t* make_composite_type(const char* name) {
+// Allocate and return a composite type instance. The type will assume
+// ownership of the heap allocated name.
+type_t* make_composite_type(char* name) {
   type_t* t = malloc(sizeof(type_t));
   t->type_category = COMPOSITE_TYPE;
   t->composite_extras = (composite_type_extras_t*)
     malloc(sizeof(composite_type_extras_t));
 
   if (name)
-    t->composite_extras->name = strdup(name);
+    t->composite_extras->name = name;
   else
     t->composite_extras->name = NULL; // Anonymous type
 
@@ -67,14 +68,12 @@ void free_composite_type(type_t* t) {
   free(t);
 }
 
-// Allocate a new field with the given parameters. New memory is
-// allocated for the name. Anonymous '-' filler fields use NULL as name.
-field_t* make_field(const char* name, type_t* type, size_t length) {
+// Allocate a new field with the given parameters. Anonymous '-'
+// filler fields use NULL as name. The field will assume ownership of
+// the heap allocated name.
+field_t* make_field(char* name, type_t* type, size_t length) {
   field_t* f = (field_t*) malloc(sizeof(field_t));
-  if (name)
-    f->name = strdup(name);
-  else
-    f->name = NULL;
+  f->name = name; // NULL for fillers
   f->type = type;
   f->length = length;
   f->next_ = NULL;

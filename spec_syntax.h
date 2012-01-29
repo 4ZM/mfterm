@@ -83,15 +83,17 @@ struct composite_type_extras_t {
   field_t* fields; // All fields of the type or NULL. Order is important.
 };
 
-// Allocate and return a composite type instance
-type_t* make_composite_type(const char* name);
+// Allocate and return a composite type instance. The type will assume
+// ownership of the heap allocated name.
+type_t* make_composite_type(char* name);
 
 // Free a composite type. This function will also free it's fields.
 void free_composite_type(type_t* t);
 
-// Allocate a new field with the given parameters. New memory is
-// allocated for the name. Anonymous '-' filler fields use NULL as name.
-field_t* make_field(const char* name, type_t* type, size_t length);
+// Allocate a new field with the given parameters. Anonymous '-'
+// filler fields use NULL as name. The field will assume ownership of
+// the heap allocated name.
+field_t* make_field(char* name, type_t* type, size_t length);
 
 // Free the memory used by a field.
 void free_field(field_t* field);
