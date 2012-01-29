@@ -24,6 +24,9 @@
   #include <stdarg.h>
   #include "spec_syntax.h"
 
+  /* #define YYDEBUG 1 */
+  /* sp_debug = 1; */
+
   #define YYERROR_VERBOSE 1
 
   struct YYLTYPE;
