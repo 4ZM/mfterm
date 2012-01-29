@@ -59,7 +59,7 @@
 
 input
 : /* empty */ { }
-| input named_composite_type_decl { }
+| input named_composite_type_decl { (void) $2; }
 ;
 
 named_composite_type_decl
@@ -134,6 +134,7 @@ field_decl
     $$ = make_field(NULL, $1, $3);
   }
 | data_type '[' error ']'{
+    (void) $1;
     $$ = NULL;
     yyerrok;
   }
