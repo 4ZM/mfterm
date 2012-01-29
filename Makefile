@@ -50,6 +50,10 @@ clean:
 mfterm: $(MFTERM_OBJS)
 	${CC} ${LDFLAGS} -o $@ $^ 
 
+# Use the dp_ prefix (instead of yy) for this parser
+dictionary_parser.c : dictionary_parser.l Makefile
+	${LEX} ${LEXFLAGS} --prefix=dp_ -o $@ $<
+
 # Flex generated source is not Wall clean, skip that flag
 dictionary_parser.o : dictionary_parser.c Makefile
 	${CC} ${LEXCFLAGS} -c $<

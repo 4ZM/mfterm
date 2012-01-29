@@ -40,20 +40,20 @@ comment        #[^\n]*
 %%
 
 {key}          {
-                 read_key(key_token, yytext);
+                 read_key(key_token, dp_text);
                  return DT_KEY;
                }
 {comment}      {} // eat comments
 [ \t\r\n]+     {} // eat white space
 .              {
-                 printf("Line: %d - Unrecognized input: %s\n", yylineno, yytext);
+                 printf("Line: %d - Unrecognized input: %s\n", dp_lineno, dp_text);
                  return DT_ERR;
                }
 
 %%
 
 // Reset the line numbering at the end of a file
-int yywrap() { yylineno = 1; return 1; }
+int dp_wrap() { dp_lineno = 1; return 1; }
 
 // Parser loop. Import keys to the dictionary as they are found.
 int dictionary_import(FILE* input) {
@@ -61,9 +61,9 @@ int dictionary_import(FILE* input) {
   int res = 0;
   int keys_count = 0;
   int imported_count = 0;
-  yyin = input;
+  dp_in = input;
 
-  while((token = yylex())) {
+  while((token = dp_lex())) {
     switch(token) {
     case DT_KEY:
       ++keys_count;
