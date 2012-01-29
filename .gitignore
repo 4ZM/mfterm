@@ -4,3 +4,6 @@ mfterm
 *~
 *.bak
 dictionary_parser.c
+spec_tokenizer.c
+spec_parser.c
+spec_parser.tab.h

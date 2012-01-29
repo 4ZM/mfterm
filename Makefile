@@ -33,19 +33,21 @@ MFTERM_SRCS =   \
 	tag.c         \
 	mifare.c      \
 	mifare_ctrl.c \
-	dictionary.c
+	dictionary.c  \
+	spec_syntax.c
 
 MFTERM_LEX =          \
-	dictionary_parser.l
+	dictionary_parser.l \
+	spec_tokenizer.l
 
-MFTERM_OBJS = $(MFTERM_SRCS:.c=.o) $(MFTERM_LEX:.l=.o)
+MFTERM_OBJS = $(MFTERM_SRCS:.c=.o) $(MFTERM_LEX:.l=.o) spec_parser.o
 
 .PHONY: clean all
 
 all: mfterm
 
 clean:
-	rm -f mfterm *.o *~ *.bak  $(MFTERM_LEX:.l=.c)
+	rm -f mfterm *.o *~ *.bak  $(MFTERM_LEX:.l=.c) spec_parser.c spec_parser.tab.h
 
 mfterm: $(MFTERM_OBJS)
 	${CC} ${LDFLAGS} -o $@ $^ 
@@ -58,12 +60,25 @@ dictionary_parser.c : dictionary_parser.l Makefile
 dictionary_parser.o : dictionary_parser.c Makefile
 	${CC} ${LEXCFLAGS} -c $<
 
+# Use the st_ prefix (instead of yy) for this parser
+spec_tokenizer.c : spec_tokenizer.l Makefile
+	${LEX} ${LEXFLAGS} --prefix=sp_ -o $@ $<
+
+# Flex generated source is not Wall clean, skip that flag
+# the st really depends on the tab.h, but that won't work here,
+# so we use the other production sp.c as a dep.
+spec_tokenizer.o : spec_tokenizer.c spec_parser.c Makefile
+	${CC} ${LEXCFLAGS} -c $<
+
+spec_parser.o : spec_parser.c Makefile
+	${CC} ${LEXCFLAGS} -c $<
+
+spec_parser.c spec_parser.tab.h: spec_parser.y Makefile
+	bison --name-prefix=sp_ --defines=spec_parser.tab.h -o $@ $<
+
 # Generic compilation rule - make file plumbing
 %.o : %.c Makefile
 	${CC} ${CFLAGS} -c $<
-
-%.c : %.l Makefile
-	${LEX} ${LEXFLAGS} -o $@ $<
 
 # makedepend section - set up include dependencies
 DEPFILE		= .depends
