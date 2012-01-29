@@ -19,14 +19,13 @@
 # Bit fields must be byte alligned
 # nested named types are not allowed
 
-TAG {
+. {
   Sector0      sectors_0
   Sector1k[15] sectors_1k
   Sector4k[12] sectors_4k
 }
 
 Sector0 {
-
   {
     Byte[4] uid                # serial
     Byte    cd                 # serial bytes xor:ed with check byte (cb) should be 0

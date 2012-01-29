@@ -70,6 +70,20 @@
 input
 : /* empty */ { }
 | input named_composite_type_decl { (void) $2; }
+| input '.' composite_type_decl {
+    if (tt_get_type(".")) {
+      // Error - the root type has allready been defined
+      sp_lerror(@1, "Root type '.' allready defined.");
+      YYERROR; // abort and initiate error recovery
+    }
+
+    // Create the type (named '.')
+    type_t* t = make_composite_type(".");
+    t->composite_extras->fields = $3;
+    t->composite_extras->decl_status = COMPLETE_DECL;
+    tt_add_type(t);
+    type_root = t;
+  }
 ;
 
 named_composite_type_decl

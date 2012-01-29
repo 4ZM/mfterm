@@ -121,6 +121,10 @@ field_t* get_field(field_t* field_list, const char* name) {
 // on this global variable.
 type_table_t* type_table = NULL;
 
+// The root type of the type hierarchy
+type_t* type_root = NULL;
+
+
 // Internal functions for allocating and freeing type table list nodes.
 type_table_t* tt_make_node_(type_t* t);
 void tt_free_node_(type_table_t* tt);
@@ -129,9 +133,8 @@ void tt_free_node_(type_table_t* tt);
 // all the types.
 void tt_clear() {
 
-  // Nothing to do?
-  if (type_table == NULL)
-    return;
+  // Reset the root
+  type_root = NULL;
 
   // Free all types and the table itself
   type_table_t* it = type_table;

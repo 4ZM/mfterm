@@ -123,6 +123,9 @@ struct type_table_t {
 // on this global variable.
 extern type_table_t* type_table;
 
+// The root type of the type hierarchy
+extern type_t* type_root;
+
 // Clear the type table - freeing the memory used by the table and by
 // all the types.
 void tt_clear();
