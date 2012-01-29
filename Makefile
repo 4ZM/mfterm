@@ -44,13 +44,16 @@ MFTERM_OBJS = $(MFTERM_SRCS:.c=.o) $(MFTERM_LEX:.l=.o) spec_parser.o
 
 .PHONY: clean all
 
-all: mfterm
+all: mfterm sp_runner
 
 clean:
-	rm -f mfterm *.o *~ *.bak  $(MFTERM_LEX:.l=.c) spec_parser.c spec_parser.tab.h
+	rm -f mfterm *.o *~ *.bak  $(MFTERM_LEX:.l=.c) spec_parser.c spec_parser.tab.h sp_runner
 
 mfterm: $(MFTERM_OBJS)
 	${CC} ${LDFLAGS} -o $@ $^ 
+
+sp_runner: sp_runner.o spec_parser.o spec_tokenizer.o spec_syntax.o
+	${CC} ${LDFLAGS} -o $@ $^
 
 # Use the dp_ prefix (instead of yy) for this parser
 dictionary_parser.c : dictionary_parser.l Makefile
