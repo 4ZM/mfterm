@@ -179,16 +179,16 @@ type_t* tt_get_type(const char* type_name) {
 }
 
 // Check if there are any partially declared types in the type
-// table. Return 1 if the type table contains partial types. Return 0
-// if it doesn't.
-int tt_contains_partial_types() {
+// table. Return a pointer to the first incomplete type or NULL if
+// none exists.
+type_t* tt_contains_partial_types() {
   type_table_t* it = type_table;
   while(it) {
     if (it->type->composite_extras->decl_status == PARTIAL_DECL)
-      return 1;
+      return it->type;
     it = it->next_;
   }
-  return 0;
+  return NULL;
 }
 
 // Allocate a new list entry for the type table
