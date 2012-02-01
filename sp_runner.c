@@ -17,5 +17,14 @@ int main(int argc, char** argv) {
     }
     tt = tt->next_;
   }
+
+  // check for missing definitions
+  type_t* partial = tt_contains_partial_types();
+  if (partial) {
+    printf("Incomplete declarations! Here is one: %s\n",
+           partial->composite_extras->name);
+    return 1;
+  }
+
   return 0;
 }
