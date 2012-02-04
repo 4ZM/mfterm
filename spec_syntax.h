@@ -33,6 +33,7 @@ typedef enum {
 
 typedef struct type_t type_t;
 typedef struct field_t field_t;
+typedef struct field_list_t field_list_t;
 typedef struct composite_type_extras_t composite_type_extras_t;
 typedef struct type_table_t type_table_t;
 
@@ -58,14 +59,20 @@ extern type_t bit_type;
  * A composite type is made up of an ordered list of fields. A field
  * is a named use of another type as an array. A field array of length
  * 1 can be treated without the array syntax in the language; but is
- * represented line all other fields.
+ * represented like all other fields.
  */
 struct field_t {
   char* name; // Field name
   type_t* type;
-  size_t length;  // Array length. 'no-array' types are realy length 1.
+  size_t length;
+};
 
-  field_t* next_; // The field list is implicit (rep. by the field type).
+/**
+ * Type representing the ordered list of fields in a composite type.
+ */
+struct field_list_t {
+  field_t* field;
+  field_list_t* next_;
 };
 
 /**
@@ -80,7 +87,7 @@ struct field_t {
 struct composite_type_extras_t {
   char* name; // Type name
   type_decl_status_t decl_status;
-  field_t* fields; // All fields of the type or NULL. Order is important.
+  field_list_t* fields; // All fields of the type or NULL.
 };
 
 // Allocate and return a composite type instance. The type will assume
@@ -101,10 +108,10 @@ void free_field(field_t* field);
 // Add a field to an existing list of fields. The order of fields is
 // significant and this function will append the field to the end of
 // the field_list.
-field_t* append_field(field_t* field_list, field_t* field);
+field_list_t* append_field(field_list_t* field_list, field_t* field);
 
 // Search the field list for a field with the given name
-field_t* get_field(field_t* field_list, const char* name);
+field_t* get_field(field_list_t* field_list, const char* name);
 
 
 /**
@@ -143,4 +150,3 @@ type_t* tt_get_type(const char* type_name);
 type_t* tt_contains_partial_types();
 
 #endif
-

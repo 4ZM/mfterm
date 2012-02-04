@@ -39,6 +39,7 @@
 %union {
   type_t* type_t_ptr;
   field_t* field_t_ptr;
+  field_list_t* field_list_t_ptr;
   char* string;
   int integer;
 }
@@ -53,14 +54,16 @@
 %type <type_t_ptr> data_type
 %type <type_t_ptr> primitive_data_type
 %type <type_t_ptr> named_composite_type_decl
-%type <field_t_ptr> composite_type_decl
+%type <field_list_t_ptr> composite_type_decl
 %type <field_t_ptr> field_decl
-%type <field_t_ptr> field_decl_list
+%type <field_list_t_ptr> field_decl_list
 %type <integer> number
 
 %destructor { free($$); } IDENTIFIER DEC_NUM HEX_NUM <string>
 %destructor { free_field($$);
-            } composite_type_decl field_decl field_decl_list <field_t_ptr>
+            } field_decl <field_t_ptr>
+%destructor { free_field($$->field); free($$);
+            } composite_type_decl field_decl_list <field_list_t_ptr>
 %destructor { if ($$ && $$->composite_extras)
                 free_composite_type($$);
             } named_composite_type_decl data_type <type_t_ptr>
@@ -121,7 +124,7 @@ field_decl_list
   }
 | field_decl_list field_decl {
     if ($1 == NULL) {
-      $$ = $2;
+      $$ = append_field(NULL, $2);
     }
     else {
       if ($2 == NULL) {
@@ -133,7 +136,8 @@ field_decl_list
       }
       else {
         // If it allready exists, we have a semantic error.
-        sp_lerror(@2, "A field with the name '%s' is allready defined.", $2->name);
+        sp_lerror(@2, "A field with the name '%s' is allready defined.",
+                  $2->name);
         $$ = $1;
         YYERROR; // abort and initiate error recovery
       }

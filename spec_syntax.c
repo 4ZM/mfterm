@@ -55,11 +55,12 @@ type_t* make_composite_type(char* name) {
 void free_composite_type(type_t* t) {
 
   // Free the fields
-  field_t* iter = t->composite_extras->fields;
+  field_list_t* iter = t->composite_extras->fields;
   while (iter) {
-    field_t* tmp = iter;
+    field_list_t* tmp = iter;
     iter = iter->next_;
-    free_field(tmp);
+    free_field(tmp->field);
+    free(tmp);
   }
 
   // Free the type data
@@ -76,7 +77,6 @@ field_t* make_field(char* name, type_t* type, size_t length) {
   f->name = name; // NULL for fillers
   f->type = type;
   f->length = length;
-  f->next_ = NULL;
   return f;
 }
 
@@ -88,26 +88,42 @@ void free_field(field_t* field) {
   free(field);
 }
 
-// Add a field to an existing list of fields. The order of fields is
+// Add a field to an existing list of fields or, if the field_list
+// parameter is NULL, create a new field list. The order of fields is
 // significant and this function will append the field to the end of
 // the field_list.
-field_t* append_field(field_t* field_list, field_t* field) {
-  field_t* it = field_list;
-  while(it->next_)
-    it = it->next_;
-  it->next_ = field;
+field_list_t* append_field(field_list_t* field_list, field_t* field) {
+
+  // Create the list node
+  field_list_t* flist = (field_list_t*) malloc(sizeof(field_list_t));
+  flist->field = field;
+  flist->next_ = NULL;
+
+  // Create the list or append to the end
+  if (field_list != NULL) {
+    field_list_t* it = field_list;
+    while(it->next_)
+      it = it->next_;
+    it->next_ = flist;
+  }
+  else {
+    field_list = flist; // Won't effect the inarg
+  }
+
+  // Return the start of the list
   return field_list;
 }
 
 // Search the field list for a field with the given name
-field_t* get_field(field_t* field_list, const char* name) {
+field_t* get_field(field_list_t* field_list, const char* name) {
   if (name == NULL || field_list == NULL)
     return NULL;
 
-  field_t* it = field_list;
+  field_list_t* it = field_list;
   while(it) {
-    if (it->name && strcmp(it->name, name) == 0)
-      return it;
+    field_t* f = it->field;
+    if (f->name && strcmp(f->name, name) == 0)
+      return f;
     it = it->next_;
   }
 

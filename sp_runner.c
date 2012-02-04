@@ -10,10 +10,10 @@ int main(int argc, char** argv) {
   type_table_t* tt = type_table;
   while(tt) {
     printf("+%s\n", tt->type->composite_extras->name);
-    field_t* f = tt->type->composite_extras->fields;
-    while(f) {
-      printf("  %s\n", f->name);
-      f = f->next_;
+    field_list_t* fl = tt->type->composite_extras->fields;
+    while(fl) {
+      printf("  %s\n", fl->field->name);
+      fl = fl->next_;
     }
     tt = tt->next_;
   }
