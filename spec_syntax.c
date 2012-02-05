@@ -222,3 +222,164 @@ type_table_t* tt_make_node_(type_t* t) {
 void tt_free_node_(type_table_t* tt) {
   free(tt);
 }
+
+
+// The global variable representing the root instance; it is an
+// instanciation of the '.' type.
+instance_t* instance_root = NULL;
+
+// Forward decls of internal functions used during creation and
+// destruction of the instance tree.
+void clear_instance_tree_(instance_t* root);
+void make_instance_(instance_t* root,
+                    size_t* obytes, size_t* obits,
+                    size_t* sbytes, size_t* sbits);
+instance_t* make_byte_instance_(field_t* field, size_t* obytes, size_t* obits);
+instance_t* make_bit_instance_(field_t* field, size_t* obytes, size_t* obits);
+instance_t* make_composite_instance_(field_t* field,
+                                     size_t* obytes, size_t* obits);
+instance_list_t* append_instance_(instance_list_t** end_ptr,
+                                  instance_t* new_field);
+
+
+// Create an instance tree matching the type tree starting at
+// type_root. The global instance tree is constructed with type_root '.'.
+instance_t* make_instance_tree(type_t* type_root) {
+  instance_t* root = malloc(sizeof(instance_t));
+  root->offset_bytes = 0;
+  root->offset_bits = 0;
+  root->size_bytes = 0;
+  root->size_bits = 0;
+  root->field = make_field(".", type_root, 1);
+  root->fields = NULL;
+
+  size_t obytes = 0;
+  size_t obits = 0;
+  make_instance_(root, &obytes, &obits,
+                 &(root->size_bytes), &(root->size_bits));
+  return root;
+}
+
+// Clear the global instance tree. Free it and set instance_root NULL
+void clear_instance_tree() {
+  if (instance_root == NULL)
+    return;
+  clear_instance_tree_(instance_root);
+  instance_root = NULL;
+}
+
+void clear_instance_tree_(instance_t* root) {
+  instance_list_t* iter = root->fields;
+  while (iter) {
+    instance_list_t* tmp = iter->next_;
+    clear_instance_tree_(iter->instance);
+    free(iter);
+    iter = tmp;
+  }
+  free(root);
+}
+
+void make_instance_(instance_t* root,
+                    size_t* obytes, size_t* obits,
+                    size_t* sbytes, size_t* sbits) {
+
+  // Pointers to the matching type field and instance field beign processed.
+  field_list_t* tf_iter = root->field->type->composite_extras->fields;
+  instance_list_t* if_iter = root->fields;
+
+  // Iterate over all the type fields and add matching instance fields.
+  while(tf_iter) {
+    field_t* f = tf_iter->field;
+
+    // Create the child sub-tree or instance.
+    instance_t* child;
+    // Byte
+    if (f->type == &byte_type) {
+      child = make_byte_instance_(f, obytes, obits);
+    }
+    // Bit
+    else if (f->type == &bit_type) {
+      child = make_bit_instance_(f, obytes, obits);
+    }
+    // Composite type
+    else {
+      child = make_composite_instance_(f, obytes, obits);
+      child->size_bytes = 0;
+      child->size_bits = 0;
+
+      make_instance_(child, obytes, obits,
+                     &(child->size_bytes), &(child->size_bits));
+
+      // Update size with bits % 8
+      child->size_bytes =
+        child->size_bytes * f->length +
+        (child->size_bits * f->length) / 8;
+      child->size_bits = (child->size_bits * f->length) % 8;
+    }
+
+    // Add the new instance or instance tree, to the root instance
+    // field list.
+    if_iter = if_iter == NULL ?
+      append_instance_(&(root->fields), child) :
+      append_instance_(&(if_iter->next_), child);
+
+    // Note that we are changing the value of the input parameters here
+    // this is part of the 'return value' of the function. Wrap the
+    // bit size mod 8.
+    *sbytes = *sbytes + child->size_bytes + (*sbits + child->size_bits) / 8;
+    *sbits = (*sbits + child->size_bits) % 8;
+
+    tf_iter = tf_iter->next_;
+  }
+}
+
+instance_t* make_byte_instance_(field_t* field, size_t* obytes, size_t* obits) {
+  instance_t* i = malloc(sizeof(instance_t));
+  i->field = field;
+  i->fields = NULL;
+  i->offset_bytes = *obytes;
+  i->offset_bits = *obits;
+  i->size_bytes = field->length;
+  i->size_bits = 0;
+  *obytes += i->size_bytes;
+  // *obits += 0;
+  return i;
+}
+
+instance_t* make_bit_instance_(field_t* field, size_t* obytes, size_t* obits) {
+  instance_t* i = malloc(sizeof(instance_t));
+  i->field = field;
+  i->fields = NULL;
+  i->offset_bytes = *obytes;
+  i->offset_bits = *obits;
+
+  // Bits % 8, overflow in bytes field
+  i->size_bytes = field->length / 8;
+  i->size_bits = field->length % 8;
+  *obytes += i->size_bytes + (*obits + i->size_bits) / 8;
+  *obits = (*obits + i->size_bits) % 8;
+  return i;
+}
+
+instance_t* make_composite_instance_(field_t* field,
+                                     size_t* obytes, size_t* obits) {
+  instance_t* i = malloc(sizeof(instance_t));
+  i->field = field;
+  i->fields = NULL;
+  i->offset_bytes = *obytes;
+  i->offset_bits = *obits;
+
+  // The size will be updated later, after recusion into all child fields.
+  i->size_bytes = 0;
+  i->size_bits = 0;
+  return i;
+}
+
+instance_list_t* append_instance_(instance_list_t** end_ptr,
+                                  instance_t* new_field) {
+  instance_list_t* il = (instance_list_t*) malloc(sizeof(instance_list_t));
+  il->instance = new_field;
+  il->next_ = NULL;
+  *end_ptr = il;
+  return il;
+}

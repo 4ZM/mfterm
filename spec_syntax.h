@@ -36,6 +36,8 @@ typedef struct field_t field_t;
 typedef struct field_list_t field_list_t;
 typedef struct composite_type_extras_t composite_type_extras_t;
 typedef struct type_table_t type_table_t;
+typedef struct instance_t instance_t;
+typedef struct instance_list_t instance_list_t;
 
 /**
  * A struct representing a data type in the specification
@@ -148,5 +150,46 @@ type_t* tt_get_type(const char* type_name);
 // table. Return a pointer to the first incomplete type or NULL if
 // none exists.
 type_t* tt_contains_partial_types();
+
+/**
+ * Type representing instances of types in the spec language. The same
+ * type can be instantiated several times in different spec types and
+ * fields. The instances map agains type fields and thus contains a
+ * length field.
+ *
+ * The size field is inclusive of the instance and all it's child
+ * instances. The bit size field will be < 8; larger bit fields in the
+ * type spec will be included in the byte field.
+ */
+struct instance_t {
+  size_t offset_bytes;
+  size_t offset_bits;
+  size_t size_bytes;
+  size_t size_bits;
+
+  field_t* field;
+
+  instance_list_t* fields;
+};
+
+/**
+ * Type representing the ordered list of instance fields in a
+ * composite type instance.
+ */
+struct instance_list_t {
+  instance_t* instance;
+  instance_list_t* next_;
+};
+
+// The global variable representing the root instance; it is an
+// instanciation of the '.' type.
+extern instance_t* instance_root;
+
+// Create an instance tree matching the type tree starting at
+// root_type. The global instance tree is constructed with root_type '.'.
+instance_t* make_instance_tree(type_t* root_type);
+
+// Clear the global instance tree. Free it and set instance_tree NULL
+void clear_instance_tree();
 
 #endif
