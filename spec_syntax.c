@@ -155,7 +155,7 @@ void tt_clear() {
   // Free all types and the table itself
   type_table_t* it = type_table;
   while(it) {
-    type_table_t* next = type_table->next_;
+    type_table_t* next = it->next_;
     free_composite_type(it->type);
     tt_free_node_(it);
     it = next;
