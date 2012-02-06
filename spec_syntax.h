@@ -20,6 +20,8 @@
  * along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+
 typedef enum {
   COMPOSITE_TYPE,
   BYTE_TYPE,
@@ -38,6 +40,10 @@ typedef struct composite_type_extras_t composite_type_extras_t;
 typedef struct type_table_t type_table_t;
 typedef struct instance_t instance_t;
 typedef struct instance_list_t instance_list_t;
+
+// Parse the input file and set up type_root and instance_root.
+// Return 0 on success.
+int spec_import(FILE* input);
 
 /**
  * A struct representing a data type in the specification

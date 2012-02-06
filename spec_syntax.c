@@ -23,6 +23,40 @@
 #include "util.h"
 #include "spec_syntax.h"
 
+// Forward declarations
+int sp_parse();
+extern FILE* sp_in;
+
+// Parse the input file and set up type_root and instance_root.
+// Return 0 on success.
+int spec_import(FILE* input) {
+
+  // Parse the input to build a type hierarchy
+  sp_in = input;
+  sp_parse();
+
+  // Check for missing definitions
+  type_t* partial = tt_contains_partial_types();
+  if (partial) {
+    printf("Error: Incomplete declaration '%s' in specification.\n",
+           partial->composite_extras->name);
+    return 1;
+  }
+
+  // Make sure we have a root type defined
+  if (type_root == NULL) {
+    printf("Error: No root type '.' found in specification.\n");
+    return 1;
+  }
+
+  // Create the instance tree
+  instance_root = make_instance_tree(type_root);
+
+  printf("Specification sucessfully imported.\n");
+
+  return 0;
+}
+
 // The primitive Byte type
 type_t byte_type = {
   .type_category = BYTE_TYPE,
