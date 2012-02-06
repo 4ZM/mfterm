@@ -61,6 +61,11 @@ int com_dict_clear(char* arg);
 int com_dict_attack(char* arg);
 int com_dict_print(char* arg);
 
+// Specification operations
+int com_spec_load(char* arg);
+int com_spec_clear(char* arg);
+int com_spec_print(char* arg);
+
 typedef struct {
   char *name;       // The command
   cmd_func_t func;  // Function to call on command

@@ -29,6 +29,7 @@
 #include "term_cmd.h"
 #include "mifare_ctrl.h"
 #include "dictionary.h"
+#include "spec_syntax.h"
 
 command_t commands[] = {
   { "help",  com_help, 0, 0, "Display this text" },
@@ -61,6 +62,10 @@ command_t commands[] = {
   { "dict clear",  com_dict_clear,  0, 1, "Clear the key dictionary" },
   { "dict attack", com_dict_attack, 0, 1, "Find keys of a physical tag"},
   { "dict",        com_dict_print,  0, 1, "Print the key dictionary" },
+
+  { "spec load",   com_spec_load,   1, 1, "Load a specification file" },
+  { "spec clear",  com_spec_clear,  0, 1, "Unload the specification" },
+  { "spec",        com_spec_print,  0, 1, "Print the specification" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
@@ -496,6 +501,42 @@ int com_dict_print(char* arg) {
 
   return 0;
 }
+
+
+int com_spec_print(char* arg) {
+  print_instance_tree();
+
+  return 0;
+}
+
+int com_spec_load(char* arg) {
+  // Start by clearing the current hierarcy
+  clear_instance_tree();
+  tt_clear();
+
+  // Open the file
+  FILE* spec_file = fopen(arg, "r");
+  if (spec_file == NULL) {
+    printf("Could not open file: %s\n", arg);
+    return 1;
+  }
+
+  // Parse the specification
+  spec_import(spec_file);
+
+  fclose(spec_file);
+
+  return 0;
+}
+
+int com_spec_clear(char* arg) {
+
+  clear_instance_tree();
+  tt_clear();
+
+  return 0;
+}
+
 
 mf_size_t parse_size(const char* str) {
 
