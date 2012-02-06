@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "util.h"
 #include "spec_syntax.h"
 
@@ -382,4 +383,77 @@ instance_list_t* append_instance_(instance_list_t** end_ptr,
   il->next_ = NULL;
   *end_ptr = il;
   return il;
+}
+
+// Forward declaration
+void print_instance_tree_(instance_t* i, int indent);
+void print_instance_(instance_t* i);
+
+
+void print_instance_tree() {
+  if (instance_root == NULL) {
+    printf("No specification loaded.\n");
+    return;
+  }
+
+  printf("[%d, %d] [%d, %d]  --  .  (root)\n",
+         instance_root->offset_bytes,
+         instance_root->offset_bits,
+         instance_root->size_bytes,
+         instance_root->size_bits);
+
+  print_instance_tree_(instance_root, 1);
+}
+
+void print_instance_tree_(instance_t* root, int indent) {
+
+  // For each field of the root instance
+  instance_list_t* il = root->fields;
+  while(il) {
+
+    // Indent
+    int count = (indent - 1) * 2;
+    while(count--)
+      printf(" ");
+    printf("+- ");
+
+    // Print instance field
+    instance_t* inst = il->instance;
+    print_instance_(inst);
+    if (inst->field->type->composite_extras != NULL)
+      print_instance_tree_(inst, indent + 1);
+
+    il = il->next_;
+  }
+}
+
+void print_instance_(instance_t* i) {
+    if (i->field->type == &byte_type) {
+      printf("[%d, %d] [%d, %d]  --  Byte[%d]  %s\n",
+             i->offset_bytes,
+             i->offset_bits,
+             i->size_bytes,
+             i->size_bits,
+             i->field->length,
+             i->field->name);
+    }
+    else if (i->field->type == &bit_type) {
+      printf("[%d, %d] [%d, %d]  --  Bit[%d]  %s\n",
+             i->offset_bytes,
+             i->offset_bits,
+             i->size_bytes,
+             i->size_bits,
+             i->field->length,
+             i->field->name);
+    }
+    else {
+      printf("[%d, %d] [%d, %d]  --  %s[%d]  %s\n",
+             i->offset_bytes,
+             i->offset_bits,
+             i->size_bytes,
+             i->size_bits,
+             i->field->type->composite_extras->name,
+             i->field->length,
+             i->field->name);
+    }
 }

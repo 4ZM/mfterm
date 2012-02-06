@@ -192,4 +192,7 @@ instance_t* make_instance_tree(type_t* root_type);
 // Clear the global instance tree. Free it and set instance_tree NULL
 void clear_instance_tree();
 
+// Print a representation of the instance hierarchy
+void print_instance_tree();
+
 #endif
