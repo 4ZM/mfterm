@@ -250,7 +250,7 @@ instance_t* make_instance_tree(type_t* type_root) {
   root->offset_bits = 0;
   root->size_bytes = 0;
   root->size_bits = 0;
-  root->field = make_field(".", type_root, 1);
+  root->field = make_field(strdup("."), type_root, 1);
   root->fields = NULL;
 
   size_t obytes = 0;

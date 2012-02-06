@@ -23,6 +23,7 @@
   #include <string.h>
   #include <stdarg.h>
   #include "spec_syntax.h"
+  #include "util.h"
 
   /* #define YYDEBUG 1 */
   /* sp_debug = 1; */
@@ -81,7 +82,7 @@ input
     }
 
     // Create the type (named '.')
-    type_t* t = make_composite_type(".");
+    type_t* t = make_composite_type(strdup("."));
     t->composite_extras->fields = $3;
     t->composite_extras->decl_status = COMPLETE_DECL;
     tt_add_type(t);
