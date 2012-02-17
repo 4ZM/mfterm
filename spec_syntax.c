@@ -303,6 +303,117 @@ void clear_instance_tree() {
   instance_root = NULL;
 }
 
+/* Get the child instance with a given name. Only look to children, */
+/* not grand children. If no child with the given name exists, return */
+/* null. */
+instance_t* get_instance_child(instance_t* inst, const char* name) {
+  if (name == NULL)
+    return NULL;
+
+  return get_instance_child_n(inst, name, strlen(name));
+}
+
+/**
+ * Like get_instance_child(inst, name), but name does not have to be
+ * null terminated. Instead the length of the name string is given by
+ * the last argument.
+ */
+instance_t* get_instance_child_n(instance_t* inst,
+                                 const char* name,
+                                 size_t nlen) {
+
+  if (inst == NULL || name == NULL || nlen == 0)
+    return NULL;
+
+  instance_list_t* iter = inst->fields;
+  while(iter) {
+    char* fname = iter->instance->field->name;
+    if (strlen(fname) == nlen && strncmp(fname, name, nlen) == 0)
+      return iter->instance;
+    iter = iter->next_;
+  }
+
+  return NULL;
+}
+
+/**
+ * Parse a specification path of the form '.fu.bar.baz' and return the
+ * instance pointed to by baz. In case the path doesn't point to a
+ * loaded instance, return NULL. */
+instance_t* parse_spec_path(const char* path) {
+
+  const char* lastpath;
+  instance_t* inst;
+
+  // Parse the path up to the last instance
+  if (parse_partial_spec_path(path, &lastpath, &inst) != 0)
+    return NULL;
+
+  // Find and return the leaf node
+  return get_instance_child(inst, lastpath);
+}
+
+/**
+ * Parse the path to produce a parent section and an instance that
+ * points to the head of the parent.
+ *
+ * The format is .fu.bar.ba(z). Where .fu.bar.ba is the path, fu, bar
+ * and baz are nested fields. The function should return parent_end
+ * pointing into path to the point after the last '.', i.e. to the 'b'
+ * in the last 'ba'. parent_inst will point to bar.
+ *
+ * The function returns 0 on success.
+ */
+int parse_partial_spec_path(const char* path,
+                            const char** parent_end,
+                            instance_t** parent_inst) {
+
+  // Check input. Paths start with '.'
+  if (path == NULL || path[0] != '.')
+    return 1;
+
+  instance_t* inst = instance_root;
+  const char* remaining_path = path + 1;
+
+  char* tok_end;
+  while((tok_end = strchr(remaining_path, '.')) != NULL) {
+    // There is still a part of the path before the last '.'
+
+    inst = get_instance_child_n(inst, remaining_path,
+                                tok_end - remaining_path);
+
+    // Exit early (error in ancestor path)
+    if (inst == NULL)
+      return 1;
+
+    // Remove the token and the '.' from the start of remaining string
+    remaining_path = tok_end + 1;
+  }
+
+  // Set the output arguments
+  if (parent_end != NULL)
+    *parent_end = remaining_path;
+  if (parent_inst != NULL)
+    *parent_inst = inst;
+
+  return 0;
+}
+
+// Count the number of fields in the instance
+int instance_fields_count(instance_t* inst) {
+  if (inst == NULL)
+    return 0;
+
+  int count = 0;
+  instance_list_t* it = inst->fields;
+  while (it) {
+    ++count;
+    it = it->next_;
+  }
+
+  return count;
+}
+
 void clear_instance_tree_(instance_t* root) {
   instance_list_t* iter = root->fields;
   while (iter) {

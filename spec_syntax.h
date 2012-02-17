@@ -201,4 +201,42 @@ void clear_instance_tree();
 // Print a representation of the instance hierarchy
 void print_instance_tree();
 
+/**
+ * Get the child instance with a given name. Only look to children,
+ * not grand children. If no child with the given name exists, return
+ * null.
+ */
+instance_t* get_instance_child(instance_t* inst, const char* name);
+
+/**
+ * Like get_instance_child(inst, name), but name does not have to be
+ * null terminated. Instead the length of the name string is given by
+ * the last argument.
+ */
+instance_t* get_instance_child_n(instance_t* inst, const char* name, size_t nlen);
+
+/**
+ * Parse a specification path of the form '.fu.bar.baz' and return the
+ * instance pointed to by baz. In case the path doesn't point to a
+ * loaded instance, return NULL. */
+instance_t* parse_spec_path(const char* path);
+
+/**
+ * Parse the path to produce a parent section and an instance that
+ * points to the head of the parent.
+ *
+ * The format is .fu.bar.ba(z). Where .fu.bar.ba is the path, fu, bar
+ * and baz are nested fields. The function should return parent_end
+ * pointing into path to the point after the last '.', i.e. to the 'b'
+ * in the last 'ba'. parent_inst will point to bar.
+ *
+ * The function returns 0 on success.
+ */
+int parse_partial_spec_path(const char* path,
+                            const char** parent_end,
+                            instance_t** parent_inst);
+
+// Return the number of fields the instance has. 0 if inst is NULL.
+int instance_fields_count(instance_t* inst);
+
 #endif
