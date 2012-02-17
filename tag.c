@@ -112,7 +112,7 @@ void print_tag_range(size_t first, size_t last) {
   printf("-------------------------------------------------------\n");
 
   // Iterate over all blocks
-  for (int block = 0; block <= last; ++block) {
+  for (int block = first; block <= last; ++block) {
 
     // Sector number
     printf("%02x  ",
