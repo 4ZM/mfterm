@@ -80,4 +80,7 @@ extern command_t commands[];
 // NULL if the command isn't found.
 command_t* find_command(const char *name);
 
+// Any command starting with '.' - path spec
+int exec_path_command(const char *line);
+
 #endif

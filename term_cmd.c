@@ -578,3 +578,18 @@ mf_key_type_t parse_key_type_default(const char* str,
     return default_type;
   return parse_key_type(str);
 }
+
+// Any command starting with '.' - path spec
+int exec_path_command(const char *line) {
+
+  instance_t* inst = parse_spec_path(line);
+
+  if (inst)
+    print_tag_data_range(inst->offset_bytes, inst->offset_bits,
+                         inst->size_bytes, inst->size_bits);
+  else
+    printf("Invalid Path\n");
+
+
+  return 0;
+}

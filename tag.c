@@ -96,16 +96,28 @@ int import_auth() {
 
 void print_tag(mf_size_t size) {
   if (size == MF_1K)
-    print_tag_range(0, MF_1K / sizeof(mf_block_t) - 1);
+    print_tag_block_range(0, MF_1K / sizeof(mf_block_t) - 1);
   else if (size == MF_4K)
-    print_tag_range(0, MF_4K / sizeof(mf_block_t) - 1);
+    print_tag_block_range(0, MF_4K / sizeof(mf_block_t) - 1);
   else {
     printf("Unsupported tag size.\n");
   }
   return;
 }
 
-void print_tag_range(size_t first, size_t last) {
+
+void print_tag_data_range(size_t byte_offset, size_t bit_offset,
+                          size_t byte_len, size_t bit_len) {
+  // This is a temporary implementation.
+  // A full impl. will only show the relevant bytes.
+  size_t start_block = byte_offset / 16;
+  size_t end_block = (byte_offset + byte_len - 1) / 16;
+  printf("Data Range: [%d, %d] [%d, %d]\n", byte_offset, bit_offset, byte_len, bit_len);
+  print_tag_block_range(start_block, end_block);
+}
+
+
+void print_tag_block_range(size_t first, size_t last) {
 
   // Print header
   printf("xS  xB  00                   07 08                   0f\n");

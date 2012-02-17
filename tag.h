@@ -58,7 +58,9 @@ int import_auth();
 
 // Output tag data
 void print_tag();
-void print_tag_range(size_t first, size_t last);
+void print_tag_block_range(size_t first, size_t last);
+void print_tag_data_range(size_t byte_offset, size_t bit_offset,
+                          size_t byte_len, size_t bit_len);
 void print_keys(const mf_tag_t* tag, mf_size_t size);
 
 // Return a hex string representation of the key

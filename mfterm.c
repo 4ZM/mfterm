@@ -28,6 +28,7 @@
 #include "term_cmd.h"
 #include "mfterm.h"
 #include "util.h"
+#include "spec_syntax.h"
 
 int stop_input_loop_ = 0;
 void stop_input_loop() {
@@ -36,6 +37,7 @@ void stop_input_loop() {
 
 char* completion_cmd_generator(const char* text, int state);
 char* completion_sub_cmd_generator(const char* text, int state);
+char* completion_spec_generator(const char* text, int state);
 int perform_filename_completion();
 char** mft_completion(char* text, int start, int end);
 int execute_line(char* line);
@@ -70,6 +72,9 @@ void input_loop() {
 
 /* Execute a command line. */
 int execute_line (char* line) {
+  if (strncmp(line, ".", 1) == 0)
+    return exec_path_command(line);
+
   command_t* command = find_command(line);
 
   if (!command) {
@@ -100,6 +105,15 @@ char** mft_completion(char* text, int start, int end) {
 
   // Don't complete on files for most cases
   rl_attempted_completion_over = 1;
+
+  // Add the trailing space unless told otherwise
+  rl_completion_suppress_append = 0;
+
+  // Complete strings starting with '.' as specification paths
+  if (text[0] == '.' && instance_root) {
+    rl_completion_suppress_append = 1; // no trailing space on paths
+    return rl_completion_matches(text, completion_spec_generator);
+  }
 
   // Commands start at 0
   if (start == 0)
@@ -198,4 +212,66 @@ char* completion_sub_cmd_generator(const char* text, int state) {
 
   // No (more) matches
   return (char*) NULL;
+}
+
+/**
+ * Called to generate completion suggestions.
+ * state == 0 on first call.
+ */
+char* completion_spec_generator(const char* text, int state) {
+
+  // Parent context is initialized on the first call
+  static instance_t* parent_inst;
+  static const char* parent_end;
+  static int parent_end_len;
+
+  // Instace iter is advanced on each repeated call
+  static instance_list_t* inst_iter;
+
+  // First call?
+  if (!state) {
+
+    // Set the parent context
+    if (parse_partial_spec_path(text, &parent_end, &parent_inst) != 0)
+      return NULL; // on error
+
+    parent_end_len = strlen(parent_end);
+
+    // The instance iter points to the first fields
+    inst_iter = parent_inst->fields;
+  }
+
+  while (inst_iter) {
+    instance_t* inst = inst_iter->instance;
+    inst_iter = inst_iter->next_;
+
+    // Anonymous filler field
+    if (inst->field->name == NULL)
+      continue;
+
+    char* fname = inst->field->name;
+    int fname_len = strlen(fname);
+
+    // Check if the field is applicable - right prefix
+    if (fname_len >= parent_end_len &&
+        strncmp(fname, parent_end, parent_end_len) == 0) {
+
+      int parent_len = parent_end - text;
+      char* str = malloc(parent_len + fname_len + 1);
+
+      // The parent part ending with '.'
+      strncpy(str, text, parent_len);
+
+      // The field
+      strncpy(str + parent_len, fname, fname_len);
+
+      // Null termination
+      *(str + parent_len + fname_len) = '\0';
+
+      return str;
+    }
+  }
+
+  // No (more) matches
+  return NULL;
 }
