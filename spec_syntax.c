@@ -335,8 +335,12 @@ instance_t* get_instance_child_n(instance_t* inst,
 
   instance_list_t* iter = inst->fields;
   while(iter) {
-    char* fname = iter->instance->field->name;
-    if (strlen(fname) == nlen && strncmp(fname, name, nlen) == 0)
+    field_t* f = iter->instance->field;
+
+    // Make sure the field has a name (isn't anaonymous) before comparing.
+    if (f && f->name &&
+        strlen(f->name) == nlen &&
+        strncmp(f->name, name, nlen) == 0)
       return iter->instance;
     iter = iter->next_;
   }
