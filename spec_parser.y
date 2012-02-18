@@ -146,6 +146,8 @@ field_decl_list
   }
 | field_decl_list error {
     $$ = $1;
+    yyclearin;
+    YYERROR;
   }
 ;
 
@@ -162,10 +164,22 @@ field_decl
 | data_type '[' number ']' '-' {
     $$ = make_field(NULL, $1, $3);
   }
-| data_type '[' error ']'{
-    (void) $1;
-    $$ = NULL;
-    yyerrok;
+
+// Error handling
+| data_type error {
+    (void) $1; $$ = NULL; YYERROR;
+  }
+| data_type '[' number ']' error {
+    (void) $1; $$ = NULL; YYERROR;
+  }
+| data_type '[' error ']' IDENTIFIER {
+    (void) $1; (void) $5; $$ = NULL; YYERROR;
+  }
+| data_type '[' error ']' '-' {
+    (void) $1; $$ = NULL; YYERROR;
+  }
+| data_type '[' error ']' error {
+    (void) $1; $$ = NULL; YYERROR;
   }
 ;
 
