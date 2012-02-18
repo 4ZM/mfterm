@@ -15,25 +15,32 @@
 # You should have received a copy of the GNU General Public License
 # along with rkfterm.  If not, see <http://www.gnu.org/licenses/>.
 
-# Types Byte Bit Addr
-# Bit fields must be byte alligned
-# nested named types are not allowed
 
+# About the specification language:
+#
+# The primitive types in the specification language are Byte and Bit
+# and arrays of such. All other types need to be defined.
+#
+# Every specification must include the root type '.'
+
+
+# The root type is specified by its type name '.'
 . {
-  Sector0      sectors_0
+  Sector0      sector_0    # The types usesed here are defined below
   Sector1k[15] sectors_1k
   Sector4k[12] sectors_4k
 }
 
+# The type Sector_0 represents the first sector.
 Sector0 {
-  {
-    Byte[4] uid                # serial
-    Byte    cd                 # serial bytes xor:ed with check byte (cb) should be 0
-    Bit[4]  -                  # Not used
-    Bit[4]  sak                # HOW TO HANDLE ALIGNMENT?
+  { # This is an anonymous inner type. The type doesn't have a name.
+    Byte[4] uid         # Unique ID
+    Byte    cd          # Check Byte; uid bytes xor:ed with cb should be 0
+    Bit[4]  -           # Not used. Use '-' as a name in theese cases
+    Bit[4]  sak
     Byte[2] atqa
     Byte[8] manufacturer_data
-  }             block0
+  }             block_0
   Block[2]      blocks
   SectorTrailer trailer
 }

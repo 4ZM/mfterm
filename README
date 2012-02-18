@@ -66,7 +66,29 @@ clear the dictionary use 'dict clear'.
 
 Other commands
 --------------
-
 Quit the mfterm program by issuing the 'quit' command.
 
 Help is available by writing 'help'
+
+
+Specification Files
+-------------------
+A specification file defines names for parts of the tag data. See the
+file mfc-spec.txt for a sample specification.
+
+Specification files are loaded with the command 'spec load'. They can
+be cleared with 'spec clear'. To display the data structure loaded use
+the command 'spec'.
+
+Once a specification has been loaded, it can be used to access the
+data in the tag by using a specification path. In the sample
+specification, the path: '.sector_0.block_0.atqa', when entered in the
+terminal, will display the two bytes of data starting with byte 6.
+
+WARNING:
+--------
+The mfterm software is neither thoroughly tested nor widely used. It
+likely contains a number of serious bugs that can be exploited to
+compromise your computer. Do NOT run the mfterm software as a
+privileged user (e.g. root), and ONLY load tag, dictionary and
+specification files that you get from people you trust.
