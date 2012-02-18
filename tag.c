@@ -105,15 +105,104 @@ void print_tag(mf_size_t size) {
   return;
 }
 
+void print_tag_byte_bits(size_t byte, size_t first_bit, size_t last_bit) {
+
+  // The byte to show parts of
+  byte_t data = current_tag.amb[byte / 16].mbd.abtData[byte % 16];
+
+  printf("[");
+
+  for (size_t i = 0; i < 8; ++i) {
+    // Separate nibbles
+    if (i == 4)
+      printf(" ");
+
+    // Outside mask
+    if (i < first_bit || i > last_bit) {
+      printf("-");
+      continue;
+    }
+
+    // Inside mask
+    if (1<<i && data)
+      printf("1");
+    else
+      printf("0");
+  }
+
+  printf("]");
+}
+
+void print_tag_bytes(size_t first_byte, size_t last_byte) {
+
+  // Write the data one block at a time
+  while (first_byte <= last_byte) {
+
+    size_t byte_len = last_byte - first_byte;
+
+    // Fill up start with spaces
+    size_t block_offset = first_byte % 16;
+    for (size_t i = 0; i < block_offset; ++i)
+      printf("-- ");
+
+    // Print the data
+    byte_t* block_data = current_tag.amb[first_byte / 16].mbd.abtData;
+    size_t block_last = block_offset + byte_len;
+    if (block_last > 15)
+      block_last = 15;
+    print_hex_array_sep(block_data  + block_offset,
+                        block_last - block_offset + 1, " ");
+
+    // Fill up end with spaces
+    for (size_t i = block_last; i < 15; ++i)
+      printf("-- ");
+
+    // Finish of with a nl
+    printf("\n");
+
+    first_byte += block_last - block_offset + 1;
+  }
+}
 
 void print_tag_data_range(size_t byte_offset, size_t bit_offset,
                           size_t byte_len, size_t bit_len) {
-  // This is a temporary implementation.
-  // A full impl. will only show the relevant bytes.
-  size_t start_block = byte_offset / 16;
-  size_t end_block = (byte_offset + byte_len - 1) / 16;
-  printf("Data Range: [%d, %d] [%d, %d]\n", byte_offset, bit_offset, byte_len, bit_len);
-  print_tag_block_range(start_block, end_block);
+
+  printf("Offset: [%d, %d] Length: [%d, %d]\n",
+         byte_offset, bit_offset, byte_len, bit_len);
+
+  // Print partial first byte
+  if (bit_offset) {
+    size_t total_bits = byte_len * 8 + bit_len;
+    size_t last_bit = bit_offset + total_bits - 1;
+    if (last_bit > 7)
+      last_bit = 7;
+
+    print_tag_byte_bits(byte_offset, bit_offset, last_bit);
+    printf("\n");
+
+    total_bits -= last_bit - bit_offset + 1;
+
+    // Update data to be printed
+    byte_offset++;
+    bit_offset = 0;
+    byte_len = total_bits / 8;
+    bit_len = total_bits % 8;
+  }
+
+  // Print bytes
+  if (byte_len) {
+    print_tag_bytes(byte_offset, byte_offset + byte_len - 1);
+
+    // Update data to be printed
+    byte_offset += byte_len;
+    byte_len = 0;
+  }
+
+  // Print trailing bits
+  if (bit_len) {
+    print_tag_byte_bits(byte_offset, 0, bit_len);
+    printf("\n");
+  }
 }
 
 
