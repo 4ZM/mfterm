@@ -33,20 +33,23 @@ int spec_import(FILE* input) {
 
   // Parse the input to build a type hierarchy
   sp_in = input;
-  sp_parse();
+  if (sp_parse()) {
+    printf("Syntax Error: Specification not imported\n");
+    goto error;
+  }
 
   // Check for missing definitions
   type_t* partial = tt_contains_partial_types();
   if (partial) {
     printf("Error: Incomplete declaration '%s' in specification.\n",
            partial->composite_extras->name);
-    return 1;
+    goto error;
   }
 
   // Make sure we have a root type defined
   if (type_root == NULL) {
     printf("Error: No root type '.' found in specification.\n");
-    return 1;
+    goto error;
   }
 
   // Create the instance tree
@@ -55,6 +58,11 @@ int spec_import(FILE* input) {
   printf("Specification sucessfully imported.\n");
 
   return 0;
+
+ error:
+  clear_instance_tree();
+  tt_clear();
+  return 1;
 }
 
 // The primitive Byte type
@@ -157,7 +165,7 @@ field_t* get_field(field_list_t* field_list, const char* name) {
   field_list_t* it = field_list;
   while(it) {
     field_t* f = it->field;
-    if (f->name && strcmp(f->name, name) == 0)
+    if (f && f->name && strcmp(f->name, name) == 0)
       return f;
     it = it->next_;
   }
