@@ -206,12 +206,6 @@ number
 
 %%
 
-void sp_error(const char* s, ...) {
-  va_list ap;
-  va_start(ap, s);
-  sp_lerror(sp_lloc, s, ap);
-}
-
 void sp_lerror(struct YYLTYPE t, const char* s, ...) {
   va_list ap;
   va_start(ap, s);

@@ -20,6 +20,7 @@
 %{
 
 #include <stdio.h>
+#include <stdarg.h>
 #include "util.h"
 #include "spec_syntax.h"
 
@@ -85,7 +86,18 @@ br             [\[\]\{\}]
 
 %%
 
-// Reset the line numbering at the end of a file
-int sp_wrap() { sp_lineno = 1; return 1; }
+// Report error, reset the line numbering and flush buffer
+void sp_error(const char* s, ...) {
+  va_list ap;
+  va_start(ap, s);
+  sp_lerror(sp_lloc, s, ap);
+  sp_lineno = 1;
+  YY_FLUSH_BUFFER;
+}
 
-
+// Reset the line numbering and flush the buffer at the end of a file
+int sp_wrap() {
+  sp_lineno = 1;
+  YY_FLUSH_BUFFER;
+  return 1;
+}
