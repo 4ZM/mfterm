@@ -53,11 +53,11 @@
 #include "mifare_ctrl.h"
 
 // State of the device/tag - should be NULL between high level calls.
-static nfc_device_t* device = NULL;
-static nfc_target_t target;
+static nfc_device* device = NULL;
+static nfc_target target;
 static mf_size_t size;
 
-static const nfc_modulation_t mf_nfc_modulation = {
+static const nfc_modulation mf_nfc_modulation = {
   .nmt = NMT_ISO14443A,
   .nbr = NBR_106,
 };
@@ -68,8 +68,8 @@ int mf_disconnect(int ret_state);
 bool mf_configure_device();
 bool mf_select_target();
 
-bool mf_authenticate(byte_t block,
-                     const byte_t* key,
+bool mf_authenticate(uint8_t block,
+                     const uint8_t* key,
                      mf_key_type_t key_type);
 
 bool mf_read_tag_internal(mf_tag_t* tag,
@@ -88,7 +88,7 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
 
 
 int mf_disconnect(int ret_state) {
-  nfc_disconnect(device);
+  nfc_close(device);
   device = NULL;
   return ret_state;
 }
@@ -96,7 +96,7 @@ int mf_disconnect(int ret_state) {
 int mf_connect() {
 
   // Connect to (any) NFC reader
-  device = nfc_connect(NULL);
+  device = nfc_open(NULL, NULL);
   if (device == NULL) {
     printf ("Could not connect to any NFC device\n");
     return -1; // Don't jump here, since we don't need to disconnect
@@ -198,50 +198,51 @@ int mf_test_auth(const mf_tag_t* keys,
 bool mf_configure_device() {
 
   // Disallow invalid frame
-  if (!nfc_configure(device, NDO_ACCEPT_INVALID_FRAMES, false))
+  if (nfc_device_set_property_bool(device, NP_ACCEPT_INVALID_FRAMES, false) < 0)
     return false;
 
   // Disallow multiple frames
-  if (!nfc_configure(device, NDO_ACCEPT_MULTIPLE_FRAMES, false))
+  if (nfc_device_set_property_bool(device, NP_ACCEPT_MULTIPLE_FRAMES, false) < 0)
     return false;
 
   // Make sure we reset the CRC and parity to chip handling.
-  if (!nfc_configure(device, NDO_HANDLE_CRC, true))
+  if (nfc_device_set_property_bool(device, NP_HANDLE_CRC, true) < 0)
     return false;
-  if (!nfc_configure(device, NDO_HANDLE_PARITY, true))
+
+  if (nfc_device_set_property_bool(device, NP_HANDLE_PARITY, true) < 0)
     return false;
 
   // Disable ISO14443-4 switching in order to read devices that emulate
   // Mifare Classic with ISO14443-4 compliance.
-  if (!nfc_configure(device, NDO_AUTO_ISO14443_4, false))
+  if (nfc_device_set_property_bool(device, NP_AUTO_ISO14443_4, false) < 0)
     return false;
 
   // Activate "easy framing" feature by default
-  if (!nfc_configure(device, NDO_EASY_FRAMING, true))
+  if (nfc_device_set_property_bool(device, NP_EASY_FRAMING, true) < 0)
     return false;
 
   // Deactivate the CRYPTO1 cipher, it may could cause problems when
   // still active
-  if (!nfc_configure(device, NDO_ACTIVATE_CRYPTO1, false))
+  if (nfc_device_set_property_bool(device, NP_ACTIVATE_CRYPTO1, false) < 0)
     return false;
 
   // Drop explicitely the field
-  if (!nfc_configure(device, NDO_ACTIVATE_FIELD, false))
+  if (nfc_device_set_property_bool(device, NP_ACTIVATE_FIELD, false) < 0)
     return false;
 
   // Override default initialization option, only try to select a tag once.
-  if (!nfc_configure(device, NDO_INFINITE_SELECT, false))
+  if (nfc_device_set_property_bool(device, NP_INFINITE_SELECT, false) < 0)
     return false;
 
   return true;
 }
 
 bool mf_select_target() {
-  if (!nfc_initiator_select_passive_target(device,
-                                           mf_nfc_modulation,
-                                           NULL,   // init data
-                                           0,      // init data len
-                                           &target)) {
+  if (nfc_initiator_select_passive_target(device,
+                                          mf_nfc_modulation,
+                                          NULL,   // init data
+                                          0,      // init data len
+                                          &target) < 0) {
     return false;
   }
   return true;
@@ -265,7 +266,7 @@ bool mf_read_tag_internal(mf_tag_t* tag,
     if (is_trailer_block(block)) {
 
       // Try to authenticate for the current sector
-      byte_t* key = key_from_tag(keys, key_type, block);
+      uint8_t* key = key_from_tag(keys, key_type, block);
       if (!mf_authenticate(block, key, key_type)) {
         // Progress indication and error report
         printf("0x%02x", block_to_sector(block));
@@ -332,7 +333,7 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
        header_block = sector_header_iterator(size)) {
 
     // Authenticate
-    byte_t* key = key_from_tag(keys, key_type, header_block);
+    uint8_t* key = key_from_tag(keys, key_type, header_block);
     if (!mf_authenticate(header_block, key, key_type)) {
       // Progress indication and error report
       if (header_block != 0) printf(".");
@@ -408,8 +409,8 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
 
     printf("Working on sector: %02x [", block_to_sector(block));
 
-    const byte_t* key_a = NULL;
-    const byte_t* key_b = NULL;
+    const uint8_t* key_a = NULL;
+    const uint8_t* key_b = NULL;
 
     // Iterate we run out of dictionary keys or the sector is cracked
     const key_list_t* key_it = dictionary_get();
@@ -485,7 +486,7 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
        block != -1;
        block = sector_header_iterator(size)) {
 
-    byte_t* key = key_from_tag(keys, key_type, block);
+    uint8_t* key = key_from_tag(keys, key_type, block);
     printf("%02x  %c  %s  ",
            block_to_sector(block),
            key_type,
@@ -506,7 +507,7 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
 }
 
 
-bool mf_authenticate(byte_t block, const byte_t* key, mf_key_type_t key_type) {
+bool mf_authenticate(uint8_t block, const uint8_t* key, mf_key_type_t key_type) {
 
   mifare_param mp;
 

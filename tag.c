@@ -108,7 +108,7 @@ void print_tag(mf_size_t size) {
 void print_tag_byte_bits(size_t byte, size_t first_bit, size_t last_bit) {
 
   // The byte to show parts of
-  byte_t data = current_tag.amb[byte / 16].mbd.abtData[byte % 16];
+  uint8_t data = current_tag.amb[byte / 16].mbd.abtData[byte % 16];
 
   printf("[");
 
@@ -146,7 +146,7 @@ void print_tag_bytes(size_t first_byte, size_t last_byte) {
       printf("-- ");
 
     // Print the data
-    byte_t* block_data = current_tag.amb[first_byte / 16].mbd.abtData;
+    uint8_t* block_data = current_tag.amb[first_byte / 16].mbd.abtData;
     size_t block_last = block_offset + byte_len;
     if (block_last > 15)
       block_last = 15;
@@ -261,7 +261,7 @@ void print_keys(const mf_tag_t* tag, mf_size_t size) {
   }
 }
 
-const char* sprint_key(const byte_t* key) {
+const char* sprint_key(const uint8_t* key) {
   static char str_buff[13];
 
   if (!key)
@@ -293,7 +293,7 @@ const char* sprint_size(mf_size_t size) {
 }
 
 
-byte_t* read_key(byte_t* key, const char* str) {
+uint8_t* read_key(uint8_t* key, const char* str) {
   if (!key || !str)
     return NULL;
 
@@ -377,11 +377,11 @@ size_t sector_size(size_t block) {
 }
 
 // Extract the key for the block parameters sector of the tag and return it
-byte_t* key_from_tag(const mf_tag_t* tag,
+uint8_t* key_from_tag(const mf_tag_t* tag,
                      mf_key_type_t key_type,
                      size_t block) {
 
-  static byte_t key[6];
+  static uint8_t key[6];
 
   size_t trailer_block = block_to_trailer(block);
 
@@ -395,7 +395,7 @@ byte_t* key_from_tag(const mf_tag_t* tag,
 
 // Write key to the sector of a tag, where the sector is specified by
 // the block.
-void key_to_tag(mf_tag_t* tag, const byte_t* key,
+void key_to_tag(mf_tag_t* tag, const uint8_t* key,
                 mf_key_type_t key_type, size_t block) {
 
   size_t trailer_block = block_to_trailer(block);

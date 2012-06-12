@@ -65,11 +65,11 @@ void print_tag_bytes(size_t first_byte, size_t last_byte);
 
 void print_keys(const mf_tag_t* tag, mf_size_t size);
 
-// Return a hex string representation of the key
-const char* sprint_key(const byte_t* key);
+// Return a hex string representationon of the key
+const char* sprint_key(const uint8_t* key);
 
 // Parse the string and set the key. Return the key, or NULL on error.
-byte_t* read_key(byte_t* key, const char* str);
+uint8_t* read_key(uint8_t* key, const char* str);
 
 // Return a string describing the tag type 1k|4k
 const char* sprint_size(mf_size_t size);
@@ -102,13 +102,13 @@ size_t sector_to_trailer(size_t sector);
 size_t sector_size(size_t block);
 
 // Extract the key for the block parameters sector of the tag and return it
-byte_t* key_from_tag(const mf_tag_t* tag,
+uint8_t* key_from_tag(const mf_tag_t* tag,
                      mf_key_type_t key_type,
                      size_t block);
 
 // Write key to the sector of a tag, where the sector is specified by
 // the block (anywhere in the sector).
-void key_to_tag(mf_tag_t* tag, const byte_t* key,
+void key_to_tag(mf_tag_t* tag, const uint8_t* key,
                 mf_key_type_t key_type, size_t block);
 
 /**

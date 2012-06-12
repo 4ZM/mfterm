@@ -377,7 +377,7 @@ int com_keys_set(char* arg) {
   size_t block = sector_to_trailer(sector);
 
   // Parse key selection and point to appropriate key
-  byte_t* key;
+  uint8_t* key;
   mf_key_type_t key_type = parse_key_type(ab);
   if (key_type == MF_KEY_A)
     key = current_auth.amb[block].mbt.abtKeyA;
