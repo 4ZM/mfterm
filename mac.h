@@ -20,6 +20,10 @@
  * along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// The DES MAC key in use
+extern unsigned char current_mac_key[];
+
+
 /**
  * Compute a DES MAC, use DES in CBC mode. Key and output should be 8
  * bytes. The length specifies the length of the input in bytes. It

@@ -69,7 +69,8 @@ command_t commands[] = {
   { "spec clear",  com_spec_clear,  0, 1, "Unload the specification" },
   { "spec",        com_spec_print,  0, 1, "Print the specification" },
 
-  { "mac compute", com_mac_block_compute, 0, 1, "#block k0..k7 : Compute block MAC" },
+  { "mac compute", com_mac_block_compute, 0, 1, "#block : Compute block MAC" },
+  { "mac key", com_mac_key_get_set, 0, 1, "<k0..k7> : Get or set MAC key" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
@@ -541,24 +542,14 @@ int com_spec_clear(char* arg) {
   return 0;
 }
 
+int com_mac_key_get_set(char* arg) {
+  char* key_str = strtok(arg, " ");
 
-int com_mac_block_compute(char* arg) {
-  char* block_str = strtok(arg, " ");
-  char* key_str = strtok(NULL, " ");
-
-  if (!block_str || !key_str) {
-    printf("Too few arguments: #block xk0 xk1 xk2 xk3 xk4 xk5 xk6 xk7\n");
-    return -1;
-  }
-
-  int block = strtol(block_str, &block_str, 16);
-  if (*block_str != '\0') {
-    printf("Invalid block character (non hex): %s\n", block_str);
-    return -1;
-  }
-  if (block < 0 || block > 0xff) {
-    printf("Invalid block [0,ff]: %x\n", block);
-    return -1;
+  if (key_str == 0) {
+    printf("Current MAC key: \n");
+    print_hex_array_sep(current_mac_key, 8, " ");
+    printf("\n");
+    return 0;
   }
 
   unsigned char key[8];
@@ -591,8 +582,31 @@ int com_mac_block_compute(char* arg) {
     return -1;
   }
 
+  // Everything ok, so update the global
+  memcpy(current_mac_key, key, 8);
+  return 0;
+}
+
+int com_mac_block_compute(char* arg) {
+  char* block_str = strtok(arg, " ");
+
+  if (!block_str) {
+    printf("Too few arguments: #block\n");
+    return -1;
+  }
+
+  int block = strtol(block_str, &block_str, 16);
+  if (*block_str != '\0') {
+    printf("Invalid block character (non hex): %s\n", block_str);
+    return -1;
+  }
+  if (block < 0 || block > 0xff) {
+    printf("Invalid block [0,ff]: %x\n", block);
+    return -1;
+  }
+
   // Use the key
-  unsigned char* mac = compute_block_mac(block, key);
+  unsigned char* mac = compute_block_mac(block, current_mac_key);
 
   // MAC is null on error, else 8 bytes
   if (mac == 0)

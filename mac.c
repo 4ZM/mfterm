@@ -23,6 +23,10 @@
 #include "mac.h"
 #include "tag.h"
 
+// The DES MAC key in use
+unsigned char current_mac_key[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+
 /**
  * Compute a DES MAC, use DES in CBC mode. Key and output should be 8
  * bytes. The length specifies the length of the input in bytes. It

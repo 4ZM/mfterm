@@ -67,6 +67,7 @@ int com_spec_clear(char* arg);
 int com_spec_print(char* arg);
 
 // MAC operations
+int com_mac_key_get_set(char* arg);
 int com_mac_block_compute(char* arg);
 
 typedef struct {
