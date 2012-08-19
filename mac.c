@@ -67,9 +67,13 @@ int compute_mac(const unsigned char* input,
  * key. Return a 8 byte MAC value.
  *
  * The input to MAC algo [ 4 serial | 14 data | 6 0-pad ]
+ *
+ * If update is * nonzero, the mac of the current tag is updated. If
+ * not, the MAC is simply printed.
  */
 unsigned char* compute_block_mac(int block,
-                                 const unsigned char* key) {
+                                 const unsigned char* key,
+                                 int update) {
 
   static unsigned char output[8];
 
@@ -84,6 +88,11 @@ unsigned char* compute_block_mac(int block,
 
   // Ret null on error
   if (res != 0) return NULL;
+
+  // Should the new MAC be written back?
+  if (update) {
+    memcpy(&current_tag.amb[block].mbd.abtData[14], output, 2);
+  }
 
   return output;
 }

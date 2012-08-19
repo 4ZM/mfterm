@@ -69,8 +69,9 @@ command_t commands[] = {
   { "spec clear",  com_spec_clear,  0, 1, "Unload the specification" },
   { "spec",        com_spec_print,  0, 1, "Print the specification" },
 
-  { "mac compute", com_mac_block_compute, 0, 1, "#block : Compute block MAC" },
   { "mac key", com_mac_key_get_set, 0, 1, "<k0..k7> : Get or set MAC key" },
+  { "mac compute", com_mac_block_compute, 0, 1, "#block : Compute block MAC" },
+  { "mac update", com_mac_block_update, 0, 1, "#block : Compute block MAC" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
@@ -90,6 +91,10 @@ mf_key_type_t parse_key_type(const char* str);
 mf_key_type_t parse_key_type_default(const char* str,
                                      mf_key_type_t default_type);
 
+// Compute the MAC using the current_mac_key. If update is nonzero,
+// the mac of the current tag is updated. If not, the MAC is simply
+// printed.
+int com_mac_block_compute_impl(char* arg, int update);
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -587,7 +592,16 @@ int com_mac_key_get_set(char* arg) {
   return 0;
 }
 
+
 int com_mac_block_compute(char* arg) {
+  return com_mac_block_compute_impl(arg, 0);
+}
+
+int com_mac_block_update(char* arg) {
+  return com_mac_block_compute_impl(arg, 1);
+}
+
+int com_mac_block_compute_impl(char* arg, int update) {
   char* block_str = strtok(arg, " ");
 
   if (!block_str) {
@@ -606,7 +620,7 @@ int com_mac_block_compute(char* arg) {
   }
 
   // Use the key
-  unsigned char* mac = compute_block_mac(block, current_mac_key);
+  unsigned char* mac = compute_block_mac(block, current_mac_key, update);
 
   // MAC is null on error, else 8 bytes
   if (mac == 0)

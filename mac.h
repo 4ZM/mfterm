@@ -34,7 +34,17 @@ int compute_mac(const unsigned char* input,
                 const unsigned char* key,
                 long length);
 
+/**
+ * Compute the MAC of a given block with the specified 8 byte
+ * key. Return a 8 byte MAC value.
+ *
+ * The input to MAC algo [ 4 serial | 14 data | 6 0-pad ]
+ *
+ * If update is * nonzero, the mac of the current tag is updated. If
+ * not, the MAC is simply printed.
+ */
 unsigned char* compute_block_mac(int block,
-                                 const unsigned char* key);
+                                 const unsigned char* key,
+                                 int update);
 
 #endif
