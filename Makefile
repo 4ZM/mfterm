@@ -17,7 +17,7 @@
 
 CC       = gcc
 CFLAGS	 = -g -Wall -std=c99
-LDFLAGS  = -g -lreadline -lnfc
+LDFLAGS  = -g -lreadline -lnfc -lssl
 
 LEX        = flex
 LEXCFLAGS	 = \
@@ -34,7 +34,8 @@ MFTERM_SRCS =   \
 	mifare.c      \
 	mifare_ctrl.c \
 	dictionary.c  \
-	spec_syntax.c
+	spec_syntax.c \
+	mac.c
 
 MFTERM_LEX =          \
 	dictionary_parser.l \

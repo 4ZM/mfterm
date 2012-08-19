@@ -66,6 +66,9 @@ int com_spec_load(char* arg);
 int com_spec_clear(char* arg);
 int com_spec_print(char* arg);
 
+// MAC operations
+int com_mac_block_compute(char* arg);
+
 typedef struct {
   char *name;       // The command
   cmd_func_t func;  // Function to call on command

@@ -30,6 +30,8 @@
 #include "mifare_ctrl.h"
 #include "dictionary.h"
 #include "spec_syntax.h"
+#include "util.h"
+#include "mac.h"
 
 command_t commands[] = {
   { "help",  com_help, 0, 0, "Display this text" },
@@ -66,6 +68,8 @@ command_t commands[] = {
   { "spec load",   com_spec_load,   1, 1, "Load a specification file" },
   { "spec clear",  com_spec_clear,  0, 1, "Unload the specification" },
   { "spec",        com_spec_print,  0, 1, "Print the specification" },
+
+  { "mac compute", com_mac_block_compute, 0, 1, "#block k0..k7 : Compute block MAC" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
@@ -275,7 +279,7 @@ int com_set(char* arg) {
   do {
     int byte = strtol(byte_str, &byte_str, 16);
     if (*byte_str != '\0') {
-      printf("Invalid byte character (non hex)q: %s\n", byte_str);
+      printf("Invalid byte character (non hex): %s\n", byte_str);
       return -1;
     }
     if (byte < 0 || byte > 0xff) {
@@ -537,6 +541,70 @@ int com_spec_clear(char* arg) {
   return 0;
 }
 
+
+int com_mac_block_compute(char* arg) {
+  char* block_str = strtok(arg, " ");
+  char* key_str = strtok(NULL, " ");
+
+  if (!block_str || !key_str) {
+    printf("Too few arguments: #block xk0 xk1 xk2 xk3 xk4 xk5 xk6 xk7\n");
+    return -1;
+  }
+
+  int block = strtol(block_str, &block_str, 16);
+  if (*block_str != '\0') {
+    printf("Invalid block character (non hex): %s\n", block_str);
+    return -1;
+  }
+  if (block < 0 || block > 0xff) {
+    printf("Invalid block [0,ff]: %x\n", block);
+    return -1;
+  }
+
+  unsigned char key[8];
+  int key_ptr = 0;
+
+  // Consume the key tokens
+  do {
+    int byte = strtol(key_str, &key_str, 16);
+    if (*key_str != '\0') {
+      printf("Invalid key character (non hex): %s\n", key_str);
+      return -1;
+    }
+    if (byte < 0 || byte > 0xff) {
+      printf("Invalid byte value [0,ff]: %x\n", byte);
+      return -1;
+    }
+
+    if (key_ptr > sizeof(key)) {
+      printf("Too many bytes specified in key (should be 8).\n");
+      return -1;
+    }
+
+    // Accept the byte and add it to the key
+    key[key_ptr++] = byte;
+
+  } while((key_str = strtok(NULL, " ")) != (char*)NULL);
+
+  if (key_ptr != sizeof(key)) {
+    printf("Too few bytes specified in key (should be 8).\n");
+    return -1;
+  }
+
+  // Use the key
+  unsigned char* mac = compute_block_mac(block, key);
+
+  // MAC is null on error, else 8 bytes
+  if (mac == 0)
+    return -1;
+
+  // Only need 16 MSBs.
+  printf("Block %2.2x, MAC : ", block);
+  print_hex_array_sep(mac, 2, " ");
+  printf("\n");
+
+  return 0;
+}
 
 mf_size_t parse_size(const char* str) {
 
