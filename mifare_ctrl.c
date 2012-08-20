@@ -90,6 +90,7 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
 int mf_disconnect(int ret_state) {
   nfc_close(device);
   device = NULL;
+  memset(&target, 0, sizeof(target));
   return ret_state;
 }
 
@@ -109,14 +110,14 @@ int mf_connect() {
   }
 
   // Try to find a tag
-  if (!mf_select_target()) {
+  if (!mf_select_target() || target.nti.nai.btSak == 0) {
     printf("Connected to device, but no tag found.\n");
     return mf_disconnect(-1);
   }
 
-  // Test if we are dealing with a Mifare compatible tag
+  // Test if we are dealing with a Mifare Classic compatible tag
   if ((target.nti.nai.btSak & 0x08) == 0) {
-    printf("Incompatible tag type: 0x%02x (i.e. not Mifare).\n",
+    printf("Incompatible tag type: 0x%02x (i.e. not Mifare Classic).\n",
            target.nti.nai.btSak);
     return mf_disconnect(-1);
   }
@@ -129,7 +130,8 @@ int mf_connect() {
     size = MF_1K;
   }
   else {
-    printf("Unsupported tag size [1|4]K.\n");
+    printf("Unsupported tag size. ATQA 0x%02x 0x%02x (i.e. not [1|4]K.)\n",
+           target.nti.nai.abtAtqa[0], target.nti.nai.abtAtqa[1]);
     return mf_disconnect(-1);
   }
 
@@ -145,6 +147,19 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type) {
   if (!mf_read_tag_internal(tag, &current_auth, key_type)) {
     printf("Read failed!\n");
     return mf_disconnect(-1);
+  }
+
+  // Print the type of card
+  if (target.nti.nai.btSak == 0x08 &&
+      target.nti.nai.abtAtqa[0] == 0x00 && target.nti.nai.abtAtqa[1] == 0x04) {
+    printf("Read MIFARE Classic 1k (SAK: 08, ATQA: 00 04)\n");
+  }
+  else if (target.nti.nai.btSak == 0x18 &&
+           target.nti.nai.abtAtqa[0] == 0x00 && target.nti.nai.abtAtqa[1] == 0x02) {
+    printf("Read MIFARE Classic 4k (SAK: 18, ATQA: 00 02)\n");
+  }
+  else {
+    printf("Read unknown tag.\n");
   }
 
   return mf_disconnect(0);
@@ -257,7 +272,7 @@ bool mf_read_tag_internal(mf_tag_t* tag,
 
   int error = 0;
 
-  printf("Reading %s tag [", sprint_size(size)); fflush(stdout);
+  printf("Reading: ["); fflush(stdout);
 
   // Read the card from end to begin
   for (int block = block_count(size) - 1; block >= 0; --block) {

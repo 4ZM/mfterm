@@ -489,7 +489,7 @@ int com_dict_attack(char* arg) {
 
   // Not much point if we don't have any keys
   if (!dictionary_get()) {
-    printf("Dictionary is empty!");
+    printf("Dictionary is empty!\n");
     return -1;
   }
 
