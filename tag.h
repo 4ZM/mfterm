@@ -34,7 +34,8 @@ typedef enum {
 typedef enum {
   MF_INVALID_KEY_TYPE = 0,
   MF_KEY_A = 'a',
-  MF_KEY_B = 'b'
+  MF_KEY_B = 'b',
+  MF_KEY_UNLOCKED = 0xff,
 } mf_key_type_t;
 
 // Convenience typedefs (shortening)

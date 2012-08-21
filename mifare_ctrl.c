@@ -62,6 +62,13 @@ static const nfc_modulation mf_nfc_modulation = {
   .nbr = NBR_106,
 };
 
+// Buffers used for raw bit/byte writes
+#define MAX_FRAME_LEN 264
+static uint8_t abtRx[MAX_FRAME_LEN];
+static int szRxBits;
+static size_t szRx = sizeof(abtRx);
+
+
 int mf_connect();
 int mf_disconnect(int ret_state);
 
@@ -71,6 +78,8 @@ bool mf_select_target();
 bool mf_authenticate(uint8_t block,
                      const uint8_t* key,
                      mf_key_type_t key_type);
+
+bool mf_unlock();
 
 bool mf_read_tag_internal(mf_tag_t* tag,
                           const mf_tag_t* keys,
@@ -85,6 +94,10 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag);
 bool mf_test_auth_internal(const mf_tag_t* keys,
                            mf_size_t size,
                            mf_key_type_t key_type);
+
+
+bool transmit_bits(const uint8_t *pbtTx, const size_t szTxBits);
+bool transmit_bytes(const uint8_t *pbtTx, const size_t szTx);
 
 
 int mf_disconnect(int ret_state) {
@@ -169,6 +182,13 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type) {
 int mf_write_tag(const mf_tag_t* tag, mf_key_type_t key_type) {
   if (mf_connect())
     return -1; // No need to disconnect here
+
+  if (key_type == MF_KEY_UNLOCKED) {
+    if (!mf_unlock()) {
+      printf("Unlocked write requested, but unlock failed!\n");
+      return false;
+    }
+  }
 
   if (!mf_write_tag_internal(tag, &current_auth, key_type)) {
     printf("Write failed!\n");
@@ -263,6 +283,44 @@ bool mf_select_target() {
   return true;
 }
 
+/**
+ * Unlocking the card allows writing to block 0 of some pirate cards.
+ */
+bool mf_unlock() {
+  static uint8_t  abtHalt[4] = { 0x50, 0x00, 0x00, 0x00 };
+
+  // Special unlock command
+  static const uint8_t  abtUnlock1[1] = { 0x40 };
+  static const uint8_t  abtUnlock2[1] = { 0x43 };
+
+  // Disable CRC and parity checking
+  if (nfc_device_set_property_bool(device, NP_HANDLE_CRC, false) < 0)
+    return false;
+
+  // Disable easy framing. Use raw send/receive methods
+  if (nfc_device_set_property_bool (device, NP_EASY_FRAMING, false) < 0)
+    return false;
+
+  // Initialize transmision
+  iso14443a_crc_append(abtHalt, 2);
+  transmit_bytes(abtHalt, 4);
+
+  // Send unlock
+  if (!transmit_bits (abtUnlock1, 7))
+    return false;
+
+  if (!transmit_bytes (abtUnlock2, 1))
+    return false;
+
+  // Reset reader configuration. CRC and easy framing.
+  if (nfc_device_set_property_bool (device, NP_HANDLE_CRC, true) < 0)
+    return false;
+  if (nfc_device_set_property_bool (device, NP_EASY_FRAMING, true) < 0)
+    return false;
+
+  return true;
+}
+
 bool mf_read_tag_internal(mf_tag_t* tag,
                       const mf_tag_t* keys, mf_key_type_t key_type) {
   mifare_param mp;
@@ -349,22 +407,24 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
 
     // Authenticate
     uint8_t* key = key_from_tag(keys, key_type, header_block);
-    if (!mf_authenticate(header_block, key, key_type)) {
-      // Progress indication and error report
-      if (header_block != 0) printf(".");
-      printf("0x%02x", block_to_sector(header_block));
-      fflush(stdout);
+    if (key_type != MF_KEY_UNLOCKED) {
+      if (!mf_authenticate(header_block, key, key_type)) {
+        // Progress indication and error report
+        if (header_block != 0) printf(".");
+        printf("0x%02x", block_to_sector(header_block));
+        fflush(stdout);
 
-      error = 1;
-      continue; // Skip the rest of the sector blocks
+        error = 1;
+        continue; // Skip the rest of the sector blocks
+      }
     }
 
     // Write the sectors blocks
     for (int block = header_block, trailer = block_to_trailer(header_block);
          block < trailer; ++block) {
 
-      // First block on tag is read only - skip it
-      if (block == 0)
+      // First block on tag is read only - skip it unless unlocked
+      if (block == 0 && key_type != MF_KEY_UNLOCKED)
         continue;
 
       // Try to write the data block
@@ -544,4 +604,23 @@ bool mf_authenticate(uint8_t block, const uint8_t* key, mf_key_type_t key_type) 
                                       NULL, 0, &target);
 
   return false;
+}
+
+bool transmit_bits(const uint8_t *pbtTx, const size_t szTxBits)
+{
+  // Transmit the bit frame command, we don't use the arbitrary parity feature
+  if ((szRxBits = nfc_initiator_transceive_bits (device, pbtTx, szTxBits, NULL, abtRx, NULL)) < 0)
+    return false;
+
+  return true;
+}
+
+
+bool transmit_bytes(const uint8_t *pbtTx, const size_t szTx)
+{
+  // Transmit the command bytes
+  if (nfc_initiator_transceive_bytes (device, pbtTx, szTx, abtRx, &szRx, 0) < 0)
+    return false;
+
+  return true;
 }

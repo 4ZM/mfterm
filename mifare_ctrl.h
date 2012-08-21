@@ -41,6 +41,8 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type);
  * the 'current_auth' keys of specified type. Finally, disconnect from
  * the device.  If there are authentication errors, those sectors will
  * not be written.
+ * If the key type is set to MF_UNLOCKED, try to unlock the card prior to
+ * write. This allows some pirate cards to write block 0.
  * Return 0 on success != 0 on failure.
  */
 int mf_write_tag(const mf_tag_t* tag, mf_key_type_t key_type);

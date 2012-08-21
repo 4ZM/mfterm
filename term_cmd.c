@@ -46,6 +46,7 @@ command_t commands[] = {
 
   { "read",  com_read_tag,  0, 1, "A|B : Read tag data from a physical tag" },
   { "write", com_write_tag, 0, 1, "A|B : Write tag data to a physical tag" },
+  { "write unlocked", com_write_tag_unlocked, 0, 1, "On pirate cards, write 1k tag with block 0." },
 
   { "print",      com_print,      0, 1, "1k|4k : Print tag data" },
   { "print keys", com_print_keys, 0, 1, "1k|4k : Print tag's keys" },
@@ -227,6 +228,20 @@ int com_write_tag(char* arg) {
 
   // Issue the read request
   mf_write_tag(&current_tag, key_type);
+  return 0;
+}
+
+int com_write_tag_unlocked(char* arg) {
+  // Add option to choose key
+  char* ab = strtok(arg, " ");
+
+  if (ab) {
+    printf("This command doesn't take any arguments\n");
+    return -1;
+  }
+
+  // Issue the read request
+  mf_write_tag(&current_tag, MF_KEY_UNLOCKED);
   return 0;
 }
 
