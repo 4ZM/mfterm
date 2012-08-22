@@ -25,7 +25,8 @@ command.
 The "current tag" can be persisted by writing it to a file with the
 'save' command. It can also be written to a physical tag with the
 'write' command. For the 'write' command to succeed, the "current
-keys" have to be set to appropriate values.
+keys" have to be set to appropriate values. The 'write unlocked'
+command can be used to write to block 0 on some 1k pirate cards.
 
 If you are reading or loading a 1k tag, the mfterm program will still
 use a full 4k tag to represent it. The last 3k will be all
@@ -71,6 +72,20 @@ Quit the mfterm program by issuing the 'quit' command.
 Help is available by writing 'help'
 
 
+MAC Computation
+---------------
+
+The function 'mac compute' is used for computing DES MACs (message
+authentication codes). They require a 64 bit key that can be set using
+the command 'mac key'. The same command, without arguments, is used to
+display the current key.
+
+The input to the DES MAC is UID + 14 left most bytes of the specified
+block.
+
+Using the command 'mac update' is shorthand for a MAC computation and
+then setting the MAC of the same block.
+
 Specification Files
 -------------------
 A specification file defines names for parts of the tag data. See the
@@ -84,6 +99,14 @@ Once a specification has been loaded, it can be used to access the
 data in the tag by using a specification path. In the sample
 specification, the path: '.sector_0.block_0.atqa', when entered in the
 terminal, will display the two bytes of data starting with byte 6.
+
+
+Building mfterm
+---------------
+
+Dependencies for building mfterm are (at least): libreadline, libnfc
+(1.6), OpenSSL, bison, flex.
+
 
 WARNING:
 --------
