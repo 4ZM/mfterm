@@ -16,7 +16,7 @@
 # along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
 
 CC       = gcc
-CFLAGS	 = -g -Wall -std=c99
+CFLAGS	 = -g -Wall -Wconversion -std=c99
 LDFLAGS  = -g -lreadline -lnfc -lssl
 
 LEX        = flex

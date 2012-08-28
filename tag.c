@@ -213,7 +213,7 @@ void print_tag_block_range(size_t first, size_t last) {
   printf("-------------------------------------------------------\n");
 
   // Iterate over all blocks
-  for (int block = first; block <= last; ++block) {
+  for (size_t block = first; block <= last; ++block) {
 
     // Sector number
     printf("%02x  ",
@@ -302,7 +302,7 @@ uint8_t* read_key(uint8_t* key, const char* str) {
   for (int i = 0; i < 6; ++i) {
     byte_tok[0] = str[i*2];
     byte_tok[1] = str[i*2+1];
-    key[i] = strtol(byte_tok, &byte_tok_end, 16);
+    key[i] = (uint8_t)strtol(byte_tok, &byte_tok_end, 16);
     if (*byte_tok_end != '\0') {
       return NULL;
     }
@@ -319,11 +319,11 @@ void strip_non_auth_data(mf_tag_t* tag) {
   static const size_t bs = sizeof(mf_block_t);
 
   // Clear 1k sector data 16 á 4 - only keep sector trailer
-  for (int i = 0; i < 0x10; ++i)
+  for (size_t i = 0; i < 0x10; ++i)
     memset(((void*)tag) + i * 4 * bs, 0x00, 3 * bs);
 
   // Clear 2-4k sector data 12 á 16 - only keep sector trailer
-  for (int i = 0; i < 0x0c; ++i)
+  for (size_t i = 0; i < 0x0c; ++i)
     memset(((void*)tag) + 0x10 * 4 * bs + i * 0x10 * bs, 0x00, 0x0f * bs);
 }
 

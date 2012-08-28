@@ -75,7 +75,7 @@ int mf_disconnect(int ret_state);
 bool mf_configure_device();
 bool mf_select_target();
 
-bool mf_authenticate(uint8_t block,
+bool mf_authenticate(size_t block,
                      const uint8_t* key,
                      mf_key_type_t key_type);
 
@@ -333,8 +333,8 @@ bool mf_read_tag_internal(mf_tag_t* tag,
   printf("Reading: ["); fflush(stdout);
 
   // Read the card from end to begin
-  for (int block = block_count(size) - 1; block >= 0; --block) {
-
+  for (int block_it = (int)block_count(size) - 1; block_it >= 0; --block_it) {
+    size_t block = (size_t)block_it;
     // Authenticate everytime we reach a trailer block
     if (is_trailer_block(block)) {
 
@@ -346,12 +346,12 @@ bool mf_read_tag_internal(mf_tag_t* tag,
         if (block != 3) printf(".");
         fflush(stdout);
 
-        block -= sector_size(block) - 1; // Skip the rest of the sector blocks
+        block_it -= (int)sector_size(block) - 1; // Skip the rest of the sector blocks
         error = 1;
       }
       else {
         // Try to read the trailer (only to *read* the access bits)
-        if (nfc_initiator_mifare_cmd(device, MC_READ, block, &mp)) {
+        if (nfc_initiator_mifare_cmd(device, MC_READ, (uint8_t)block, &mp)) {
           // Copy the keys over to our tag buffer
           key_to_tag(&buffer_tag, keys->amb[block].mbt.abtKeyA, MF_KEY_A, block);
           key_to_tag(&buffer_tag, keys->amb[block].mbt.abtKeyB, MF_KEY_B, block);
@@ -369,7 +369,7 @@ bool mf_read_tag_internal(mf_tag_t* tag,
 
     else { // I.e. not a sector trailer
       // Try to read out the block
-      if (!nfc_initiator_mifare_cmd(device, MC_READ, block, &mp)) {
+      if (!nfc_initiator_mifare_cmd(device, MC_READ, (uint8_t)block, &mp)) {
         printf("\nUnable to read block: 0x%02x.\n", block);
         return false;
       }
@@ -401,9 +401,10 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
   printf("Writing %s tag [", sprint_size(size)); fflush(stdout);
 
   // Process each sector in turn
-  for (int header_block = sector_header_iterator(0);
-       header_block != -1;
-       header_block = sector_header_iterator(size)) {
+  for (int header_block_it = sector_header_iterator(0);
+       header_block_it != -1;
+       header_block_it = sector_header_iterator(size)) {
+    size_t header_block = (size_t)header_block_it;
 
     // Authenticate
     uint8_t* key = key_from_tag(keys, key_type, header_block);
@@ -420,7 +421,7 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
     }
 
     // Write the sectors blocks
-    for (int block = header_block, trailer = block_to_trailer(header_block);
+    for (size_t block = header_block, trailer = block_to_trailer(header_block);
          block < trailer; ++block) {
 
       // First block on tag is read only - skip it unless unlocked
@@ -440,20 +441,20 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
       }
 
       // Write the data block
-      if (!nfc_initiator_mifare_cmd(device, MC_WRITE, block, &mp)) {
+      if (!nfc_initiator_mifare_cmd(device, MC_WRITE, (uint8_t)block, &mp)) {
         printf("\nUnable to write block: 0x%02x.\n", block);
         return false;
       }
     }
 
     // Auth ok and sector read ok, finish up by reading trailer
-    int trailer_block = block_to_trailer(header_block);
+    size_t trailer_block = block_to_trailer(header_block);
     memcpy (mp.mpd.abtData, tag->amb[trailer_block].mbt.abtKeyA, 6);
     memcpy (mp.mpd.abtData + 6, tag->amb[trailer_block].mbt.abtAccessBits, 4);
     memcpy (mp.mpd.abtData + 10, tag->amb[trailer_block].mbt.abtKeyB, 6);
 
     // Try to write the trailer
-    if (!nfc_initiator_mifare_cmd(device, MC_WRITE, trailer_block, &mp)) {
+    if (!nfc_initiator_mifare_cmd(device, MC_WRITE, (uint8_t)trailer_block, &mp)) {
       printf("\nUnable to write block: 0x%02x.\n", trailer_block);
       return false;
     }
@@ -479,8 +480,10 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
   clear_tag(&buffer_tag);
 
   // Iterate over the start blocks in all sectors
-  for (int block = sector_header_iterator(0);
-       block >= 0; block = sector_header_iterator(size)) {
+  for (int block_it = sector_header_iterator(0);
+       block_it != -1;
+       block_it = sector_header_iterator(size)) {
+    size_t block = (size_t)block_it;
 
     printf("Working on sector: %02x [", block_to_sector(block));
 
@@ -557,9 +560,10 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
   printf("xS  T  Key           Status\n");
   printf("----------------------------\n");
 
-  for (int block = sector_header_iterator(0);
-       block != -1;
-       block = sector_header_iterator(size)) {
+  for (int block_it = sector_header_iterator(0);
+       block_it != -1;
+       block_it = sector_header_iterator(size)) {
+    size_t block = (size_t)block_it;
 
     uint8_t* key = key_from_tag(keys, key_type, block);
     printf("%02x  %c  %s  ",
@@ -582,7 +586,7 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
 }
 
 
-bool mf_authenticate(uint8_t block, const uint8_t* key, mf_key_type_t key_type) {
+bool mf_authenticate(size_t block, const uint8_t* key, mf_key_type_t key_type) {
 
   mifare_param mp;
 
@@ -596,7 +600,7 @@ bool mf_authenticate(uint8_t block, const uint8_t* key, mf_key_type_t key_type) 
   memcpy(mp.mpa.abtKey, key, 6);
 
   // Try to authenticate for the current sector
-  if (nfc_initiator_mifare_cmd(device, mc, block, &mp))
+  if (nfc_initiator_mifare_cmd(device, mc, (uint8_t)block, &mp))
     return true;
 
   // Do the hand shaking again if auth failed

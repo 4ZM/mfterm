@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -152,7 +153,8 @@ int perform_filename_completion() {
   state == 0 on first call.
  */
 char* completion_cmd_generator(const char* text, int state) {
-  static int cmd_index, len;
+  static int cmd_index;
+  static size_t len;
 
   // First call?
   if (!state) {
@@ -178,7 +180,8 @@ char* completion_cmd_generator(const char* text, int state) {
 }
 
 char* completion_sub_cmd_generator(const char* text, int state) {
-  static int cmd_index, len, full_len;
+  static int cmd_index;
+  static size_t len, full_len;
 
   // First call?
   if (!state) {
@@ -223,7 +226,7 @@ char* completion_spec_generator(const char* text, int state) {
   // Parent context is initialized on the first call
   static instance_t* parent_inst;
   static const char* parent_end;
-  static int parent_end_len;
+  static size_t parent_end_len;
 
   // Instace iter is advanced on each repeated call
   static instance_list_t* inst_iter;
@@ -250,13 +253,15 @@ char* completion_spec_generator(const char* text, int state) {
       continue;
 
     char* fname = inst->field->name;
-    int fname_len = strlen(fname);
+    size_t fname_len = strlen(fname);
 
     // Check if the field is applicable - right prefix
     if (fname_len >= parent_end_len &&
         strncmp(fname, parent_end, parent_end_len) == 0) {
 
-      int parent_len = parent_end - text;
+      if (parent_end - text <= 0)
+        return NULL;
+      size_t parent_len = (size_t)(parent_end - text);
       char* str = malloc(parent_len + fname_len + 1);
 
       // The parent part ending with '.'

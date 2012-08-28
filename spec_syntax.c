@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stddef.h>
 #include "util.h"
 #include "spec_syntax.h"
 
@@ -391,8 +392,11 @@ int parse_partial_spec_path(const char* path,
   while((tok_end = strchr(remaining_path, '.')) != NULL) {
     // There is still a part of the path before the last '.'
 
-    inst = get_instance_child_n(inst, remaining_path,
-                                tok_end - remaining_path);
+    ptrdiff_t tok_name = tok_end - remaining_path;
+    if (tok_name <= 0)
+      return 1;
+
+    inst = get_instance_child_n(inst, remaining_path, (size_t)tok_name);
 
     // Exit early (error in ancestor path)
     if (inst == NULL)

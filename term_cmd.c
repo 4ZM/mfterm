@@ -103,7 +103,7 @@ command_t* find_command(const char *name) {
   command_t* cmd = NULL;
   size_t cmd_len = 0;
 
-  for (int i = 0; commands[i].name; i++) {
+  for (size_t i = 0; commands[i].name; ++i) {
     size_t l = strlen(commands[i].name);
     if (l > cmd_len && strncmp(name, commands[i].name, l) == 0) {
       cmd = &commands[i];
@@ -121,9 +121,9 @@ command_t* find_command(const char *name) {
 void print_help_(size_t cmd) {
 
   // Find longest command (and cache the result)
-  static int cmd_len_max = 0;
+  static size_t cmd_len_max = 0;
   if (cmd_len_max == 0) {
-    for (int i = 0; commands[i].name; i++) {
+    for (int i = 0; commands[i].name; ++i) {
       size_t cmd_len = strlen(commands[i].name);
       cmd_len_max = cmd_len > cmd_len_max ? cmd_len : cmd_len_max;
     }
@@ -131,7 +131,7 @@ void print_help_(size_t cmd) {
 
   // Format: 4x' ' | cmd | ' '-pad-to-longest-cmd | 4x' ' | doc
   printf ("    %s", commands[cmd].name);
-  for (int j = cmd_len_max - strlen(commands[cmd].name); j >= 0; --j)
+  for (int j = (int)(cmd_len_max - strlen(commands[cmd].name)); j >= 0; --j)
     printf(" ");
   printf ("    %s.\n", commands[cmd].doc);
 }
@@ -140,7 +140,7 @@ int com_help(char* arg) {
 
   // Help request for specific command?
   if (arg) {
-    for (int i = 0; commands[i].name; ++i) {
+    for (size_t i = 0; commands[i].name; ++i) {
       if (strcmp(arg, commands[i].name) == 0) {
         print_help_(i);
         return 0;
@@ -150,7 +150,7 @@ int com_help(char* arg) {
   }
 
   // Help for all commands (with doc flag)
-  for (int i = 0; commands[i].name; i++) {
+  for (size_t i = 0; commands[i].name; i++) {
     if (commands[i].document)
       print_help_(i);
   }
@@ -298,13 +298,13 @@ int com_set(char* arg) {
 
   // Consume the byte tokens
   do {
-    int byte = strtol(byte_str, &byte_str, 16);
+    long int byte = strtol(byte_str, &byte_str, 16);
     if (*byte_str != '\0') {
       printf("Invalid byte character (non hex): %s\n", byte_str);
       return -1;
     }
     if (byte < 0 || byte > 0xff) {
-      printf("Invalid byte value [0,ff]: %x\n", byte);
+      printf("Invalid byte value [0,ff]: %lx\n", byte);
       return -1;
     }
 
@@ -314,7 +314,7 @@ int com_set(char* arg) {
     }
 
     // Write the data
-    current_tag.amb[block].mbd.abtData[offset++] = byte;
+    current_tag.amb[block].mbd.abtData[offset++] = (uint8_t)byte;
 
   } while((byte_str = strtok(NULL, " ")) != (char*)NULL);
 
@@ -378,7 +378,7 @@ int com_keys_set(char* arg) {
   }
 
   // Read sector
-  int sector = strtol(sector_str, &sector_str, 16);
+  long int sector = strtol(sector_str, &sector_str, 16);
 
   // Sanity check sector range
   if (*sector_str != '\0') {
@@ -386,7 +386,7 @@ int com_keys_set(char* arg) {
     return -1;
   }
   if (sector < 0 || sector > 0x1b) {
-    printf("Invalid sector [0,1b]: %x\n", sector);
+    printf("Invalid sector [0,1b]: %lx\n", sector);
     return -1;
   }
 
@@ -399,7 +399,7 @@ int com_keys_set(char* arg) {
   }
 
   // Compute the block that houses the key for the desired sector
-  size_t block = sector_to_trailer(sector);
+  size_t block = sector_to_trailer((size_t)sector);
 
   // Parse key selection and point to appropriate key
   uint8_t* key;
@@ -572,18 +572,18 @@ int com_mac_key_get_set(char* arg) {
     return 0;
   }
 
-  unsigned char key[8];
+  uint8_t key[8];
   int key_ptr = 0;
 
   // Consume the key tokens
   do {
-    int byte = strtol(key_str, &key_str, 16);
+    long int byte = strtol(key_str, &key_str, 16);
     if (*key_str != '\0') {
       printf("Invalid key character (non hex): %s\n", key_str);
       return -1;
     }
     if (byte < 0 || byte > 0xff) {
-      printf("Invalid byte value [0,ff]: %x\n", byte);
+      printf("Invalid byte value [0,ff]: %lx\n", byte);
       return -1;
     }
 
@@ -593,7 +593,7 @@ int com_mac_key_get_set(char* arg) {
     }
 
     // Accept the byte and add it to the key
-    key[key_ptr++] = byte;
+    key[key_ptr++] = (uint8_t)byte;
 
   } while((key_str = strtok(NULL, " ")) != (char*)NULL);
 
