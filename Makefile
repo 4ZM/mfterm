@@ -17,7 +17,7 @@
 
 CC       = gcc
 CFLAGS	 = -g -Wall -Wconversion -std=c99
-LDFLAGS  = -g -lreadline -lnfc -lssl
+LDFLAGS  = -g -lreadline -lnfc -lssl -lcrypto
 
 LEX        = flex
 LEXCFLAGS	 = \
@@ -51,7 +51,7 @@ clean:
 	rm -f mfterm *.o *~ *.bak  $(MFTERM_LEX:.l=.c) spec_parser.c spec_parser.tab.h
 
 mfterm: $(MFTERM_OBJS)
-	${CC} ${LDFLAGS} -o $@ $^ 
+	${CC} -o $@ $^ ${LDFLAGS}
 
 # Use the dp_ prefix (instead of yy) for this parser
 dictionary_parser.c : dictionary_parser.l Makefile
