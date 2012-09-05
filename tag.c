@@ -261,6 +261,50 @@ void print_keys(const mf_tag_t* tag, mf_size_t size) {
   }
 }
 
+void print_ac(const mf_tag_t* tag) {
+
+  // Print header
+  printf("xS  xB  Raw       C1 C2 C3\n");
+  printf("--------------------------\n");
+
+  // Iterate over all blocks (in 1k sectors)
+  for (size_t block = 0; block < 0x10 * 4; ++block) {
+
+    // Sector number
+    printf("%02x  ",
+           block < 0x10*4 ? block / 4 : 0x10 + (block - 0x10*4) / 0x10);
+
+    // Block number
+    printf("%02x  ", block);
+
+    const uint8_t* ac = tag->amb[block].mbt.abtAccessBits;
+
+    // Print raw bytes
+    print_hex_array(ac, 4);
+
+    // Print the C1, C2, C3 bits
+    int c1 = (ac[1] & 1<<(4 + (block % 4))) > 0;
+    int c2 = (ac[2] & 1<<(0 + (block % 4))) > 0;
+    int c3 = (ac[2] & 1<<(4 + (block % 4))) > 0;
+    printf("   %d  %d  %d", c1, c2, c3);
+
+    // Print enterpretation
+    if (block % 4 < 3) {
+      // Data block
+    }
+    else {
+      // Trailer block
+    }
+
+    printf("\n");
+
+    // Indicate sector bondaries with extra nl
+    if ((block + 1) % 4 == 0)
+      printf("\n");
+  }
+}
+
+
 const char* sprint_key(const uint8_t* key) {
   static char str_buff[13];
 

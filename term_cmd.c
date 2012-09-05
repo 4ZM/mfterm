@@ -50,6 +50,7 @@ command_t commands[] = {
 
   { "print",      com_print,      0, 1, "1k|4k : Print tag data" },
   { "print keys", com_print_keys, 0, 1, "1k|4k : Print tag's keys" },
+  { "print ac",   com_print_ac,   0, 1, "Print access conditions" },
 
   { "set", com_set, 0, 1, "#block #offset = xx xx xx : Set tag data" },
 
@@ -337,6 +338,17 @@ int com_print_keys(char* arg) {
   }
 
   print_keys(&current_tag, size);
+
+  return 0;
+}
+
+int com_print_ac(char* arg) {
+  if (strtok(arg, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+
+  print_ac(&current_tag);
 
   return 0;
 }

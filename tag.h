@@ -65,6 +65,7 @@ void print_tag_data_range(size_t byte_offset, size_t bit_offset,
 void print_tag_bytes(size_t first_byte, size_t last_byte);
 
 void print_keys(const mf_tag_t* tag, mf_size_t size);
+void print_ac(const mf_tag_t* tag);
 
 // Return a hex string representationon of the key
 const char* sprint_key(const uint8_t* key);
