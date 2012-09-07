@@ -140,7 +140,7 @@ void print_help_(size_t cmd) {
 int com_help(char* arg) {
 
   // Help request for specific command?
-  if (arg) {
+  if (arg && *arg != '\0') {
     for (size_t i = 0; commands[i].name; ++i) {
       if (strcmp(arg, commands[i].name) == 0) {
         print_help_(i);
