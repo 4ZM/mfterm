@@ -263,9 +263,31 @@ void print_keys(const mf_tag_t* tag, mf_size_t size) {
 
 void print_ac(const mf_tag_t* tag) {
 
+  static const char* ac_data_str[8] = {
+    /* 0 0 0 */ "   A|B A|B A|B A|B   .   .   .   .   .   .",
+    /* 0 0 1 */ "   A|B  x   x  A|B   .   .   .   .   .   .",
+    /* 0 1 0 */ "   A|B  x   x   x    .   .   .   .   .   .",
+    /* 0 1 1 */ "    B   B   x   x    .   .   .   .   .   .",
+    /* 1 0 0 */ "   A|B  B   x   x    .   .   .   .   .   .",
+    /* 1 0 1 */ "    B   x   x   x    .   .   .   .   .   .",
+    /* 1 1 0 */ "   A|B  B   B  A|B   .   .   .   .   .   .",
+    /* 1 1 1 */ "    x   x   x   x    .   .   .   .   .   .",
+  };
+
+  static const char* ac_trailer_str[8] = {
+    /* 0 0 0 */ "    .   .   .   .    x   A   A   x   A   A",
+    /* 0 0 1 */ "    .   .   .   .    x   A   A   A   A   A",
+    /* 0 1 0 */ "    .   .   .   .    x   x   A   x   A   x",
+    /* 0 1 1 */ "    .   .   .   .    x   B  A|B  B   x   B",
+    /* 1 0 0 */ "    .   .   .   .    x   B  A|B  x   x   B",
+    /* 1 0 1 */ "    .   .   .   .    x   x  A|B  B   x   x",
+    /* 1 1 0 */ "    .   .   .   .    x   x  A|B  x   x   x",
+    /* 1 1 1 */ "    .   .   .   .    x   x  A|B  x   x   x",
+  };
+
   // Print header
-  printf("xS  xB  Raw       C1 C2 C3\n");
-  printf("--------------------------\n");
+  printf("xS  xB  Raw       C1 C2 C3    R   W   I   D   AR  AW  ACR ACW BR  BW\n");
+  printf("--------------------------------------------------------------------\n");
 
   // Iterate over all blocks (in 1k sectors)
   for (size_t block = 0; block < 0x10 * 4; ++block) {
@@ -277,7 +299,7 @@ void print_ac(const mf_tag_t* tag) {
     // Block number
     printf("%02x  ", block);
 
-    const uint8_t* ac = tag->amb[block].mbt.abtAccessBits;
+    const uint8_t* ac = tag->amb[block_to_trailer(block)].mbt.abtAccessBits;
 
     // Print raw bytes
     print_hex_array(ac, 4);
@@ -289,11 +311,14 @@ void print_ac(const mf_tag_t* tag) {
     printf("   %d  %d  %d", c1, c2, c3);
 
     // Print enterpretation
+    int c123 = (c1<<2) | (c2<<1) | c3;
     if (block % 4 < 3) {
       // Data block
+      printf("%s", ac_data_str[c123]);
     }
     else {
       // Trailer block
+      printf("%s", ac_trailer_str[c123]);
     }
 
     printf("\n");
