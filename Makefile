@@ -23,6 +23,7 @@ LEX        = flex
 LEXCFLAGS	 = \
   -g -std=c99 -Wall \
   -Wno-unused-function \
+  -Wno-unused-but-set-variable \
   -Wno-implicit-function-declaration
 LEXFLAGS   =
 
