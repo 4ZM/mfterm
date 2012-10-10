@@ -342,7 +342,7 @@ bool mf_read_tag_internal(mf_tag_t* tag,
       uint8_t* key = key_from_tag(keys, key_type, block);
       if (!mf_authenticate(block, key, key_type)) {
         // Progress indication and error report
-        printf("0x%02x", block_to_sector(block));
+        printf("0x%02zx", block_to_sector(block));
         if (block != 3) printf(".");
         fflush(stdout);
 
@@ -360,7 +360,7 @@ bool mf_read_tag_internal(mf_tag_t* tag,
           memcpy(buffer_tag.amb[block].mbt.abtAccessBits,
                  mp.mpd.abtData + 6, 4);
         } else {
-          printf ("\nUnable to read trailer block: 0x%02x.\n", block);
+          printf ("\nUnable to read trailer block: 0x%02zx.\n", block);
           return false;
         }
         printf("."); fflush(stdout); // Progress indicator
@@ -370,7 +370,7 @@ bool mf_read_tag_internal(mf_tag_t* tag,
     else { // I.e. not a sector trailer
       // Try to read out the block
       if (!nfc_initiator_mifare_cmd(device, MC_READ, (uint8_t)block, &mp)) {
-        printf("\nUnable to read block: 0x%02x.\n", block);
+        printf("\nUnable to read block: 0x%02zx.\n", block);
         return false;
       }
       memcpy(buffer_tag.amb[block].mbd.abtData, mp.mpd.abtData, 0x10);
@@ -412,7 +412,7 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
       if (!mf_authenticate(header_block, key, key_type)) {
         // Progress indication and error report
         if (header_block != 0) printf(".");
-        printf("0x%02x", block_to_sector(header_block));
+        printf("0x%02zx", block_to_sector(header_block));
         fflush(stdout);
 
         error = 1;
@@ -442,7 +442,7 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
 
       // Write the data block
       if (!nfc_initiator_mifare_cmd(device, MC_WRITE, (uint8_t)block, &mp)) {
-        printf("\nUnable to write block: 0x%02x.\n", block);
+        printf("\nUnable to write block: 0x%02zx.\n", block);
         return false;
       }
     }
@@ -455,7 +455,7 @@ bool mf_write_tag_internal(const mf_tag_t* tag,
 
     // Try to write the trailer
     if (!nfc_initiator_mifare_cmd(device, MC_WRITE, (uint8_t)trailer_block, &mp)) {
-      printf("\nUnable to write block: 0x%02x.\n", trailer_block);
+      printf("\nUnable to write block: 0x%02zx.\n", trailer_block);
       return false;
     }
 
@@ -485,7 +485,7 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
        block_it = sector_header_iterator(size)) {
     size_t block = (size_t)block_it;
 
-    printf("Working on sector: %02x [", block_to_sector(block));
+    printf("Working on sector: %02zx [", block_to_sector(block));
 
     const uint8_t* key_a = NULL;
     const uint8_t* key_b = NULL;
@@ -566,7 +566,7 @@ bool mf_test_auth_internal(const mf_tag_t* keys,
     size_t block = (size_t)block_it;
 
     uint8_t* key = key_from_tag(keys, key_type, block);
-    printf("%02x  %c  %s  ",
+    printf("%02zx  %c  %s  ",
            block_to_sector(block),
            key_type,
            sprint_key(key));
