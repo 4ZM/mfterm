@@ -557,7 +557,7 @@ void print_instance_tree() {
     return;
   }
 
-  printf("[%d, %d] [%d, %d]  --  .  (root)\n",
+  printf("[%zu, %zu] [%zu, %zu]  --  .  (root)\n",
          instance_root->offset_bytes,
          instance_root->offset_bits,
          instance_root->size_bytes,
@@ -590,7 +590,7 @@ void print_instance_tree_(instance_t* root, int indent) {
 
 void print_instance_(instance_t* i) {
     if (i->field->type == &byte_type) {
-      printf("[%d, %d] [%d, %d]  --  Byte[%d]  %s\n",
+      printf("[%zu, %zu] [%zu, %zu]  --  Byte[%zu]  %s\n",
              i->offset_bytes,
              i->offset_bits,
              i->size_bytes,
@@ -599,7 +599,7 @@ void print_instance_(instance_t* i) {
              i->field->name);
     }
     else if (i->field->type == &bit_type) {
-      printf("[%d, %d] [%d, %d]  --  Bit[%d]  %s\n",
+      printf("[%zu, %zu] [%zu, %zu]  --  Bit[%zu]  %s\n",
              i->offset_bytes,
              i->offset_bits,
              i->size_bytes,
@@ -608,7 +608,7 @@ void print_instance_(instance_t* i) {
              i->field->name);
     }
     else {
-      printf("[%d, %d] [%d, %d]  --  %s[%d]  %s\n",
+      printf("[%zu, %zu] [%zu, %zu]  --  %s[%zu]  %s\n",
              i->offset_bytes,
              i->offset_bits,
              i->size_bytes,
