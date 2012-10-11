@@ -71,7 +71,7 @@ int compute_mac(const unsigned char* input,
  * If update is * nonzero, the mac of the current tag is updated. If
  * not, the MAC is simply printed.
  */
-unsigned char* compute_block_mac(int block,
+unsigned char* compute_block_mac(unsigned int block,
                                  const unsigned char* key,
                                  int update) {
 

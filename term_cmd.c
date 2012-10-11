@@ -277,7 +277,7 @@ int com_set(char* arg) {
     return -1;
   }
 
-  int block = strtol(block_str, &block_str, 16);
+  unsigned int block = (unsigned int) strtoul(block_str, &block_str, 16);
   if (*block_str != '\0') {
     printf("Invalid block character (non hex): %s\n", block_str);
     return -1;
@@ -287,7 +287,7 @@ int com_set(char* arg) {
     return -1;
   }
 
-  int offset = strtol(offset_str, &offset_str, 16);
+  unsigned int offset = (unsigned int) strtoul(offset_str, &offset_str, 16);
   if (*offset_str != '\0') {
     printf("Invalid offset character (non hex): %s\n", offset_str);
     return -1;
@@ -636,7 +636,7 @@ int com_mac_block_compute_impl(char* arg, int update) {
     return -1;
   }
 
-  int block = strtol(block_str, &block_str, 16);
+  unsigned int block = (unsigned int) strtoul(block_str, &block_str, 16);
   if (*block_str != '\0') {
     printf("Invalid block character (non hex): %s\n", block_str);
     return -1;

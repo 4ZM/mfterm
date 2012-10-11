@@ -167,7 +167,7 @@ void print_tag_bytes(size_t first_byte, size_t last_byte) {
 void print_tag_data_range(size_t byte_offset, size_t bit_offset,
                           size_t byte_len, size_t bit_len) {
 
-  printf("Offset: [%d, %d] Length: [%d, %d]\n",
+  printf("Offset: [%zu, %zu] Length: [%zu, %zu]\n",
          byte_offset, bit_offset, byte_len, bit_len);
 
   // Print partial first byte
@@ -216,11 +216,11 @@ void print_tag_block_range(size_t first, size_t last) {
   for (size_t block = first; block <= last; ++block) {
 
     // Sector number
-    printf("%02x  ",
+    printf("%02zx  ",
            block < 0x10*4 ? block / 4 : 0x10 + (block - 0x10*4) / 0x10);
 
     // Block number
-    printf("%02x  ", block);
+    printf("%02zx  ", block);
 
     // then print the block data
     print_hex_array_sep(current_tag.amb[block].mbd.abtData,
@@ -293,11 +293,11 @@ void print_ac(const mf_tag_t* tag) {
   for (size_t block = 0; block < 0x10 * 4; ++block) {
 
     // Sector number
-    printf("%02x  ",
+    printf("%02zx  ",
            block < 0x10*4 ? block / 4 : 0x10 + (block - 0x10*4) / 0x10);
 
     // Block number
-    printf("%02x  ", block);
+    printf("%02zx  ", block);
 
     const uint8_t* ac = tag->amb[block_to_trailer(block)].mbt.abtAccessBits;
 
