@@ -24,7 +24,7 @@
 #include "util.h"
 #include "spec_syntax.h"
 
-#include "spec_parser.tab.h"
+#include "libsp_a-spec_parser.h"
 
 int colnum = 0;
 

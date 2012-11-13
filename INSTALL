@@ -1,0 +1,13 @@
+Installation of mfterm
+
+If you got the sources from git, run "./autogen.sh" to have the auto
+tools generate some files requried for the build. If you got the
+source from a source code distribution, then you do not have to
+perform this step.
+
+To build and install mfterm issue the commands:
+
+$ ./autogen.sh      # If using the sources from the git repo
+$ ./configure       # Possibly with some options, use --help
+$ make
+$ make install      # Possibly using sudo 

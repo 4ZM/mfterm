@@ -1,9 +1,10 @@
 mfterm
 .depends
 *.o
+*.a
 *~
 *.bak
-dictionary_parser.c
-spec_tokenizer.c
-spec_parser.c
-spec_parser.tab.h
+libdp_a-dictionary_parser.c
+libsp_a-spec_tokenizer.c
+libsp_a-spec_parser.c
+libsp_a-spec_parser.h
