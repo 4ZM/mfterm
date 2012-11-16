@@ -32,7 +32,7 @@ mfterm_SOURCES = configure.h    \
   spec_syntax.h spec_syntax.c   \
   mac.h mac.c
 
-mfterm_LDADD = libdp.a libsp.a -lreadline -lnfc -lssl -lcrypto
+mfterm_LDADD = libdp.a libsp.a -lreadline -lnfc -lcrypto
 
 # We create two convenience libraries fot the parser targets. This is
 # to allow us to use different flags (since automake doesn't support

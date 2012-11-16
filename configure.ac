@@ -31,13 +31,18 @@ AC_PROG_RANLIB
 AM_PROG_CC_C_O
 
 # Checks for libraries.
-AC_CHECK_LIB([crypto], [SHA1_Init], [HAVE_LIBCRYPTO=yes])
-AC_CHECK_LIB([nfc], [nfc_open])
-AC_CHECK_LIB([readline], [rl_completion_matches])
-AC_CHECK_LIB([ssl], [DES_ncbc_encrypt])
+AC_CHECK_LIB([nfc], [nfc_open], [],
+             [AC_MSG_ERROR([libnfc >= 1.6 is required (http://www.libnfc.org/download)])])
+
+AC_CHECK_LIB([readline], [rl_completion_matches], [],
+             [AC_MSG_ERROR([libreadline is required])])
+
+AC_CHECK_LIB([crypto], [DES_set_key_unchecked], [HAVE_LIBCRYPTO=yes],
+             [AC_MSG_ERROR([libcrypto is required])])
 
 # Checks for header files.
-AC_CHECK_HEADERS([stddef.h stdint.h stdlib.h string.h strings.h])
+AC_CHECK_HEADERS([stddef.h stdint.h stdlib.h string.h strings.h], [],
+                 [AC_MSG_ERROR([A required header file was not found.])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -47,7 +52,10 @@ AC_CHECK_TYPES([ptrdiff_t])
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([memset strcasecmp strchr strdup strtol strtoul])
+AC_CHECK_FUNCS([memset strcasecmp strchr strdup strtol strtoul], [],
+               [AC_MSG_ERROR([A required function was not found.])])
+
 
 AC_CONFIG_FILES([Makefile])
+
 AC_OUTPUT
