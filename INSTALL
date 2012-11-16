@@ -11,3 +11,6 @@ $ ./autogen.sh      # If using the sources from the git repo
 $ ./configure       # Possibly with some options, use --help
 $ make
 $ make install      # Possibly using sudo 
+
+Dependencies for building mfterm are: libnfc (1.6), libreadline,
+libcrypto, OpenSSL, bison, flex.

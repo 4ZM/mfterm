@@ -104,8 +104,9 @@ terminal, will display the two bytes of data starting with byte 6.
 Building mfterm
 ---------------
 
-Dependencies for building mfterm are (at least): libreadline, libnfc
-(1.6), OpenSSL, bison, flex.
+Standard: ./configure; make; make install
+
+See INSTALL file for details.
 
 
 WARNING:
