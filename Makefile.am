@@ -21,7 +21,7 @@ SUBDIRS = .
 
 bin_PROGRAMS = mfterm
 
-mfterm_SOURCES = configure.h    \
+mfterm_SOURCES =                \
   mfterm.h mfterm.c             \
   term_cmd.h term_cmd.c         \
   util.h util.c                 \
