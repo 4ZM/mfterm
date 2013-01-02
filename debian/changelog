@@ -1,0 +1,5 @@
+mfterm (1.0.2) unstable; urgency=low
+
+  * Initial release for Debian.
+
+ -- Markus Näsman <markus@botten.org>  Wed, 02 Jan 2013 21:08:35 +0100

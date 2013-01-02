@@ -24,3 +24,7 @@ libdp_a-dictionary_parser.c
 libsp_a-spec_tokenizer.c
 libsp_a-spec_parser.c
 libsp_a-spec_parser.h
+debian/files
+debian/mfterm.debhelper.log
+debian/mfterm.substvars
+
