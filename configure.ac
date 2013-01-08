@@ -23,9 +23,20 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
+AC_CHECK_PROGS(YACC, 'bison -y' byacc yacc, :)
+if test "x$YACC" == "x:"; then
+  AC_MSG_ERROR([Bison or some other YACC compatible parser generator is required.])
+fi
 AC_PROG_YACC
+
 AC_PROG_CC
+
+AC_CHECK_PROGS(LEX, flex lex, :)
+if test "x$LEX" == "x:"; then
+  AC_MSG_ERROR([Lex or Flex or is required.])
+fi
 AM_PROG_LEX
+
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AM_PROG_CC_C_O
