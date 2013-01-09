@@ -64,15 +64,19 @@ void parse_cmdline(int argc, char** argv) {
   static struct option long_options[] = {
     {"help",      no_argument,       0,  'h' },
     {"version",   no_argument,       0,  'v' },
+    {"tag",       required_argument, 0,  't' },
     {"keys",      required_argument, 0,  'k' },
+    {"dict",      required_argument, 0,  'd' },
     {0,           0,                 0,  0   }
   };
   
+  char* tag_file = NULL;
   char* keys_file = NULL;
+  char* dict_file = NULL;
   
   int opt = 0;
   int long_index = 0;
-  while ((opt = getopt_long(argc, argv,"hvk:", 
+  while ((opt = getopt_long(argc, argv,"hvt:k:d:", 
 			    long_options, &long_index )) != -1) {
     switch (opt) {
     case 'h' : 
@@ -81,15 +85,27 @@ void parse_cmdline(int argc, char** argv) {
     case 'v' :
       print_version();
       exit(0);
+    case 't' : tag_file = optarg; 
+      break;
     case 'k' : keys_file = optarg; 
+      break;
+    case 'd' : dict_file = optarg; 
       break;
     default : 
       exit(1);
     }
   }
 
+  // If a tag file was specified, load it
+  if (tag_file != NULL && com_load_tag(tag_file))
+    exit(0);
+
   // If a keys file was specified, load it
   if (keys_file != NULL && com_keys_load(keys_file))
+    exit(0);
+
+  // If a dictionary file was specified, load it
+  if (dict_file != NULL && com_dict_load(dict_file))
     exit(0);
 
   // Default is to do nothing, just enter the terminal
@@ -331,7 +347,9 @@ void print_help() {
   printf("Options: \n");
   printf("  --help          (-h)   Show this help message.\n");
   printf("  --version       (-v)   Display version information.\n");
+  printf("  --tag=tagfile   (-t)   Load a tag from the specified file.\n");
   printf("  --keys=keyfile  (-k)   Load keys from the specified file.\n");
+  printf("  --dict=dictfile (-d)   Load dictionary from the specified file.\n");
   printf("\n");
   printf("Report bugs to: anders@4zm.org\n");
   printf(PACKAGE_NAME); printf(" home page: <https://github.com/4zm/mfterm>\n");
