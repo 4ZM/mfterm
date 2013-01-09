@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Anders Sundman <anders@4zm.org>
+ * Copyright (C) 2011-2013 Anders Sundman <anders@4zm.org>
  *
  * This file is part of mfterm.
  *
@@ -26,10 +26,13 @@
 #include <string.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <getopt.h>
 #include "term_cmd.h"
 #include "mfterm.h"
 #include "util.h"
 #include "spec_syntax.h"
+
+#include "config.h"
 
 int stop_input_loop_ = 0;
 void stop_input_loop() {
@@ -43,13 +46,53 @@ int perform_filename_completion();
 char** mft_completion(char* text, int start, int end);
 int execute_line(char* line);
 void initialize_readline();
+void parse_cmdline(int argc, char** argv);
+
+void print_help();
+void print_version();
 
 typedef char** rl_completion_func_t(const char*, int, int);
 
 int main(int argc, char** argv) {
+  parse_cmdline(argc, argv);
   initialize_readline();
   input_loop();
   return 0;
+}
+
+void parse_cmdline(int argc, char** argv) {
+  static struct option long_options[] = {
+    {"help",      no_argument,       0,  'h' },
+    {"version",   no_argument,       0,  'v' },
+    {"keys",      required_argument, 0,  'k' },
+    {0,           0,                 0,  0   }
+  };
+  
+  char* keys_file = NULL;
+  
+  int opt = 0;
+  int long_index = 0;
+  while ((opt = getopt_long(argc, argv,"hvk:", 
+			    long_options, &long_index )) != -1) {
+    switch (opt) {
+    case 'h' : 
+      print_help();
+      exit(0);
+    case 'v' :
+      print_version();
+      exit(0);
+    case 'k' : keys_file = optarg; 
+      break;
+    default : 
+      exit(1);
+    }
+  }
+
+  // If a keys file was specified, load it
+  if (keys_file != NULL && com_keys_load(keys_file))
+    exit(0);
+
+  // Default is to do nothing, just enter the terminal
 }
 
 // Request user input until stop_intput_loop_ == 0
@@ -279,4 +322,25 @@ char* completion_spec_generator(const char* text, int state) {
 
   // No (more) matches
   return NULL;
+}
+
+void print_help() {
+  printf("A terminal interface for working with Mifare Classic tags.\n");
+  printf("Usage: mfterm [-v] [-h] [-k keyfile]\n");
+  printf("\n");
+  printf("Options: \n");
+  printf("  --help          (-h)   Show this help message.\n");
+  printf("  --version       (-v)   Display version information.\n");
+  printf("  --keys=keyfile  (-k)   Load keys from the specified file.\n");
+  printf("\n");
+  printf("Report bugs to: anders@4zm.org\n");
+  printf(PACKAGE_NAME); printf(" home page: <https://github.com/4zm/mfterm>\n");
+}
+
+void print_version() {
+  printf(PACKAGE_STRING); printf("\n");
+  printf("Copyright (C) 2011-2013 Anders Sundman <anders@4zm.org>\n");
+  printf("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
+  printf("This is free software: you are free to change and redistribute it.\n");
+  printf("There is NO WARRANTY, to the extent permitted by law.\n");
 }
