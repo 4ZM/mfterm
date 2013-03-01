@@ -102,7 +102,7 @@ nfc_initiator_mifare_cmd (nfc_device * pnd, const mifare_cmd mc, const uint8_t u
   }
   // Fire the mifare command
   int res;
-  if ((res = nfc_initiator_transceive_bytes (pnd, abtCmd, 2 + szParamLen, abtRx, &szRx, -1))  < 0) {
+  if ((res = nfc_initiator_transceive_bytes (pnd, abtCmd, 2 + szParamLen, abtRx, szRx, -1))  < 0) {
     if (res == NFC_ERFTRANS) {
       // "Invalid received frame",  usual means we are
       // authenticated on a sector but the requested MIFARE cmd (read, write)
