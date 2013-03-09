@@ -1,13 +1,14 @@
 /*-
  * Public platform independent Near Field Communication (NFC) library examples
- * 
- * Copyright (C) 2009, Roel Verdult
- * Copyright (C) 2010, Romuald Conty, Romain Tartière
- * 
+ *
+ * Copyright (C) 2009 Roel Verdult
+ * Copyright (C) 2010 Romain Tartière
+ * Copyright (C) 2010, 2011 Romuald Conty
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *  1) Redistributions of source code must retain the above copyright notice,
- *  this list of conditions and the following disclaimer. 
+ *  this list of conditions and the following disclaimer.
  *  2 )Redistributions in binary form must reproduce the above copyright
  *  notice, this list of conditions and the following disclaimer in the
  *  documentation and/or other materials provided with the distribution.
@@ -23,13 +24,13 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * Note that this license only applies on the examples, NFC library itself is under LGPL
  *
  */
 
 /**
- * @file mifaretag.h
+ * @file mifare.h
  * @brief provide samples structs and functions to manipulate MIFARE Classic and Ultralight tags using libnfc
  */
 
@@ -53,29 +54,29 @@ typedef enum {
 } mifare_cmd;
 
 // MIFARE command params
-typedef struct {
+struct mifare_param_auth {
   uint8_t  abtKey[6];
-  uint8_t  abtUid[4];
-} mifare_param_auth;
+  uint8_t  abtAuthUid[4];
+};
 
-typedef struct {
+struct mifare_param_data {
   uint8_t  abtData[16];
-} mifare_param_data;
+};
 
-typedef struct {
+struct mifare_param_value {
   uint8_t  abtValue[4];
-} mifare_param_value;
+};
 
 typedef union {
-  mifare_param_auth mpa;
-  mifare_param_data mpd;
-  mifare_param_value mpv;
+  struct mifare_param_auth mpa;
+  struct mifare_param_data mpd;
+  struct mifare_param_value mpv;
 } mifare_param;
 
 // Reset struct alignment to default
 #  pragma pack()
 
-bool    nfc_initiator_mifare_cmd (nfc_device * pnd, const mifare_cmd mc, const uint8_t ui8Block, mifare_param * pmp);
+bool    nfc_initiator_mifare_cmd(nfc_device *pnd, const mifare_cmd mc, const uint8_t ui8Block, mifare_param *pmp);
 
 // Compiler directive, set struct alignment to 1 uint8_t for compatibility
 #  pragma pack(1)

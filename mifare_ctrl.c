@@ -595,7 +595,7 @@ bool mf_authenticate(size_t block, const uint8_t* key, mf_key_type_t key_type) {
   mifare_param mp;
 
   // Set the authentication information (uid)
-  memcpy(mp.mpa.abtUid, target.nti.nai.abtUid + target.nti.nai.szUidLen - 4, 4);
+  memcpy(mp.mpa.abtAuthUid, target.nti.nai.abtUid + target.nti.nai.szUidLen - 4, 4);
 
   // Select key for authentication
   mifare_cmd mc = (key_type == MF_KEY_A) ? MC_AUTH_A : MC_AUTH_B;
