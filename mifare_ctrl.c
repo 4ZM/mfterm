@@ -109,8 +109,12 @@ int mf_disconnect(int ret_state) {
 
 int mf_connect() {
 
+  // Initialize libnfc and set the nfc_context
+  nfc_context *context;
+  nfc_init(&context);
+
   // Connect to (any) NFC reader
-  device = nfc_open(NULL, NULL);
+  device = nfc_open(context, NULL);
   if (device == NULL) {
     printf ("Could not connect to any NFC device\n");
     return -1; // Don't jump here, since we don't need to disconnect
@@ -591,7 +595,7 @@ bool mf_authenticate(size_t block, const uint8_t* key, mf_key_type_t key_type) {
   mifare_param mp;
 
   // Set the authentication information (uid)
-  memcpy(mp.mpa.abtUid, target.nti.nai.abtUid + target.nti.nai.szUidLen - 4, 4);
+  memcpy(mp.mpa.abtAuthUid, target.nti.nai.abtUid + target.nti.nai.szUidLen - 4, 4);
 
   // Select key for authentication
   mifare_cmd mc = (key_type == MF_KEY_A) ? MC_AUTH_A : MC_AUTH_B;
@@ -613,7 +617,7 @@ bool mf_authenticate(size_t block, const uint8_t* key, mf_key_type_t key_type) {
 bool transmit_bits(const uint8_t *pbtTx, const size_t szTxBits)
 {
   // Transmit the bit frame command, we don't use the arbitrary parity feature
-  if ((szRxBits = nfc_initiator_transceive_bits (device, pbtTx, szTxBits, NULL, abtRx, NULL)) < 0)
+  if ((szRxBits = nfc_initiator_transceive_bits (device, pbtTx, szTxBits, NULL, abtRx, 0, NULL)) < 0)
     return false;
 
   return true;
@@ -623,7 +627,7 @@ bool transmit_bits(const uint8_t *pbtTx, const size_t szTxBits)
 bool transmit_bytes(const uint8_t *pbtTx, const size_t szTx)
 {
   // Transmit the command bytes
-  if (nfc_initiator_transceive_bytes (device, pbtTx, szTx, abtRx, &szRx, 0) < 0)
+  if (nfc_initiator_transceive_bytes (device, pbtTx, szTx, abtRx, szRx, 0) < 0)
     return false;
 
   return true;
