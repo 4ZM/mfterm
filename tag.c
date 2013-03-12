@@ -406,7 +406,7 @@ size_t sector_count(mf_size_t size) {
 }
 
 int is_trailer_block(size_t block) {
-  return (block + 1) % (block < 0x40 ? 4 : 0x10) == 0;
+  return (block + 1) % (block < 0x80 ? 4 : 0x10) == 0;
 }
 
 size_t block_to_sector(size_t block) {
