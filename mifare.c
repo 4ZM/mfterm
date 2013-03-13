@@ -112,7 +112,7 @@ nfc_initiator_mifare_cmd(nfc_device *pnd, const mifare_cmd mc, const uint8_t ui8
       // is not permitted by current acces bytes;
       // So there is nothing to do here.
     }
-		else if(res == NFC_ECHIP) {
+		else if (res == NFC_EMFCAUTHFAIL) {
       // Since we implement a dictionary brute force attack,
       // don't print an error on failed authentications.
     }
