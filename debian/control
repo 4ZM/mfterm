@@ -1,0 +1,14 @@
+Source: mfterm
+Section: utils
+Priority: extra
+Maintainer: Markus Näsman <markus@botten.org>
+Build-Depends: debhelper (>= 8.0.0), automake, libssl-dev, libnfc-dev, libnfc4, hardening-wrapper, libusb-0.1-4, libpcsclite1, mime-support, m4, libsigsegv2, perl-modules, flex, gawk, libreadline-dev, bison
+Standards-Version: 3.9.3
+Homepage: https://github.com/4ZM/mfterm
+Vcs-Git: git://github.com/4ZM/mfterm.git
+
+Package: mfterm
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Terminal for working with Mifare Classic 1-4k Tags
+ mfterm is a terminal interface for working with Mifare Classic tags.
