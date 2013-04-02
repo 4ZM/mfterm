@@ -74,6 +74,7 @@ command_t commands[] = {
   { "mac key", com_mac_key_get_set, 0, 1, "<k0..k7> : Get or set MAC key" },
   { "mac compute", com_mac_block_compute, 0, 1, "#block : Compute block MAC" },
   { "mac update", com_mac_block_update, 0, 1, "#block : Compute block MAC" },
+  { "mac validate", com_mac_validate, 0, 1, "1k|4k : Validates block MAC of the whole tag" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
@@ -619,7 +620,6 @@ int com_mac_key_get_set(char* arg) {
   return 0;
 }
 
-
 int com_mac_block_compute(char* arg) {
   return com_mac_block_compute_impl(arg, 0);
 }
@@ -658,6 +658,45 @@ int com_mac_block_compute_impl(char* arg, int update) {
   print_hex_array_sep(mac, 2, " ");
   printf("\n");
 
+  return 0;
+}
+
+int com_mac_validate(char* arg) {
+  char* a = strtok(arg, " ");
+
+  if (a && strtok(NULL, " ") != (char*)NULL) {
+    printf("Too many arguments\n");
+    return -1;
+  }
+  
+  mf_size_t size = parse_size_default(a, MF_1K);
+
+  if (size == MF_INVALID_SIZE) {
+    printf("Unknown argument: %s\n", a);
+    return -1;
+  }
+
+  for(size_t i = 1; i < block_count(size); i++)
+  {
+    if(is_trailer_block(i))
+    {
+		continue;
+	}
+    unsigned char* mac = compute_block_mac(i, current_mac_key, 0);  
+    printf("Block: %2x ", i);
+    printf("Tag: ");
+    print_hex_array_sep(&current_tag.amb[i].mbd.abtData[14], 2, " ");
+    printf(" Computed: ");
+    print_hex_array_sep(mac, 2, " ");
+    printf(" Result: ");
+    if(memcmp(mac, &current_tag.amb[i].mbd.abtData[14], 2) == 0)
+    {
+		printf("VALID");
+	} else {
+		printf("IN-VALID");			
+	}
+    printf("\n");
+  }	
   return 0;
 }
 
