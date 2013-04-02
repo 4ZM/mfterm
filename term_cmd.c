@@ -683,6 +683,7 @@ int com_mac_validate(char* arg) {
 		continue;
 	}
     unsigned char* mac = compute_block_mac(i, current_mac_key, 0);  
+    printf("Block: %2x ", i);
     printf("Tag: ");
     print_hex_array_sep(&current_tag.amb[i].mbd.abtData[14], 2, " ");
     printf(" Computed: ");
