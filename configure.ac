@@ -43,7 +43,7 @@ AM_PROG_CC_C_O
 
 # Checks for libraries.
 AC_CHECK_LIB([nfc], [nfc_open], [],
-             [AC_MSG_ERROR([libnfc >= 1.6 is required (http://www.libnfc.org/download)])])
+             [AC_MSG_ERROR([libnfc >= 1.7 is required (http://www.libnfc.org/download)])])
 
 AC_CHECK_LIB([readline], [rl_completion_matches], [],
              [AC_MSG_ERROR([libreadline is required])])

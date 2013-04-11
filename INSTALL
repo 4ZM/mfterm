@@ -12,5 +12,23 @@ $ ./configure       # Possibly with some options, use --help
 $ make
 $ make install      # Possibly using sudo 
 
-Dependencies for building mfterm are: libnfc (1.6), libreadline,
+Dependencies for building mfterm are: libnfc (1.7.0), libreadline,
 libcrypto, OpenSSL, bison, flex.
+
+Trouble shooting:
+
+If you get error messages when trying to read a tag. Verify that
+libnfc is installed and configured correctly with the 'nfc-list'
+utility program (supplied with libnfc). It should not give you any
+error messages and if you place a tag on your reader, it should be
+detected.
+
+When building, if you get the error message: 
+"error: implicit declaration of function ‘rpl_malloc’"
+
+Try this: after running the autogen, but before running the configure,
+set the shell variable:
+
+$ export ac_cv_func_malloc_0_nonnull=yes
+
+then run configure, make, make install again.
