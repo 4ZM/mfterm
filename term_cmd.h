@@ -37,6 +37,7 @@ int com_clear_tag(char* arg);
 
 // Read/Write tag NFC operations
 int com_read_tag(char* arg);
+int com_read_tag_unlocked(char* arg);
 int com_write_tag(char* arg);
 int com_write_tag_unlocked(char* arg);
 

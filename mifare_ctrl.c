@@ -160,6 +160,13 @@ int mf_read_tag(mf_tag_t* tag, mf_key_type_t key_type) {
   if (mf_connect())
     return -1; // No need to disconnect here
 
+  if (key_type == MF_KEY_UNLOCKED) {
+    if (!mf_unlock()) {
+      printf("Unlocked read requested, but unlock failed!\n");
+      return false;
+    }
+  }
+
   if (!mf_read_tag_internal(tag, &current_auth, key_type)) {
     printf("Read failed!\n");
     return mf_disconnect(-1);
@@ -325,7 +332,7 @@ bool mf_unlock() {
 }
 
 bool mf_read_tag_internal(mf_tag_t* tag,
-                      const mf_tag_t* keys, mf_key_type_t key_type) {
+                          const mf_tag_t* keys, mf_key_type_t key_type) {
   mifare_param mp;
 
   static mf_tag_t buffer_tag;
@@ -338,8 +345,14 @@ bool mf_read_tag_internal(mf_tag_t* tag,
   // Read the card from end to begin
   for (int block_it = (int)block_count(size) - 1; block_it >= 0; --block_it) {
     size_t block = (size_t)block_it;
+
+    // Print progress for the unlocked read
+    if (key_type == MF_KEY_UNLOCKED && is_trailer_block(block))
+      printf("."); fflush(stdout);
+
     // Authenticate everytime we reach a trailer block
-    if (is_trailer_block(block)) {
+    // unless we are doing an unlocked read
+    if (key_type != MF_KEY_UNLOCKED && is_trailer_block(block)) {
 
       // Try to authenticate for the current sector
       uint8_t* key = key_from_tag(keys, key_type, block);
