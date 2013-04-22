@@ -16,7 +16,7 @@
 # along with mfterm.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.67])
-AC_INIT([mfterm], [1.0.2], [anders@4zm.org])
+AC_INIT([mfterm], [1.0.3], [anders@4zm.org])
 AC_CONFIG_SRCDIR([mfterm.c])
 AC_CONFIG_HEADERS([config.h])
 
