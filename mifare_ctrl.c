@@ -131,6 +131,12 @@ int mf_connect() {
     return mf_disconnect(-1);
   }
 
+  // Allow SAK & ATQA == 0. Assume 1k pirate card.
+  if (target.nti.nai.btSak == 0 && target.nti.nai.abtAtqa[1] == 0) {
+    size = MF_1K;
+    return 0;
+  }
+
   // Test if we are dealing with a Mifare Classic compatible tag
   if ((target.nti.nai.btSak & 0x08) == 0) {
     printf("Incompatible tag type: 0x%02x (i.e. not Mifare Classic).\n",
