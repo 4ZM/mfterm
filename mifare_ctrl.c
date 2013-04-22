@@ -567,9 +567,11 @@ bool mf_dictionary_attack_internal(mf_tag_t* tag) {
 
   }
 
-  // All keys found, use them as current keys
   if (all_keys_found)
-    memcpy(tag, &buffer_tag, MF_4K);
+    printf("All keys were found\n");
+
+  // Use the found keys
+  memcpy(tag, &buffer_tag, MF_4K);
 
   return true;
 }
