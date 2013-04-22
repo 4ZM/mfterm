@@ -234,15 +234,13 @@ int com_write_tag(char* arg) {
 }
 
 int com_write_tag_unlocked(char* arg) {
-  // Add option to choose key
   char* ab = strtok(arg, " ");
-
   if (ab) {
     printf("This command doesn't take any arguments\n");
     return -1;
   }
 
-  // Issue the read request
+  // Issue the write request
   mf_write_tag(&current_tag, MF_KEY_UNLOCKED);
   return 0;
 }
