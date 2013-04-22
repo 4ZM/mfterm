@@ -34,6 +34,8 @@ mfterm_SOURCES =                \
 
 mfterm_LDADD = libdp.a libsp.a -lreadline -lnfc -lcrypto
 
+man1_MANS = mfterm.man
+
 # We create two convenience libraries fot the parser targets. This is
 # to allow us to use different flags (since automake doesn't support
 # per file, but only per target flags).

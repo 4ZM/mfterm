@@ -1,0 +1,318 @@
+.\" mfterm Manual
+.\" Contact anders@4zm.org to correct errors or typos.
+
+.TH mfterm 1 "22 Apr 2013" "1.0.3" "mfterm Manual"
+
+.SH NAME
+mfterm \- The Mifare Terminal
+
+.SH SYNOPSIS
+.B mfterm
+[\fB-v\fR\]
+[\fB-h\fR\]
+[\fB-t\fR \fItagfile\fR]
+[\fB-k\fR \fIkeyfile\fR]
+[\fB-d\fR \fIdictionary\fR]
+
+
+.\" ---------------------- DESCRIPTION -----------------------------
+
+
+.SH DESCRIPTION
+
+.P
+
+mfterm is a terminal interface for working with Mifare tags.
+
+.PP
+
+The program is used as an interactive shell to read and write Mifare
+tags using libnfc and a libnfc compatible reader or to simply
+manipulate Mifare data dumps from files. See the \fBCOMMANDS\fR
+section below for a description of the commands available.
+
+.PP
+
+In mfterm, there are a number of global state variables. One for tag
+data, one for keys and some others. Data is read and loaded to this
+memory and written and saved from the same. The contents of the tag
+data variable is displayed using the \fBprint\fR command. The keys in
+the key variable are displayed using the \fBkeys\fR command. Both tag
+and key variables are 4k, but only the first 1k is used for 1k tags.
+
+.PP
+
+Please see the \fBREADME\fR and \fBINSTALL\fR files for further
+information.
+
+
+.\" --------------------------- OPTIONS --------------------------- 
+
+
+.SH OPTIONS
+These are the command line options of mfterm.
+
+.TP 5
+
+.TP
+\fB-h\fR, \fB--help\fR
+Displays a help message.
+
+.TP
+\fB-v\fR, \fB--version\fR
+Display version information.
+
+.TP
+\fB-t\fR \fItagfile\fR, \fB--tag=\fR\fItagfile\fR
+Load a tag from the specified file. Before starting the terminal.
+
+.TP
+\fB-k\fR \fIkeyfile\fR, \fB--keys=\fR\fIkeyfile\fR
+Load keys from the specified file. Before starting the terminal.
+
+.TP
+\fB-d\fR \fIdictionary\fR, \fB--dict=\fR\fIdictionary\fR
+Load dictionary from the specified file. Before starting the terminal.
+
+
+.\" --------------------------- COMMANDS --------------------------- 
+
+
+.SH COMMANDS
+These are the commands available from the mfterm prompt.
+
+
+.\" --------------------- TAG - COMMANDS ---------------------------
+
+
+.RS -4
+.B Tag Commands:
+.RE
+
+.TP
+\fBprint \fR[\fB1k\fR|\fB4k\fR]
+Print the current tag data. The data is formatted to show sectors and
+blocks in hexadecimal. Optionally specify tag size (default is 1k).
+
+.TP
+\fBread \fR[\fBA\fR|\fBB\fR]
+Read a tag. A libnfc compatible reader must be connected and a tag
+present. The keys in the key state variable will be used to
+authenticate each sector. Optionally specify witch key to use for
+reading (default is A).
+
+.TP
+\fBwrite \fR[\fBA\fR|\fBB\fR]
+Write a tag. A libnfc compatible reader must be connected and a tag
+present. The keys in the key state variable will be used to
+authenticate each sector. Optionally specify witch key to use for
+reading (default is A).
+
+.TP
+\fBload\fR
+Load tag data from a file. The file should be a raw binary file
+containing exactly 4k. If the tag data represents a 1k tag, the data
+should be padded.
+
+.TP
+\fBsave\fR
+Save tag data to a file. A raw binary dump of the data will be
+written. If the tag is a 1k tag, the data will be padded with zeroes
+to 4k size.
+
+.TP
+\fBclear\fR
+Clear the current tag data in memory.
+
+.TP
+\fBprint keys \fR[\fB1k\fR|\fB4k\fR]
+Extract the key information from the tag loaded into memory and
+display it. This is not the same as the keys command. The later will
+print the keys stored in the keys variable, this prints keys from the
+tag.
+
+.TP
+\fBprint ac\fR
+Print the access conditions for each block. Possible values are A, B,
+A|B or '-'. Their meanings are, in turn, that the A or B or both A and
+B keys or neither key can be used. The columns R, W, I, D represents
+read, write, increment and decrement. They apply for all non trailer
+blocks. For the trailer blocks the columns AR, AW, ACR, ACW, BR, BW
+apply. They are permissions for; reading the A-key, writing the A-key,
+reading the access control bits, writing the access control bits,
+reading the B-key and writing the B-key.
+
+.TP
+\fBset \fIblock offset\fR \fB=\fR \fIxx xx xx\fR
+Write some values to the tag variable in memory. Specify data as
+hexadecimal bytes separated by spaces.
+
+
+.\" --------------------- KEY - COMMANDS ---------------------------
+
+
+.RS -4
+.B Key Management Commands:
+.RE
+
+.TP
+\fBkeys\fR [\fB1k\fR|\fB4k\fR]
+Print the keys currently loaded. Optionally specify if keys for the
+full 4k tag should be displayed or just the ones for the first
+1k. Default is 1k.
+
+.TP
+\fBkeys load\fR \fIfile\fR
+Load keys from a file into memory. The key file is a regular binary
+tag dump, but only the key fields are used. That means that any tag
+dump can be loaded as keys.
+
+.TP
+\fBkeys save\fR \fIfile\fR
+Save the current keys in memory to a file. The keys will be saved as a
+normal binary tag dump with all values except the keys cleared.
+
+.TP
+\fBkeys import\fR
+Import keys from the current tag.
+
+.TP
+\fBkeys clear\fR
+Clear the keys in memory.
+
+.TP
+\fBkeys set\fR \fBA\fR|\fBB\fR \fIsector\fR \fIkey\fR
+Set a specific key explicitly. Specify the key in hex, if it is an A-
+or B-key and what sector to set the key for.
+
+.TP
+\fBkeys test\fR
+Try to authenticate with the keys. Use this command to test a set of
+keys with a specific tag.
+
+.\" ------------------ PIRATE - COMMANDS ---------------------------
+
+.RS -4
+.B Pirate Card Commands:
+.RE
+
+These commands will only work on the back door:ed pirate cards (aka
+Chinese magic cards) with writable first block.
+
+.TP
+\fBread unlocked\fR
+Read the card without using keys and disregard access control bits.
+
+.TP
+\fBwrite unlocked\fR
+Write to a back door:ed 1k tag. This will write block 0 and possibly
+modify the UID.
+
+.\" -------------------- DICT - COMMANDS ---------------------------
+
+.RS -4
+.B Dictionary Attack Commands:
+.RE
+
+.TP
+\fBdict load\fR \fIfile\fR
+Load a dictionary key file. This is a regular text file with one key
+written in hex per line. Loading multiple dictionaries will merge
+their contents and remove duplicates.
+
+.TP
+\fBdict clear\fR
+Clear the key dictionary in memory.
+
+.TP
+\fBdict attack\fR
+Find keys of a physical tag by trying all keys in the loaded
+dictionary. If any keys are found the current keys variable will be
+updated.
+
+.TP
+\fBdict\fR
+Print the contents of the key dictionary currently loaded.
+
+.\" -------------------- SPEC - COMMANDS ---------------------------
+
+.RS -4
+.B Contents Specification Commands:
+.RE
+
+.TP
+\fBspec load\fR \fIfile\fR
+Load a specification file.
+
+.TP
+\fBspec clear\fR
+Unload the specification.
+
+.TP
+\fBspec\fR
+Print the specification.
+
+.\" --------------------- MAC - COMMANDS ---------------------------
+
+.RS -4
+.B MAC Commands:
+.RE
+
+These are commands for creating and validating DES MACs (message
+authentication codes) to sign the contents of specific blocks.
+
+.TP
+\fBmac key\fR [\fIkey\fR]
+Get or set MAC key.
+
+.TP
+\fBmac compute\fR \fI#block\fR
+Compute the MAC for a specified block.
+
+.TP
+\fBmac update\fR \fI#block\fR
+Compute the MAC for a specified block, truncate it and write it back
+into the current tag data.
+
+.TP
+\fBmac validate\fR [\fB1k\fR|\fB4k\fR]
+Validates MACs for every block of the tag.
+
+.\" -------------------- MISC - COMMANDS ---------------------------
+
+.RS -4
+.B General commands:
+.RE
+
+.TP 5
+
+.TP
+\fBquit\fR
+Exit the program.
+
+.TP
+\fBhelp\fR
+Show a list of available commands and a short description of each. 
+
+
+.\" ------------------------- NOTES -------------------------------
+
+
+.SH NOTE
+
+The \fBmac\fR and \fBspec\fR command groups are experimental. They 
+
+
+.\" ---------------------- TRAILER STUFF ---------------------------
+
+
+.SH SEE ALSO
+nfc-list(1)
+
+.SH LICENSE
+Copyright (C) 2011-2013 Anders Sundman <anders@4zm.org>
+
+License GPLv3+: GNU GPL version 3 or later. This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+
+.SH AUTHOR
+Anders Sundman <anders@4zm.org>
