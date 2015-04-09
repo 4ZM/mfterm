@@ -54,6 +54,7 @@ command_t commands[] = {
   { "print ac",   com_print_ac,   0, 1, "Print access conditions" },
 
   { "set", com_set, 0, 1, "#block #offset = xx xx xx : Set tag data" },
+  { "setuid", com_setuid, 0, 1, "xx xx xx xx: Set tag UID" },
 
   { "keys load",   com_keys_load,   1, 1, "Load keys from a file" },
   { "keys save",   com_keys_save,   1, 1, "Save keys to a file" },
@@ -330,6 +331,38 @@ int com_set(char* arg) {
     current_tag.amb[block].mbd.abtData[offset++] = (uint8_t)byte;
 
   } while((byte_str = strtok(NULL, " ")) != (char*)NULL);
+
+  return 0;
+}
+
+int com_setuid(char* arg) {
+  char* byte_str = strtok(arg, " ");
+  int block = 0;
+
+  /// TODO : Check arg size (display warning if < 4)
+  if (!byte_str) {
+    printf("Too few arguments: xx xx xx xx\n");
+    return -1;
+  }
+
+  // Consume the byte tokens
+  do {
+    long int byte = strtol(byte_str, &byte_str, 16);
+
+    if (byte < 0 || byte > 0xff) {
+      printf("Invalid byte value [0,ff]: %lx\n", byte);
+      return -1;
+    }
+
+    // Write the data
+    current_tag.amb[0].mbd.abtData[block++] = (uint8_t)byte;
+
+  } while(((byte_str = strtok(NULL, " ")) != (char*)NULL) && (block < 4));
+  // Compute and write BCC
+  current_tag.amb[0].mbd.abtData[4] = (uint8_t)current_tag.amb[0].mbd.abtData[0] ^
+    (uint8_t)current_tag.amb[0].mbd.abtData[1] ^
+    (uint8_t)current_tag.amb[0].mbd.abtData[2] ^
+    (uint8_t)current_tag.amb[0].mbd.abtData[3];
 
   return 0;
 }
