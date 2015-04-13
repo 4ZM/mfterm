@@ -43,6 +43,7 @@ int com_write_tag_unlocked(char* arg);
 
 // Tag print commands
 int com_print(char* arg);
+int com_print_head(char* arg);
 int com_print_keys(char* arg);
 int com_print_ac(char* arg);
 

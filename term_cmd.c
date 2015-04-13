@@ -50,6 +50,7 @@ command_t commands[] = {
   { "write unlocked", com_write_tag_unlocked, 0, 1, "On pirate cards, write 1k tag with block 0" },
 
   { "print",      com_print,      0, 1, "1k|4k : Print tag data" },
+  { "print head", com_print_head, 0, 1, "Print first sector" },
   { "print keys", com_print_keys, 0, 1, "1k|4k : Print tag's keys" },
   { "print ac",   com_print_ac,   0, 1, "Print access conditions" },
 
@@ -277,6 +278,11 @@ int com_print(char* arg) {
 
   print_tag(size);
 
+  return 0;
+}
+
+int com_print_head(char* arg) {
+  print_tag_head();
   return 0;
 }
 

@@ -105,6 +105,11 @@ void print_tag(mf_size_t size) {
   return;
 }
 
+void print_tag_head() {
+  print_tag_block_range(0, 3);
+  return;
+}
+
 void print_tag_byte_bits(size_t byte, size_t first_bit, size_t last_bit) {
 
   // The byte to show parts of
@@ -498,4 +503,3 @@ int sector_header_iterator(int state) {
 
   return -1; // End marker for 4k state
 }
-
