@@ -48,6 +48,7 @@ int com_print_ac(char* arg);
 
 // Tag set (value) command
 int com_set(char* arg);
+int com_setuid(char* arg);
 
 // Key operations
 int com_keys_load(char* arg);
