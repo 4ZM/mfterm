@@ -301,7 +301,7 @@ int com_set(char* arg) {
     printf("Invalid block character (non hex): %s\n", block_str);
     return -1;
   }
-  if (block < 0 || block > 0xff) {
+  if (block > 0xff) {
     printf("Invalid block [0,ff]: %x\n", block);
     return -1;
   }
@@ -311,7 +311,7 @@ int com_set(char* arg) {
     printf("Invalid offset character (non hex): %s\n", offset_str);
     return -1;
   }
-  if (offset < 0 || offset > 0x0f) {
+  if (offset > 0x0f) {
     printf("Invalid offset [0,f]: %x\n", offset);
     return -1;
   }
@@ -691,7 +691,7 @@ int com_mac_block_compute_impl(char* arg, int update) {
     printf("Invalid block character (non hex): %s\n", block_str);
     return -1;
   }
-  if (block < 0 || block > 0xff) {
+  if (block > 0xff) {
     printf("Invalid block [0,ff]: %x\n", block);
     return -1;
   }
