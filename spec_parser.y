@@ -60,14 +60,14 @@
 %type <field_list_t_ptr> field_decl_list
 %type <integer> number
 
-%destructor { free($$); } IDENTIFIER DEC_NUM HEX_NUM <string>
-%destructor { free_field($$);
-            } field_decl <field_t_ptr>
-%destructor { free_field($$->field); free($$);
-            } composite_type_decl field_decl_list <field_list_t_ptr>
+%destructor { free($$); } IDENTIFIER DEC_NUM HEX_NUM
+%destructor { free_field($$); } field_decl
+%destructor { free_field($$->field);
+              free($$);
+	    } composite_type_decl field_decl_list
 %destructor { if ($$ && $$->composite_extras)
                 free_composite_type($$);
-            } named_composite_type_decl data_type <type_t_ptr>
+            } named_composite_type_decl primitive_data_type data_type
 
 %% /* Grammar rules and actions follow.  */
 
