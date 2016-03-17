@@ -167,11 +167,15 @@ char** mft_completion(char* text, int start, int end) {
   rl_attempted_completion_over = 1;
 
   // Add the trailing space unless told otherwise
-  rl_completion_suppress_append = 0;
+#ifdef HAVE_RL_COMPLETION_SUPPRESS_APPEND
+    rl_completion_suppress_append = 0;
+#endif
 
   // Complete strings starting with '.' as specification paths
   if (text[0] == '.' && instance_root) {
+#ifdef HAVE_RL_COMPLETION_SUPPRESS_APPEND
     rl_completion_suppress_append = 1; // no trailing space on paths
+#endif
     return rl_completion_matches(text, completion_spec_generator);
   }
 

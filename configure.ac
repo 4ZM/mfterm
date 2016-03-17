@@ -45,8 +45,16 @@ AM_PROG_CC_C_O
 AC_CHECK_LIB([nfc], [nfc_open], [],
              [AC_MSG_ERROR([libnfc >= 1.7 is required (http://www.libnfc.org/download)])])
 
-AC_CHECK_LIB([readline], [rl_completion_matches], [],
+AC_CHECK_LIB([readline], [rl_completion_matches], [have_readline=yes],
              [AC_MSG_ERROR([libreadline is required])])
+
+if test $have_readline = yes
+then
+  AC_EGREP_HEADER([int rl_completion_suppress_append],
+  [readline/readline.h],
+  AC_DEFINE(HAVE_RL_COMPLETION_SUPPRESS_APPEND, 1, [Define if you have rl_completion_suppress_append]),
+  AC_MSG_WARN([Command completion support limited by installed readline library]))
+fi
 
 AC_CHECK_LIB([crypto], [DES_set_key_unchecked], [HAVE_LIBCRYPTO=yes],
              [AC_MSG_ERROR([libcrypto is required])])
