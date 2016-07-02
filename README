@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/4ZM/mfterm.svg?branch=master)](https://travis-ci.org/4ZM/mfterm)
+
 mfterm is a terminal interface for working with Mifare Classic tags.
 
 Tab completion on commands is available. Also, commands that have file
