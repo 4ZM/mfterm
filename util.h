@@ -36,4 +36,10 @@ void print_hex_array(const unsigned char* data, size_t nbytes);
 // Print a byte array in hex with the specified byte separation.
 void print_hex_array_sep(const unsigned char* data, size_t nbytes, char* sep);
 
+//Hexadecimal to Ascii functions
+int hex_to_int(char c);
+int hex_to_ascii(char c, char d);
+int figureOfSpace(char *inpout);
+char *hexToAscii(char *inpout);
+
 #endif
