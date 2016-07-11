@@ -66,9 +66,101 @@ void print_hex_array(const unsigned char* data, size_t nbytes) {
 }
 
 void print_hex_array_sep(const unsigned char* data, size_t nbytes, char* sep) {
-    for (int i = 0; i < nbytes; ++i) {
+  
+  size_t length = strlen((char *)data);
+  char converted[length*2 +1]; 
+
+   for (int i = 0; i < nbytes; ++i) {
+  sprintf(&converted[i*2], "%02x", data[i]);
       printf("%02x", data[i]);
-      if (sep)
+      if (sep) {
         printf("%s", sep);
+      }
+
     }
+    printf("|%s|",hexToAscii(converted));
+}
+
+int hex_to_int(char c) {
+        int result = 0;
+
+  switch (c) {
+  
+  case 'a' :
+    result = 10;
+  break;
+
+  case 'b' :
+    result = 11;
+  break;
+
+  case 'c' :
+    result = 12;
+  break;
+
+  case 'd' :
+    result = 13;
+  break;
+
+  case 'e' :
+    result = 14;
+  break;
+
+  case 'f' :
+    result = 15;
+  break;
+
+  default:
+    result = c - 48;
+  }
+
+        return result;
+}
+
+int hex_to_ascii(char c, char d) {
+
+  int rep = 0;
+  
+  if (c != ' ' && d != ' ') {
+
+          int high = hex_to_int(c) * 16;
+          int low = hex_to_int(d);
+          rep = (high+low);
+  }
+  if (rep == 0 || rep > 127 || rep < 33) {
+    rep = 46;
+  }
+
+  return rep;
+}
+
+int figureOfSpace(char *inpout) {
+  int rep = 0;
+
+  size_t size = strlen((char *)inpout),i;
+  for (i = 0; i < size; i++) {
+    if (inpout[i] == ' ') {
+      rep++;
+    }
+  }
+
+  return rep;
+}
+
+char *hexToAscii(char *inpout) {
+
+  int space = figureOfSpace(inpout);
+  size_t length = strlen(inpout),newLength = (length - (size_t)space)/2;
+  char *output = (char *)malloc((newLength)*sizeof(char));
+        int i,comp = 0;
+        for(i = 1; i < length; i++){
+                if (inpout[i-1] != ' ' && inpout[i] != ' ') {
+      output[comp] = (char)hex_to_ascii((char)inpout[i-1],(char)inpout[i]);
+      comp++;
+      i++;
+    }
+        }
+  output[newLength] = '\0';
+  return output;
+
 }
