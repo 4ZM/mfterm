@@ -72,3 +72,12 @@ void print_hex_array_sep(const unsigned char* data, size_t nbytes, char* sep) {
         printf("%s", sep);
     }
 }
+
+void print_ascii_rendering(const unsigned char* data, size_t nbytes, char nonascii) {
+    for (int i = 0; i < nbytes; ++i) {
+      if (data[i] >= 32 && data[i] < 127)
+        printf("%c", data[i]);
+      else
+        printf("%c", nonascii);
+    }
+}

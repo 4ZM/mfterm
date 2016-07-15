@@ -214,8 +214,8 @@ void print_tag_data_range(size_t byte_offset, size_t bit_offset,
 void print_tag_block_range(size_t first, size_t last) {
 
   // Print header
-  printf("xS  xB  00                   07 08                   0f\n");
-  printf("-------------------------------------------------------\n");
+  printf("xS  xB  00                   07 08                   0f        ASCII       \n");
+  printf("---------------------------------------------------------------------------\n");
 
   // Iterate over all blocks
   for (size_t block = first; block <= last; ++block) {
@@ -231,6 +231,13 @@ void print_tag_block_range(size_t first, size_t last) {
     print_hex_array_sep(current_tag.amb[block].mbd.abtData,
                         sizeof(mf_block_t), " ");
 
+    // finally, an ascii rendering
+    printf(" [");
+    print_ascii_rendering(current_tag.amb[block].mbd.abtData,
+                         sizeof(mf_block_t), '.');
+    printf("]");
+
+    // EOL
     printf("\n");
 
     // Indicate sector bondaries with extra nl
