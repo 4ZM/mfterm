@@ -229,7 +229,7 @@ void print_tag_block_range(size_t first, size_t last) {
 
     // then print the block data
     print_hex_array_sep(current_tag.amb[block].mbd.abtData,
-                    sizeof(mf_block_t), " ");
+                        sizeof(mf_block_t), " ");
 
     printf("\n");
 

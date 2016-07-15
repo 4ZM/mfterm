@@ -38,25 +38,25 @@ command_t commands[] = {
   { "?",     com_help, 0, 0, "Synonym for 'help'" },
 
   { "quit",  com_quit, 0, 1, "Exit the program" },
-  { "q",  com_quit, 0, 0, "Exit the program" },
+  { "q",     com_quit, 0, 0, "Exit the program" },
   { "exit",  com_quit, 0, 0, "Synonym for 'quit'" },
 
-  { "load",  com_load_tag, 1, 1, "Load tag data from a file" },
-  { "save",  com_save_tag, 1, 1, "Save tag data to a file" },
+  { "load",  com_load_tag,  1, 1, "Load tag data from a file" },
+  { "save",  com_save_tag,  1, 1, "Save tag data to a file" },
   { "clear", com_clear_tag, 0, 1, "Clear the current tag data" },
 
-  { "read",  com_read_tag,  0, 1, "A|B : Read tag data from a physical tag" },
-  { "read unlocked", com_read_tag_unlocked, 0, 1, "On pirate cards, read card without keys" },
-  { "write", com_write_tag, 0, 1, "A|B : Write tag data to a physical tag" },
+  { "read",           com_read_tag,           0, 1, "A|B : Read tag data from a physical tag" },
+  { "read unlocked",  com_read_tag_unlocked,  0, 1, "On pirate cards, read card without keys" },
+  { "write",          com_write_tag,          0, 1, "A|B : Write tag data to a physical tag" },
   { "write unlocked", com_write_tag_unlocked, 0, 1, "On pirate cards, write 1k tag with block 0" },
 
   { "print",      com_print,      0, 1, "1k|4k : Print tag data" },
-  { "p",      com_print,      0, 0, "1k|4k : Print tag data" },
+  { "p",          com_print,      0, 0, "1k|4k : Print tag data" },
   { "print head", com_print_head, 0, 1, "Print first sector" },
   { "print keys", com_print_keys, 0, 1, "1k|4k : Print tag's keys" },
   { "print ac",   com_print_ac,   0, 1, "Print access conditions" },
 
-  { "set", com_set, 0, 1, "#block #offset = xx xx xx : Set tag data" },
+  { "set",    com_set,    0, 1, "#block #offset = xx xx xx : Set tag data" },
   { "setuid", com_setuid, 0, 1, "xx xx xx xx: Set tag UID" },
 
   { "keys load",   com_keys_load,   1, 1, "Load keys from a file" },
@@ -76,10 +76,10 @@ command_t commands[] = {
   { "spec clear",  com_spec_clear,  0, 1, "Unload the specification" },
   { "spec",        com_spec_print,  0, 1, "Print the specification" },
 
-  { "mac key", com_mac_key_get_set, 0, 1, "<k0..k7> : Get or set MAC key" },
-  { "mac compute", com_mac_block_compute, 0, 1, "#block : Compute block MAC" },
-  { "mac update", com_mac_block_update, 0, 1, "#block : Compute block MAC" },
-  { "mac validate", com_mac_validate, 0, 1, "1k|4k : Validates block MAC of the whole tag" },
+  { "mac key",      com_mac_key_get_set,   0, 1, "<k0..k7> : Get or set MAC key" },
+  { "mac compute",  com_mac_block_compute, 0, 1, "#block : Compute block MAC" },
+  { "mac update",   com_mac_block_update,  0, 1, "#block : Compute block MAC" },
+  { "mac validate", com_mac_validate,      0, 1, "1k|4k : Validates block MAC of the whole tag" },
 
   { (char *)NULL, (cmd_func_t)NULL, 0, 0, (char *)NULL }
 };
