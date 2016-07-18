@@ -353,8 +353,9 @@ bool mf_read_tag_internal(mf_tag_t* tag,
     size_t block = (size_t)block_it;
 
     // Print progress for the unlocked read
-    if (key_type == MF_KEY_UNLOCKED && is_trailer_block(block))
+    if (key_type == MF_KEY_UNLOCKED && is_trailer_block(block)) {
       printf("."); fflush(stdout);
+    }
 
     // Authenticate everytime we reach a trailer block
     // unless we are doing an unlocked read
