@@ -1,7 +1,7 @@
 .\" mfterm Manual
 .\" Contact anders@4zm.org to correct errors or typos.
 
-.TH mfterm 1 "22 Apr 2013" "1.0.3" "mfterm Manual"
+.TH mfterm 1 "14 Sep 2016" "1.0.7" "mfterm Manual"
 
 .SH NAME
 mfterm \- The Mifare Terminal
@@ -46,7 +46,7 @@ Please see the \fBREADME\fR and \fBINSTALL\fR files for further
 information.
 
 
-.\" --------------------------- OPTIONS --------------------------- 
+.\" --------------------------- OPTIONS ---------------------------
 
 
 .SH OPTIONS
@@ -75,7 +75,7 @@ Load keys from the specified file. Before starting the terminal.
 Load dictionary from the specified file. Before starting the terminal.
 
 
-.\" --------------------------- COMMANDS --------------------------- 
+.\" --------------------------- COMMANDS ---------------------------
 
 
 .SH COMMANDS
@@ -292,7 +292,7 @@ Exit the program.
 
 .TP
 \fBhelp\fR
-Show a list of available commands and a short description of each. 
+Show a list of available commands and a short description of each.
 
 
 .\" ------------------------- NOTES -------------------------------
@@ -300,7 +300,7 @@ Show a list of available commands and a short description of each.
 
 .SH NOTE
 
-The \fBmac\fR and \fBspec\fR command groups are experimental. They 
+The \fBmac\fR and \fBspec\fR command groups are experimental. They
 
 
 .\" ---------------------- TRAILER STUFF ---------------------------
@@ -310,7 +310,7 @@ The \fBmac\fR and \fBspec\fR command groups are experimental. They
 nfc-list(1)
 
 .SH LICENSE
-Copyright (C) 2011-2013 Anders Sundman <anders@4zm.org>
+Copyright (C) 2011-2016 Anders Sundman <anders@4zm.org>
 
 License GPLv3+: GNU GPL version 3 or later. This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
 
