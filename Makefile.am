@@ -35,6 +35,7 @@ mfterm_SOURCES =                \
 mfterm_LDADD = libdp.a libsp.a -lreadline -lnfc -lcrypto
 
 man1_MANS = mfterm.man
+dist_man1_MANS = mfterm.man
 
 # We create two convenience libraries fot the parser targets. This is
 # to allow us to use different flags (since automake doesn't support
@@ -45,7 +46,7 @@ libdp_a_SOURCES = dictionary_parser.l
 libdp_a_LFLAGS = --prefix=dp_ -o$(LEX_OUTPUT_ROOT).c
 libdp_a_CFLAGS = -g -std=c99 -Wall -Wno-unused-function -Wno-unused-but-set-variable -Wno-implicit-function-declaration
 
-libsp_a_SOURCES = spec_tokenizer.l spec_parser.y 
+libsp_a_SOURCES = spec_tokenizer.l spec_parser.y
 libsp_a_LFLAGS = --prefix=sp_ -o$(LEX_OUTPUT_ROOT).c
 libsp_a_YFLAGS = --name-prefix=sp_ -d
 libsp_a_CFLAGS = -g -std=c99 -Wall -Wno-unused-function -Wno-unused-but-set-variable -Wno-implicit-function-declaration
