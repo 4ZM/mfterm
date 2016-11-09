@@ -10,7 +10,7 @@ Installation
 
 ### Linux
 
-Precompiled package in [Kali Linux](!https://www.kali.org/)
+Precompiled package in [Kali Linux](https://www.kali.org/)
 
 Usage
 -----------
