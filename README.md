@@ -1,7 +1,19 @@
-[![Build Status](https://travis-ci.org/4ZM/mfterm.svg?branch=master)](https://travis-ci.org/4ZM/mfterm)
+# Mfterm [![Build Status](https://travis-ci.org/4ZM/mfterm.svg?branch=master)](https://travis-ci.org/4ZM/mfterm)
 
 mfterm is a terminal interface for working with Mifare Classic tags.
 
+Installation
+-----------
+### Mac OS
+
+`brew install mfterm`
+
+### Linux
+
+Precompiled package in [Kali Linux](!https://www.kali.org/)
+
+Usage
+-----------
 Tab completion on commands is available. Also, commands that have file
 name arguments provide tab completion on files. There is also a
 command history, like in most normal shells.
