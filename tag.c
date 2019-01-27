@@ -129,7 +129,7 @@ void print_tag_byte_bits(size_t byte, size_t first_bit, size_t last_bit) {
     }
 
     // Inside mask
-    if (1<<i && data)
+    if ((1<<i) & data)
       printf("1");
     else
       printf("0");
