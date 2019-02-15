@@ -259,8 +259,8 @@ char* completion_sub_cmd_generator(const char* text, int state) {
     ++cmd_index;
 
     // Extract command and sub-command
-    char buff[128];
-    strncpy(buff, name, sizeof(buff));
+    char buff[129];
+    strncpy(buff, name, sizeof(buff-1));
     char* cmd = strtok(buff, " ");
     char* sub = strtok(NULL, " ");
 
@@ -316,7 +316,7 @@ char* completion_spec_generator(const char* text, int state) {
       continue;
 
     char* fname = inst->field->name;
-    size_t fname_len = strlen(fname);
+    size_t fname_len = strlen(fname)+1;
 
     // Check if the field is applicable - right prefix
     if (fname_len >= parent_end_len &&
