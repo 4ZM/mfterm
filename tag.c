@@ -32,6 +32,7 @@ int load_mfd(const char* fn, mf_tag_t* tag);
 int save_mfd(const char* fn, const mf_tag_t* tag);
 
 int load_mfd(const char* fn, mf_tag_t* tag) {
+
   FILE* mfd_file = fopen(fn, "rb");
 
   if (mfd_file == NULL) {
@@ -40,9 +41,32 @@ int load_mfd(const char* fn, mf_tag_t* tag) {
   }
 
   if (fread(tag, 1, sizeof(mf_tag_t), mfd_file) != sizeof(mf_tag_t)) {
-    printf("Could not read file: %s\n", fn);
     fclose(mfd_file);
-    return 1;
+    FILE *mfd_file_to_append = fopen(fn, "a");
+
+    if (mfd_file_to_append == NULL)) {
+        printf("Could not open file: %s\n", fn);
+        return 1;
+    }
+
+    fseek(mfd_file_to_append, 0, SEEK_END);
+    long initialSize = currentSize;
+    long currentSize = ftell(file);
+
+    while (currentSize < 4096) {
+        fputc('0', mfd_file_to_append);
+        currentSize++;
+    }
+
+    fclose(mfd_file_to_append);
+    printf("0 appended for %s to %s\n", initialSize, currentSize);
+
+    if (fread(tag, 1, sizeof(mf_tag_t), mfd_file) != sizeof(mf_tag_t)){
+        printf("Could not read file: %s\n", fn);
+        return 1;
+    }
+    fclose(mfd_file);
+    return 0;
   }
 
   fclose(mfd_file);
