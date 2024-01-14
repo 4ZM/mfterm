@@ -68,7 +68,7 @@ void print_tag_bytes(size_t first_byte, size_t last_byte);
 void print_keys(const mf_tag_t* tag, mf_size_t size);
 void print_ac(const mf_tag_t* tag);
 
-// Return a hex string representationon of the key
+// Return a hex string representation of the key
 const char* sprint_key(const uint8_t* key);
 
 // Parse the string and set the key. Return the key, or NULL on error.

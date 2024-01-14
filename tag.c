@@ -31,46 +31,66 @@ void strip_non_auth_data(mf_tag_t* tag);
 int load_mfd(const char* fn, mf_tag_t* tag);
 int save_mfd(const char* fn, const mf_tag_t* tag);
 
-int load_mfd(const char* fn, mf_tag_t* tag) {
+int load_mfd_4k(const char *fn, mf_tag_t *tag);
 
-  FILE* mfd_file = fopen(fn, "rb");
+int append_to_4k(const char *fn);
 
-  if (mfd_file == NULL) {
-    printf("Could not open file: %s\n", fn);
+int load_mfd(const char *fn, mf_tag_t *tag) {
+    int result = load_mfd_4k(fn, tag);
+    if (result == 0) {
+        return 0;
+    }
+    if (result == 2) {
+        return 1;
+    }
+
+    if (append_to_4k(fn) == 1) {
+        return 1;
+    }
+
+    if (load_mfd_4k(fn, tag) == 0) {
+        return 0;
+    }
+    printf("Could not read file: %s\n", fn);
     return 1;
-  }
+}
 
-  if (fread(tag, 1, sizeof(mf_tag_t), mfd_file) != sizeof(mf_tag_t)) {
-    fclose(mfd_file);
+int append_to_4k(const char *fn) {
     FILE *mfd_file_to_append = fopen(fn, "a");
-
-    if (mfd_file_to_append == NULL)) {
+    if (mfd_file_to_append == NULL) {
         printf("Could not open file: %s\n", fn);
         return 1;
     }
 
     fseek(mfd_file_to_append, 0, SEEK_END);
+    long currentSize = ftell(mfd_file_to_append);
     long initialSize = currentSize;
-    long currentSize = ftell(file);
-
+    if (initialSize != 1024) {
+        printf("File needs to be either 1k or 4k\n");
+        return 1;
+    }
     while (currentSize < 4096) {
         fputc('0', mfd_file_to_append);
         currentSize++;
     }
 
     fclose(mfd_file_to_append);
-    printf("0 appended for %s to %s\n", initialSize, currentSize);
-
-    if (fread(tag, 1, sizeof(mf_tag_t), mfd_file) != sizeof(mf_tag_t)){
-        printf("Could not read file: %s\n", fn);
-        return 1;
-    }
-    fclose(mfd_file);
+    printf("Zeros appended for %ld to %ld\n", initialSize, currentSize);
     return 0;
-  }
+}
 
-  fclose(mfd_file);
-  return 0;
+int load_mfd_4k(const char *fn, mf_tag_t *tag) {
+    FILE* mfd_file = fopen(fn, "rb");
+    if (mfd_file == NULL) {
+        printf("Could not open file: %s\n", fn);
+        return 2;
+    }
+
+    if (fread(tag, 1, sizeof(mf_tag_t), mfd_file) == sizeof(mf_tag_t)) {
+        fclose(mfd_file);
+        return 0;
+    }
+    return 1;
 }
 
 int save_mfd(const char* fn, const mf_tag_t* tag) {
