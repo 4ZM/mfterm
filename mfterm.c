@@ -260,7 +260,10 @@ char* completion_sub_cmd_generator(const char* text, int state) {
 
     // Extract command and sub-command
     char buff[128];
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wstringop-truncation"
     strncpy(buff, name, sizeof(buff));
+    #pragma GCC diagnostic pop
     char* cmd = strtok(buff, " ");
     char* sub = strtok(NULL, " ");
 
