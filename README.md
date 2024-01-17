@@ -118,7 +118,7 @@ terminal, will display the two bytes of data starting with byte 6.
 Building mfterm
 ---------------
 
-Standard: ./configure; make; make install
+Standard: ./autogen.sh; ./configure; make; make install
 
 See INSTALL file for details.
 

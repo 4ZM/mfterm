@@ -45,13 +45,19 @@ int compute_mac(const unsigned char* input,
 
   // Generate a key schedule. Don't be picky, allow bad keys.
   DES_key_schedule schedule;
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   DES_set_key_unchecked(&des_key, &schedule);
+  #pragma GCC diagnostic pop
 
   // IV is all zeroes
   unsigned char ivec[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
   // Compute the DES in CBC
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   DES_ncbc_encrypt(padded_input, output, length, &schedule, &ivec, 1);
+  #pragma GCC diagnostic pop
 
   // Move up and truncate (we only want 8 bytes)
   for (int i = 0; i < 8; ++i)
